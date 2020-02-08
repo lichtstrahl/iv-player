@@ -1,6 +1,7 @@
-package root.iv.ivplayer;
+package root.iv.ivplayer.activity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,6 +10,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.reactivex.disposables.CompositeDisposable;
+import root.iv.ivplayer.R;
+import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.ws.EchoWSListener;
 import root.iv.ivplayer.ws.WSHolder;
 import root.iv.ivplayer.ws.WSUtil;
@@ -20,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private WSHolder wsHolder;
     private EditText input;
     private CompositeDisposable disposable;
+    private NotificationPublisher notificationPublisher;
+    private boolean showPushNotify = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
         disposable = new CompositeDisposable();
 
 
+        notificationPublisher = new NotificationPublisher(getApplicationContext());
+
         button.setOnClickListener(this::click);
     }
 
@@ -42,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         wsHolder.open(this::recv);
+        showPushNotify = false;
     }
 
     @Override
@@ -49,6 +57,13 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         wsHolder.close();
         disposable.dispose();
+        showPushNotify = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i("tag:ws", "DESTROY");
     }
 
     private void click(View view) {
@@ -56,11 +71,13 @@ public class MainActivity extends AppCompatActivity {
         if (!text.isEmpty()) {
             wsHolder.send(text);
             appendMsg("Я: " + text);
+            input.getText().clear();
         }
     }
 
     private void recv(String msg) {
         runOnUiThread(() -> appendMsg("Некто: " + msg));
+        if (showPushNotify) notificationPublisher.notification(msg);
     }
 
     private void appendMsg(String msg) {
