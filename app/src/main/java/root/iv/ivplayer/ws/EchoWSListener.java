@@ -2,10 +2,9 @@ package root.iv.ivplayer.ws;
 
 import android.util.Log;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.subjects.PublishSubject;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
@@ -13,6 +12,12 @@ import okio.ByteString;
 
 public class EchoWSListener extends WebSocketListener {
     private static final String WS_TAG = "tag:ws";
+
+    private PublishSubject<String> publish = PublishSubject.create();
+
+    public Disposable subscribe(Consumer<String> consumer) {
+        return publish.subscribe(consumer);
+    }
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
@@ -22,6 +27,7 @@ public class EchoWSListener extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         Log.i(WS_TAG,"Recv: " + text);
+        publish.onNext(text);
     }
 
     @Override

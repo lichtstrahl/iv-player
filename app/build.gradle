@@ -26,6 +26,9 @@ android {
 
 dependencies {
     def httpVersion = '3.6.0'
+    def rxAndroid = '2.1.1'
+    def rxJava = '2.2.17'
+    def rxBinding = '3.1.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
@@ -36,4 +39,13 @@ dependencies {
 
     // OkHttp
     implementation "com.squareup.okhttp3:okhttp:$httpVersion"
+
+    // RxJava
+    implementation "io.reactivex.rxjava2:rxandroid:$rxAndroid"
+    implementation "io.reactivex.rxjava2:rxjava:$rxJava"
+
+    // RxBinding
+    implementation "com.jakewharton.rxbinding3:rxbinding:$rxBinding"
+    implementation "com.jakewharton.rxbinding3:rxbinding-core:$rxBinding"
+    implementation "com.jakewharton.rxbinding3:rxbinding-appcompat:$rxBinding"
 }

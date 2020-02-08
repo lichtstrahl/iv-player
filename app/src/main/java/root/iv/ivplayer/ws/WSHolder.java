@@ -1,9 +1,10 @@
 package root.iv.ivplayer.ws;
 
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
 import okio.ByteString;
 
 public class WSHolder {
@@ -12,17 +13,19 @@ public class WSHolder {
     private WebSocket webSocket;
     private OkHttpClient httpClient;
     private Request initRequest;
-    private WebSocketListener listener;
+    private EchoWSListener listener;
+    private Disposable disposable;
 
-    public WSHolder(String url, WebSocketListener listener) {
+    public WSHolder(String url, EchoWSListener listener) {
         this.initRequest = new Request.Builder().url(url).build();
         this.httpClient = new OkHttpClient();
         this.listener = listener;
         this.webSocket = null;
     }
 
-    public void open() {
+    public void open(Consumer<String> consumer) {
         webSocket = httpClient.newWebSocket(initRequest, listener);
+        disposable = listener.subscribe(consumer);
     }
 
     public void send(String msg) {
@@ -35,5 +38,6 @@ public class WSHolder {
 
     public void close() {
         webSocket.close(CODE_OK, null);
+        disposable.dispose();
     }
 }

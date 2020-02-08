@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">IvPlayer</string>
+    <string name="send">Отправить</string>
 </resources>
