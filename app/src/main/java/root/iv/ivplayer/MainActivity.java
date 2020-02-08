@@ -1,17 +1,15 @@
 package root.iv.ivplayer;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.WebSocket;
+import androidx.appcompat.app.AppCompatActivity;
+
 import root.iv.ivplayer.ws.EchoWSListener;
 import root.iv.ivplayer.ws.WSHolder;
+import root.iv.ivplayer.ws.WSUtil;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
         button = this.findViewById(R.id.button);
         view = this.findViewById(R.id.view);
-        wsHolder = new WSHolder("ws://echo.websocket.org", new EchoWSListener());
+        wsHolder = new WSHolder(WSUtil.templateURL(), new EchoWSListener());
 
         button.setOnClickListener(this::click);
     }
