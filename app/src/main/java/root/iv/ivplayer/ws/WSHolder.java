@@ -15,17 +15,20 @@ public class WSHolder {
     private Request initRequest;
     private EchoWSListener listener;
     private Disposable disposable;
+    private boolean opened;
 
     public WSHolder(String url, EchoWSListener listener) {
         this.initRequest = new Request.Builder().url(url).build();
         this.httpClient = new OkHttpClient();
         this.listener = listener;
         this.webSocket = null;
+        this.opened = false;
     }
 
     public void open(Consumer<String> consumer) {
         webSocket = httpClient.newWebSocket(initRequest, listener);
         disposable = listener.subscribe(consumer);
+        opened = true;
     }
 
     public void send(String msg) {
@@ -39,5 +42,10 @@ public class WSHolder {
     public void close() {
         webSocket.close(CODE_OK, null);
         disposable.dispose();
+        opened = false;
+    }
+
+    public boolean isOpened() {
+        return opened;
     }
 }
