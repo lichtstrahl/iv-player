@@ -1,6 +1,6 @@
 package root.iv.ivplayer.activity;
 
-import android.content.IntentFilter;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,12 +9,9 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.util.Locale;
 
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
@@ -22,7 +19,7 @@ import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
     private static final String SAVE_VIEW = "save:view";
     private static final String SAVE_INPUT = "save:input";
@@ -48,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         disposable = new CompositeDisposable();
         msgReceiver = new MsgReceiver();
+        msgReceiver.setListener(this);
 
         if (savedInstanceState != null)
             reload(savedInstanceState);
@@ -84,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "DESTROY");
+        msgReceiver.removeListener();
     }
 
     private void click(View view) {
@@ -103,10 +101,7 @@ public class MainActivity extends AppCompatActivity {
             ChatService.stop(this);
     }
 
-    private void recv(String msg) {
-        runOnUiThread(() -> appendMsg("Некто: " + msg));
-        if (showPushNotify) notificationPublisher.notification(msg);
-    }
+
 
     private void appendMsg(String msg) {
         String str = view.getText().toString();
@@ -119,5 +114,11 @@ public class MainActivity extends AppCompatActivity {
         view.setText(saveMsg);
         String saveInput = bundle.getString(SAVE_INPUT);
         input.setText(saveInput);
+    }
+
+    @Override
+    public void receive(Intent intent) {
+        String msg = ChatService.getMessage(intent);
+        appendMsg("Некто: " + msg);
     }
 }

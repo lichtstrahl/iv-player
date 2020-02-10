@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -92,6 +93,13 @@ public class ChatService extends IntentService {
     public static void stop(Context context) {
         Intent intent = new Intent(context, ChatService.class);
         context.stopService(intent);
+    }
+
+    public static String getMessage(Intent intent) {
+        Bundle bundle = intent.getExtras();
+        if (bundle != null)
+            return bundle.getString(INTENT_MSG);
+        return "";
     }
 
     private void receiveMsg(String msg) {
