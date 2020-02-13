@@ -71,7 +71,7 @@ public class NotificationPublisher {
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setOngoing(true)
                 .setContentIntent(clickIntent)
-                .setContent(notificationLayout);
+                .setCustomContentView(notificationLayout);
 
         createChannel(CHANNEL_SERVICE, CHANNEL_NAME);
 

@@ -15,12 +15,14 @@ public class ChatServiceConnection implements ServiceConnection {
         Log.i(TAG, "connected");
         bind = true;
         chatBinder = (ChatService.ChatBinder) service;
+        chatBinder.bind();
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
         Log.i(TAG, "disconnected");
         bind = false;
+        chatBinder.unbind();
     }
 
     public void send(String msg) {
@@ -41,5 +43,6 @@ public class ChatServiceConnection implements ServiceConnection {
 
     public void unbound(){
         bind = false;
+        chatBinder.unbind();
     }
 }

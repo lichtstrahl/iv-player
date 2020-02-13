@@ -46,12 +46,14 @@ public class ChatService extends Service {
     private WSHolder wsHolder;
     private ChatBinder chatBinder;
     private ArrayDeque<String> msgQueue;        // Очередь сообщений (на приём)
+    private int countClient;
 
     public ChatService() {
         this.notificationPublisher = new NotificationPublisher(this);
         this.wsHolder = new WSHolder(WSUtil.templateURL(), new EchoWSListener());
         chatBinder = new ChatBinder();
         msgQueue = new ArrayDeque<>();
+        countClient = 0;
     }
 
     public static void start(Context context) {
@@ -108,7 +110,16 @@ public class ChatService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Service start");
+        String action = intent.getAction();
+        Log.i(TAG, "Service start. Action: " + action);
+
+        // Если пришла команда закончить работу. То отправляем сообщение Activity, если оно ещё живое
+        // И убираем нотификацию
+        if (action != null && action.equalsIgnoreCase(ACTION_END)) {
+            sendBroadcast(new Intent(ACTION_END));
+            stopSelf();
+        }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -143,8 +154,9 @@ public class ChatService extends Service {
     }
 
     private PendingIntent closeIntent() {
-        Intent closeIntent = new Intent(ACTION_END);
-        return PendingIntent.getBroadcast(this, 0, closeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent closeIntent = new Intent(this, ChatService.class);
+        closeIntent.setAction(ACTION_END);
+        return PendingIntent.getService(this, 0, closeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     private PendingIntent mainActivityIntent() {
@@ -164,6 +176,14 @@ public class ChatService extends Service {
 
         public int countMsgInQueue() {
             return ChatService.this.msgQueue.size();
+        }
+
+        public void bind() {
+            countClient++;
+        }
+
+        public void unbind() {
+            countClient--;
         }
     }
 }
