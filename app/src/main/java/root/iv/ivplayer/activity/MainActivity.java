@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
         if (ChatService.fromNotification(getIntent())) {
             changeSwitch(true);
+            ChatService.bind(this, serviceConnection);
         }
     }
 
