@@ -64,11 +64,14 @@ public class NotificationPublisher {
         RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.notification_chat);
         notificationLayout.setOnClickPendingIntent(R.id.buttonClose, closeIntent);
 
+
         NotificationCompat.Builder notificationBuilder = builderCompat(CHANNEL_SERVICE)
                 .setSmallIcon(R.drawable.ic_chat)
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(notificationLayout)
-                .setContentIntent(activityIntent(cls));
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setOngoing(true)
+                .setContentIntent(activityIntent(cls))
+                .setContent(notificationLayout);
 
         createChannel(CHANNEL_SERVICE, CHANNEL_NAME);
 

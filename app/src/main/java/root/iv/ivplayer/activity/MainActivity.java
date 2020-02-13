@@ -5,18 +5,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 
@@ -30,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     private EditText input;
     private CompositeDisposable disposable;
     private MsgReceiver msgReceiver;
+    private Switch viewStatusService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         button = this.findViewById(R.id.button);
         view = this.findViewById(R.id.view);
         input = this.findViewById(R.id.input);
+        viewStatusService = this.findViewById(R.id.statusService);
 
         disposable = new CompositeDisposable();
         msgReceiver = new MsgReceiver();
@@ -113,6 +112,12 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
             case ChatService.ACTION_END:
                 Log.i(TAG, "END");
                 ChatService.stop(this);
+                viewStatusService.setChecked(false);
+                break;
+
+            case ChatService.ACTION_START:
+                Log.i(TAG, "START");
+                viewStatusService.setChecked(true);
                 break;
             default:
 

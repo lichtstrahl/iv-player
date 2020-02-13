@@ -21,6 +21,7 @@ public class ChatService extends IntentService {
     // ACTION
     public static final String ACTION_END = "root.iv.ivplayer.service.END";
     public static final String ACTION_MSG = "root.iv.ivplayer.service.MSG";
+    public static final String ACTION_START = "root.iv.ivplayer.service.START";
     public static final String ACTION_CLOSE = "root.iv.ivplayer.service.CLOSE";
 
     private static final String INTENT_FINISH_CODE = "intent:finish-code";
@@ -54,6 +55,7 @@ public class ChatService extends IntentService {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_END);
         filter.addAction(ACTION_MSG);
+        filter.addAction(ACTION_START);
 
         return filter;
     }
@@ -85,6 +87,8 @@ public class ChatService extends IntentService {
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         Log.i(TAG, "Start service");
+        Intent startIntent = new Intent(ACTION_START);
+        sendBroadcast(startIntent);
         return super.onStartCommand(intent, flags, startId);
     }
 
