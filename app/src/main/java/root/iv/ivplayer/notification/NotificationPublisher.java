@@ -59,7 +59,7 @@ public class NotificationPublisher {
 
     public Notification customForegroundChatService
             (Context context,
-             @NonNull Class cls,
+             @NonNull PendingIntent clickIntent,
              @NonNull PendingIntent closeIntent) {
         RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.notification_chat);
         notificationLayout.setOnClickPendingIntent(R.id.buttonClose, closeIntent);
@@ -70,7 +70,7 @@ public class NotificationPublisher {
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setOngoing(true)
-                .setContentIntent(activityIntent(cls))
+                .setContentIntent(clickIntent)
                 .setContent(notificationLayout);
 
         createChannel(CHANNEL_SERVICE, CHANNEL_NAME);

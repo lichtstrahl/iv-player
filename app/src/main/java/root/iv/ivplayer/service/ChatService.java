@@ -34,6 +34,7 @@ public class ChatService extends Service {
 
     private static final String INTENT_FINISH_CODE = "intent:finish-code";
     private static final String INTENT_MSG = "intent:msg";
+    private static final String INTENT_FROM_NOTIFICATION = "intent:from-notification";
 
     private static final String TAG = "tag:ws";
     private static final String NAME = "ChatService";
@@ -98,7 +99,10 @@ public class ChatService extends Service {
         Intent startIntent = new Intent(ACTION_START);
         sendBroadcast(startIntent);
 
-        Notification notification = notificationPublisher.customForegroundChatService(this, MainActivity.class, closeIntent());
+        Notification notification = notificationPublisher.customForegroundChatService(
+                this,
+                mainActivityIntent(),
+                closeIntent());
         startForeground(NOTIFICATION_ID, notification);
     }
 
@@ -127,6 +131,10 @@ public class ChatService extends Service {
         return "";
     }
 
+    public static boolean fromNotification(Intent intent) {
+        return intent.getBooleanExtra(INTENT_FROM_NOTIFICATION, false);
+    }
+
     private void receiveMsg(String msg) {
         Intent intent = new Intent(ACTION_MSG);
         intent.putExtra(INTENT_MSG, msg);
@@ -136,7 +144,13 @@ public class ChatService extends Service {
 
     private PendingIntent closeIntent() {
         Intent closeIntent = new Intent(ACTION_END);
-        return PendingIntent.getBroadcast(this, 123, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(this, 0, closeIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+    }
+
+    private PendingIntent mainActivityIntent() {
+        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        mainActivityIntent.putExtra(INTENT_FROM_NOTIFICATION, true);
+        return PendingIntent.getActivity(this, 0, mainActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     public class ChatBinder extends Binder {

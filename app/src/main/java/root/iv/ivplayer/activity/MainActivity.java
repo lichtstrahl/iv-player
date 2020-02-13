@@ -53,6 +53,10 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
 
         viewStatusService.setOnCheckedChangeListener(this::changeStatus);
+
+        if (ChatService.fromNotification(getIntent())) {
+            changeSwitch(true);
+        }
     }
 
     @Override
@@ -111,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         if (status)
             executeChatService();
         else
-            unbindChatService();
+            stopChatService();
     }
 
     // Чтение сообщений из очереди сервиса
@@ -138,6 +142,18 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         }
     }
 
+    // Отвязаться и остановить сервис
+    private void stopChatService() {
+        unbindChatService();
+        ChatService.stop(this);
+    }
+
+    private void changeSwitch(boolean value) {
+        viewStatusService.setOnCheckedChangeListener(null);
+        viewStatusService.setChecked(value);
+        viewStatusService.setOnCheckedChangeListener(this::changeStatus);
+    }
+
     // interface Listener (MsgReceiver)
     @Override
     public void receive(Intent intent) {
@@ -152,13 +168,13 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
             case ChatService.ACTION_END:
                 Log.i(TAG, "Activity: END");
-                unbindChatService();
-                viewStatusService.setChecked(false);
+                stopChatService();
+                changeSwitch(false);
                 break;
 
             case ChatService.ACTION_START:
                 Log.i(TAG, "Activity: START");
-                viewStatusService.setChecked(true);
+                changeSwitch(true);
                 break;
             default:
         }
