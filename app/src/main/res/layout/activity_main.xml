@@ -12,12 +12,21 @@
         android:layout_alignBottom="@id/input"
         android:text="@string/send"/>
 
+    <Button
+        android:id="@+id/buttonClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/buttonSend"
+        android:text="@string/button_clear"/>
+
     <EditText
         android:id="@+id/input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toStartOf="@id/buttonSend"
+        android:lines="1"
         android:layout_margin="8dp"/>
 
     <TextView
@@ -25,16 +34,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="@dimen/stdMargin"
-        android:layout_below="@id/input"
+        android:layout_below="@id/buttonClear"
         android:layout_above="@id/statusService"/>
 
     <Switch
         android:id="@+id/statusService"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/stdMargin"
-        android:layout_alignParentEnd="true"/>
+        android:layout_toStartOf="@id/buttonClear"
+        android:layout_alignTop="@id/buttonClear"
+        android:layout_alignBottom="@id/buttonClear"
+        android:layout_margin="@dimen/stdMargin"/>
 
     <TextView
         android:layout_width="match_parent"

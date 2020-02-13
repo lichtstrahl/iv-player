@@ -99,6 +99,11 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         }
     }
 
+    @OnClick(R.id.buttonClear)
+    protected void clickClear() {
+        view.setText("");
+    }
+
     private void appendMsg(String msg) {
         String str = view.getText().toString();
         str = str.concat(msg).concat("\n");
