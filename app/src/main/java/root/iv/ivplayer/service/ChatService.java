@@ -1,15 +1,21 @@
 package root.iv.ivplayer.service;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import root.iv.ivplayer.activity.MainActivity;
 import root.iv.ivplayer.notification.NotificationPublisher;
@@ -17,7 +23,7 @@ import root.iv.ivplayer.ws.EchoWSListener;
 import root.iv.ivplayer.ws.WSHolder;
 import root.iv.ivplayer.ws.WSUtil;
 
-public class ChatService extends IntentService {
+public class ChatService extends Service {
     // ACTION
     public static final String ACTION_END = "root.iv.ivplayer.service.END";
     public static final String ACTION_MSG = "root.iv.ivplayer.service.MSG";
@@ -32,23 +38,29 @@ public class ChatService extends IntentService {
     private static final int STATUS_OK = 0;
     private static final int NOTIFICATION_ID = 1;
 
-    // INTENT
-    private static final Intent endIntent = new Intent(ACTION_END)
-            .putExtra(INTENT_FINISH_CODE, STATUS_OK);
-
 
     private NotificationPublisher notificationPublisher;
     private WSHolder wsHolder;
+    private ChatBinder chatBinder;
 
     public ChatService() {
-        super(NAME);
         this.notificationPublisher = new NotificationPublisher(this);
         this.wsHolder = new WSHolder(WSUtil.templateURL(), new EchoWSListener());
+        chatBinder = new ChatBinder();
     }
 
     public static void start(Context context) {
         Intent intent = new Intent(context, ChatService.class);
         context.startService(intent);
+    }
+
+    public static void bind(Context context, ServiceConnection connection) {
+        Intent intent = new Intent(context, ChatService.class);
+        context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    public static void unbind(Context context, ServiceConnection connection) {
+        context.unbindService(connection);
     }
 
     public static IntentFilter getIntentFilter() {
@@ -60,36 +72,30 @@ public class ChatService extends IntentService {
         return filter;
     }
 
+    @Nullable
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        wsHolder.open(this::receiveMsg);
+    public IBinder onBind(Intent intent) {
+        Log.i(TAG, "Service bind");
+        return chatBinder;
+    }
 
-        long t0 = System.currentTimeMillis();
-        long t1 = System.currentTimeMillis();
-        while (wsHolder.isOpened()) {
-            if (t1 - t0 > 5000) {
-                Log.i(TAG, "Жду сообщений");
-                t0 = t1;
-            }
-            t1 = System.currentTimeMillis();
-        }
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.i(TAG, "Service unbind");
+        return false;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "Create");
-        Notification notification = notificationPublisher.customForegroundChatService(this, MainActivity.class, closeIntent());
-        startForeground(NOTIFICATION_ID, notification);
-    }
 
-    // Отправка команд
-    @Override
-    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        Log.i(TAG, "Start service");
+        Log.i(TAG, "Create service");
+        wsHolder.open(this::receiveMsg);
         Intent startIntent = new Intent(ACTION_START);
         sendBroadcast(startIntent);
-        return super.onStartCommand(intent, flags, startId);
+
+        Notification notification = notificationPublisher.customForegroundChatService(this, MainActivity.class, closeIntent());
+        startForeground(NOTIFICATION_ID, notification);
     }
 
     @Override
@@ -119,5 +125,11 @@ public class ChatService extends IntentService {
     private PendingIntent closeIntent() {
         Intent closeIntent = new Intent(ACTION_END);
         return PendingIntent.getBroadcast(this, 123, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public class ChatBinder extends Binder {
+        public void send(String msg) {
+            ChatService.this.wsHolder.send(msg);
+        }
     }
 }

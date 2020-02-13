@@ -16,6 +16,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
+import root.iv.ivplayer.service.ChatServiceConnection;
 
 public class MainActivity extends AppCompatActivity implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     private CompositeDisposable disposable;
     private MsgReceiver msgReceiver;
     private Switch viewStatusService;
+    private ChatServiceConnection serviceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         disposable = new CompositeDisposable();
         msgReceiver = new MsgReceiver();
         msgReceiver.setListener(this);
+        serviceConnection = new ChatServiceConnection();
 
         if (savedInstanceState != null)
             reload(savedInstanceState);
@@ -62,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     @Override
     protected void onStart() {
         super.onStart();
-        ChatService.start(this);
         registerReceiver(msgReceiver, ChatService.getIntentFilter());
     }
 
@@ -84,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         if (!text.isEmpty()) {
             appendMsg("Я: " + text);
             input.getText().clear();
+
+            if (serviceConnection.isBind())
+                serviceConnection.send(text);
         }
     }
 
@@ -102,9 +107,9 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
     private void changeStatus(View view, boolean status) {
         if (status)
-            ChatService.start(this);
+            ChatService.bind(this, serviceConnection);
         else
-            ChatService.stop(this);
+            ChatService.unbind(this, serviceConnection);
     }
 
     @Override
@@ -119,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
             case ChatService.ACTION_END:
                 Log.i(TAG, "END");
-                ChatService.stop(this);
+                ChatService.unbind(this, serviceConnection);
                 viewStatusService.setChecked(false);
                 break;
 
