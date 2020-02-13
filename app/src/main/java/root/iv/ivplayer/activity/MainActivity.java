@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         if (status)
             ChatService.bind(this, serviceConnection);
         else
-            ChatService.unbind(this, serviceConnection);
+            unbindChatService();
     }
 
     // Чтение сообщений из очереди сервиса
@@ -124,6 +124,15 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         }
     }
 
+    // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound
+    private void unbindChatService() {
+        if (serviceConnection.isBind()) {
+            serviceConnection.unbound();
+            ChatService.unbind(this, serviceConnection);
+        }
+    }
+
+    // interface Listener (MsgReceiver)
     @Override
     public void receive(Intent intent) {
         String action = intent.getAction();
@@ -137,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
             case ChatService.ACTION_END:
                 Log.i(TAG, "Activity: END");
-                ChatService.unbind(this, serviceConnection);
+                unbindChatService();
                 viewStatusService.setChecked(false);
                 break;
 

@@ -38,4 +38,8 @@ public class ChatServiceConnection implements ServiceConnection {
     public boolean isBind() {
         return bind;
     }
+
+    public void unbound(){
+        bind = false;
+    }
 }
