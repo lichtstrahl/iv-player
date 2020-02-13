@@ -93,6 +93,12 @@ public class ChatService extends Service {
     }
 
     @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        Log.i(TAG, "Service rebind");
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
 
