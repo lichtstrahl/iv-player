@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -12,6 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.receiver.MsgReceiver;
@@ -23,23 +25,23 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     private static final String SAVE_VIEW = "save:view";
     private static final String SAVE_INPUT = "save:input";
 
-    private Button button;
-    private TextView view;
-    private EditText input;
+    @BindView(R.id.view)
+    protected TextView view;
+    @BindView(R.id.input)
+    protected EditText input;
+    @BindView(R.id.statusService)
+    protected Switch viewStatusService;
+
     private CompositeDisposable disposable;
     private MsgReceiver msgReceiver;
-    private Switch viewStatusService;
     private ChatServiceConnection serviceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
-        button = this.findViewById(R.id.button);
-        view = this.findViewById(R.id.view);
-        input = this.findViewById(R.id.input);
-        viewStatusService = this.findViewById(R.id.statusService);
 
         disposable = new CompositeDisposable();
         msgReceiver = new MsgReceiver();
@@ -50,8 +52,6 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
             reload(savedInstanceState);
 
 
-
-        button.setOnClickListener(this::click);
         viewStatusService.setOnCheckedChangeListener(this::changeStatus);
     }
 
@@ -82,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         msgReceiver.removeListener();
     }
 
-    private void click(View view) {
+    @OnClick(R.id.buttonSend)
+    protected void click(View view) {
         String text = input.getText().toString();
         if (!text.isEmpty()) {
             appendMsg("Я: " + text);
@@ -145,8 +146,6 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
                 viewStatusService.setChecked(true);
                 break;
             default:
-
         }
-
     }
 }

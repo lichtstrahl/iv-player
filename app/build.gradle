@@ -19,8 +19,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 
@@ -29,6 +29,7 @@ dependencies {
     def rxAndroid = '2.1.1'
     def rxJava = '2.2.17'
     def rxBinding = '3.1.0'
+    def butterKnife = '10.2.1'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
@@ -48,4 +49,8 @@ dependencies {
     implementation "com.jakewharton.rxbinding3:rxbinding:$rxBinding"
     implementation "com.jakewharton.rxbinding3:rxbinding-core:$rxBinding"
     implementation "com.jakewharton.rxbinding3:rxbinding-appcompat:$rxBinding"
+
+    // ButterKnife
+    implementation "com.jakewharton:butterknife:$butterKnife"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife"
 }
