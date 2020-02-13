@@ -21,33 +21,33 @@ public class EchoWSListener extends WebSocketListener {
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
-        Log.i(WS_TAG, "Open");
+        Log.i(WS_TAG, "WS: Open");
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String text) {
-        Log.i(WS_TAG,"Recv: " + text);
+        Log.i(WS_TAG,"WS: Recv: " + text);
         publish.onNext(text);
     }
 
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
-        Log.i(WS_TAG, "Recv: " + bytes.hex());
+        Log.i(WS_TAG, "WS: Recv: " + bytes.hex());
     }
 
     @Override
     public void onClosing(WebSocket webSocket, int code, String reason) {
 
-        Log.i(WS_TAG, "Close: ");
+        Log.i(WS_TAG, "WS: Close ");
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        Log.i(WS_TAG, "Error", t);
+        Log.i(WS_TAG, "WS: Error", t);
     }
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
-        Log.i(WS_TAG, "Closed");
+        Log.i(WS_TAG, "WS: Closed");
     }
 }

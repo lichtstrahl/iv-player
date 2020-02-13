@@ -93,7 +93,7 @@ public class ChatService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        Log.i(TAG, "Create service");
+        Log.i(TAG, "Service create");
         wsHolder.open(this::receiveMsg);
         Intent startIntent = new Intent(ACTION_START);
         sendBroadcast(startIntent);
@@ -105,6 +105,7 @@ public class ChatService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.i(TAG, "Service destroy");
         wsHolder.close();
     }
 

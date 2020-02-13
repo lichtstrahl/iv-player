@@ -136,13 +136,13 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
                 break;
 
             case ChatService.ACTION_END:
-                Log.i(TAG, "END");
+                Log.i(TAG, "Activity: END");
                 ChatService.unbind(this, serviceConnection);
                 viewStatusService.setChecked(false);
                 break;
 
             case ChatService.ACTION_START:
-                Log.i(TAG, "START");
+                Log.i(TAG, "Activity: START");
                 viewStatusService.setChecked(true);
                 break;
             default:
