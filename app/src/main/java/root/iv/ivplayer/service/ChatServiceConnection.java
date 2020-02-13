@@ -27,6 +27,14 @@ public class ChatServiceConnection implements ServiceConnection {
         chatBinder.send(msg);
     }
 
+    public String read() {
+        return chatBinder.read();
+    }
+
+    public int countMsgInQueue() {
+        return chatBinder.countMsgInQueue();
+    }
+
     public boolean isBind() {
         return bind;
     }

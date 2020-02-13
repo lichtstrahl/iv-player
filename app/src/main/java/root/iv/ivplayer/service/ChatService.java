@@ -14,6 +14,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -42,11 +44,13 @@ public class ChatService extends Service {
     private NotificationPublisher notificationPublisher;
     private WSHolder wsHolder;
     private ChatBinder chatBinder;
+    private ArrayDeque<String> msgQueue;        // Очередь сообщений (на приём)
 
     public ChatService() {
         this.notificationPublisher = new NotificationPublisher(this);
         this.wsHolder = new WSHolder(WSUtil.templateURL(), new EchoWSListener());
         chatBinder = new ChatBinder();
+        msgQueue = new ArrayDeque<>();
     }
 
     public static void start(Context context) {
@@ -119,6 +123,7 @@ public class ChatService extends Service {
     private void receiveMsg(String msg) {
         Intent intent = new Intent(ACTION_MSG);
         intent.putExtra(INTENT_MSG, msg);
+        msgQueue.addLast(msg);
         sendBroadcast(intent);
     }
 
@@ -130,6 +135,14 @@ public class ChatService extends Service {
     public class ChatBinder extends Binder {
         public void send(String msg) {
             ChatService.this.wsHolder.send(msg);
+        }
+
+        public String read() {
+            return ChatService.this.msgQueue.removeFirst();
+        }
+
+        public int countMsgInQueue() {
+            return ChatService.this.msgQueue.size();
         }
     }
 }

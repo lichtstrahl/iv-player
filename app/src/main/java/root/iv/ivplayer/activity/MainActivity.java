@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     @Override
     protected void onStart() {
         super.onStart();
+        readMsgFromQueue();
         registerReceiver(msgReceiver, ChatService.getIntentFilter());
     }
 
@@ -112,6 +113,16 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
             ChatService.unbind(this, serviceConnection);
     }
 
+    // Чтение сообщений из очереди сервиса
+    private void readMsgFromQueue() {
+        if (serviceConnection.isBind()) {
+            while (serviceConnection.countMsgInQueue() != 0) {
+                String msg = serviceConnection.read();
+                appendMsg("Некто: " + msg);
+            }
+        }
+    }
+
     @Override
     public void receive(Intent intent) {
         String action = intent.getAction();
@@ -119,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         switch (action) {
             case ChatService.ACTION_MSG:
                 String msg = ChatService.getMessage(intent);
+                serviceConnection.read();
                 appendMsg("Некто: " + msg);
                 break;
 
