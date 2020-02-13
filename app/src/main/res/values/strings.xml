@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">IvPlayer</string>
     <string name="send">Отправить</string>
+    <string name="label_status_service">Приём сообщений (вкл/выкл):</string>
 </resources>

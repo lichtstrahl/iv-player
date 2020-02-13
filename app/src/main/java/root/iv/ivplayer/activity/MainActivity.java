@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
 
         button.setOnClickListener(this::click);
+        viewStatusService.setOnCheckedChangeListener(this::changeStatus);
     }
 
     @Override
@@ -97,6 +98,13 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         view.setText(saveMsg);
         String saveInput = bundle.getString(SAVE_INPUT);
         input.setText(saveInput);
+    }
+
+    private void changeStatus(View view, boolean status) {
+        if (status)
+            ChatService.start(this);
+        else
+            ChatService.stop(this);
     }
 
     @Override
