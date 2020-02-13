@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
     private void changeStatus(View view, boolean status) {
         if (status)
-            ChatService.bind(this, serviceConnection);
+            executeChatService();
         else
             unbindChatService();
     }
@@ -122,6 +122,12 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
                 appendMsg("Некто: " + msg);
             }
         }
+    }
+
+    // Запуск сервиса и привязка к нему
+    private void executeChatService() {
+        ChatService.start(this);
+        ChatService.bind(this, serviceConnection);
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound

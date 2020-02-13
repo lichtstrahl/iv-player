@@ -103,6 +103,12 @@ public class ChatService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Service start");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Service destroy");
