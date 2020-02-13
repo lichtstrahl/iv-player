@@ -9,6 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,10 +28,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     private Button button;
     private TextView view;
     private EditText input;
-    private Switch statusService;
     private CompositeDisposable disposable;
-    private NotificationPublisher notificationPublisher;
-    private boolean showPushNotify = false;
     private MsgReceiver msgReceiver;
 
     @Override
@@ -41,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         button = this.findViewById(R.id.button);
         view = this.findViewById(R.id.view);
         input = this.findViewById(R.id.input);
-        statusService = this.findViewById(R.id.statusService);
 
         disposable = new CompositeDisposable();
         msgReceiver = new MsgReceiver();
@@ -51,10 +48,8 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
             reload(savedInstanceState);
 
 
-        notificationPublisher = new NotificationPublisher(getApplicationContext());
 
         button.setOnClickListener(this::click);
-        statusService.setOnCheckedChangeListener(this::changeStatusService);
     }
 
     @Override
@@ -67,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     @Override
     protected void onStart() {
         super.onStart();
-        showPushNotify = false;
+        ChatService.start(this);
         registerReceiver(msgReceiver, ChatService.getIntentFilter());
     }
 
@@ -75,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     protected void onStop() {
         super.onStop();
         disposable.dispose();
-        showPushNotify = true;
         unregisterReceiver(msgReceiver);
     }
 
@@ -93,16 +87,6 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
         }
     }
 
-    private void changeStatusService(CompoundButton view, boolean status) {
-        Log.i(TAG, "Change status: " + status);
-        if (status)
-            ChatService.start(this);
-        else
-            ChatService.stop(this);
-    }
-
-
-
     private void appendMsg(String msg) {
         String str = view.getText().toString();
         str = str.concat(msg).concat("\n");
@@ -118,7 +102,21 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
     @Override
     public void receive(Intent intent) {
-        String msg = ChatService.getMessage(intent);
-        appendMsg("Некто: " + msg);
+        String action = intent.getAction();
+
+        switch (action) {
+            case ChatService.ACTION_MSG:
+                String msg = ChatService.getMessage(intent);
+                appendMsg("Некто: " + msg);
+                break;
+
+            case ChatService.ACTION_END:
+                Log.i(TAG, "END");
+                ChatService.stop(this);
+                break;
+            default:
+
+        }
+
     }
 }

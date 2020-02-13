@@ -1,6 +1,5 @@
 package root.iv.ivplayer.notification;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,6 +7,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.widget.RemoteViews;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.activity.MainActivity;
@@ -35,7 +38,7 @@ public class NotificationPublisher {
                 .build();
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        createChannel(notificationManager, CHANNEL_ID, CHANNEL_NAME);
+        createChannel(CHANNEL_ID, CHANNEL_NAME);
 
         notificationManager.notify(0, notification.build());
     }
@@ -48,16 +51,35 @@ public class NotificationPublisher {
                 .setContentText("Сервис приёма сообщений")
                 .setContentIntent(mainActivityIntent);
 
-        NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        createChannel(manager, CHANNEL_SERVICE, CHANNEL_NAME);
+
+        createChannel(CHANNEL_SERVICE, CHANNEL_NAME);
 
         return notificationBuilder.build();
     }
 
-    private void createChannel(NotificationManager notificationManager, String channelId, String channelName) {
+    public Notification customForegroundChatService
+            (Context context,
+             @NonNull Class cls,
+             @NonNull PendingIntent closeIntent) {
+        RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.notification_chat);
+        notificationLayout.setOnClickPendingIntent(R.id.buttonClose, closeIntent);
+
+        NotificationCompat.Builder notificationBuilder = builderCompat(CHANNEL_SERVICE)
+                .setSmallIcon(R.drawable.ic_chat)
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notificationLayout)
+                .setContentIntent(activityIntent(cls));
+
+        createChannel(CHANNEL_SERVICE, CHANNEL_NAME);
+
+        return notificationBuilder.build();
+    }
+
+    private void createChannel(String channelId, String channelName) {
+        NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
-            notificationManager.createNotificationChannel(channel);
+            manager.createNotificationChannel(channel);
         }
     }
 
@@ -71,4 +93,12 @@ public class NotificationPublisher {
                 ? new Notification.Builder(context, channelID)
                 : new Notification.Builder(context);
     }
+
+    private NotificationCompat.Builder builderCompat(String channelID) {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                ? new NotificationCompat.Builder(context, channelID)
+                : new NotificationCompat.Builder(context);
+    }
+
+
 }

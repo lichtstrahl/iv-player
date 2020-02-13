@@ -2,6 +2,7 @@ package root.iv.ivplayer.service;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,14 +11,18 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import root.iv.ivplayer.activity.MainActivity;
 import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.ws.EchoWSListener;
 import root.iv.ivplayer.ws.WSHolder;
 import root.iv.ivplayer.ws.WSUtil;
 
 public class ChatService extends IntentService {
-    private static final String ACTION_END = "root.iv.ivplayer.service.END";
-    private static final String ACTION_MSG = "root.iv.ivplayer.service.MSG";
+    // ACTION
+    public static final String ACTION_END = "root.iv.ivplayer.service.END";
+    public static final String ACTION_MSG = "root.iv.ivplayer.service.MSG";
+    public static final String ACTION_CLOSE = "root.iv.ivplayer.service.CLOSE";
+
     private static final String INTENT_FINISH_CODE = "intent:finish-code";
     private static final String INTENT_MSG = "intent:msg";
 
@@ -49,6 +54,7 @@ public class ChatService extends IntentService {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_END);
         filter.addAction(ACTION_MSG);
+
         return filter;
     }
 
@@ -65,15 +71,13 @@ public class ChatService extends IntentService {
             }
             t1 = System.currentTimeMillis();
         }
-
-        sendBroadcast(endIntent);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Create");
-        Notification notification = notificationPublisher.foregroundChatService();
+        Notification notification = notificationPublisher.customForegroundChatService(this, MainActivity.class, closeIntent());
         startForeground(NOTIFICATION_ID, notification);
     }
 
@@ -106,5 +110,10 @@ public class ChatService extends IntentService {
         Intent intent = new Intent(ACTION_MSG);
         intent.putExtra(INTENT_MSG, msg);
         sendBroadcast(intent);
+    }
+
+    private PendingIntent closeIntent() {
+        Intent closeIntent = new Intent(ACTION_END);
+        return PendingIntent.getBroadcast(this, 123, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

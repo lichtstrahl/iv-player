@@ -10,7 +10,6 @@ import java.util.List;
 
 public class MsgReceiver extends BroadcastReceiver {
     private static final String TAG = "tag:ws";
-    private static final String ACTION = "action:new-msg";
 
     private Listener listener;
 
