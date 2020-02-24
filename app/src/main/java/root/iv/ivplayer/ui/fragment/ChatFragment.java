@@ -1,15 +1,18 @@
-package root.iv.ivplayer.activity;
+package root.iv.ivplayer.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,7 +23,7 @@ import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
 
-public class MainActivity extends AppCompatActivity implements MsgReceiver.Listener {
+public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
     private static final String SAVE_VIEW = "save:view";
     private static final String SAVE_INPUT = "save:input";
@@ -36,11 +39,15 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
     private MsgReceiver msgReceiver;
     private ChatServiceConnection serviceConnection;
 
+    public static ChatFragment getInstance() {
+        return new ChatFragment();
+    }
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+        ButterKnife.bind(this, view);
 
 
         disposable = new CompositeDisposable();
@@ -54,35 +61,37 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
         viewStatusService.setOnCheckedChangeListener(this::changeStatus);
 
-        if (ChatService.fromNotification(getIntent())) {
+        if (ChatService.fromNotification(this.getActivity().getIntent())) {
             changeSwitch(true);
-            ChatService.bind(this, serviceConnection);
+            ChatService.bind(this.getContext(), serviceConnection);
         }
+
+        return view;
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(SAVE_VIEW, view.getText().toString());
         outState.putString(SAVE_INPUT, input.getText().toString());
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         readMsgFromQueue();
-        registerReceiver(msgReceiver, ChatService.getIntentFilter());
+        this.getContext().registerReceiver(msgReceiver, ChatService.getIntentFilter());
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         disposable.dispose();
-        unregisterReceiver(msgReceiver);
+        this.getContext().unregisterReceiver(msgReceiver);
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         msgReceiver.removeListener();
     }
@@ -136,22 +145,22 @@ public class MainActivity extends AppCompatActivity implements MsgReceiver.Liste
 
     // Запуск сервиса и привязка к нему
     private void executeChatService() {
-        ChatService.start(this);
-        ChatService.bind(this, serviceConnection);
+        ChatService.start(this.getContext());
+        ChatService.bind(this.getContext(), serviceConnection);
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound
     private void unbindChatService() {
         if (serviceConnection.isBind()) {
             serviceConnection.unbound();
-            ChatService.unbind(this, serviceConnection);
+            ChatService.unbind(this.getContext(), serviceConnection);
         }
     }
 
     // Отвязаться и остановить сервис
     private void stopChatService() {
         unbindChatService();
-        ChatService.stop(this);
+        ChatService.stop(this.getContext());
     }
 
     private void changeSwitch(boolean value) {

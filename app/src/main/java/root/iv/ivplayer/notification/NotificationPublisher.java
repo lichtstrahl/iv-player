@@ -13,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.activity.MainActivity;
+import root.iv.ivplayer.ui.fragment.ChatFragment;
 
 public class NotificationPublisher {
     private static final String CHANNEL_ID = "channel:1";
@@ -26,7 +26,7 @@ public class NotificationPublisher {
     }
 
     public void notification(String text) {
-        PendingIntent pIntent = activityIntent(MainActivity.class);
+        PendingIntent pIntent = activityIntent(ChatFragment.class);
 
         Notification.Builder notification = builder(CHANNEL_ID);
 
@@ -44,7 +44,7 @@ public class NotificationPublisher {
     }
 
     public Notification foregroundChatService() {
-        PendingIntent mainActivityIntent = activityIntent(MainActivity.class);
+        PendingIntent mainActivityIntent = activityIntent(ChatFragment.class);
         Notification.Builder notificationBuilder = builder(CHANNEL_SERVICE)
                 .setContentTitle("Чат")
                 .setSmallIcon(R.drawable.ic_chat)

@@ -16,7 +16,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayDeque;
 
-import root.iv.ivplayer.activity.MainActivity;
+import root.iv.ivplayer.ui.fragment.ChatFragment;
 import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.ws.EchoWSListener;
 import root.iv.ivplayer.ws.WSHolder;
@@ -163,7 +163,7 @@ public class ChatService extends Service {
     }
 
     private PendingIntent mainActivityIntent() {
-        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        Intent mainActivityIntent = new Intent(this, ChatFragment.class);
         mainActivityIntent.putExtra(INTENT_FROM_NOTIFICATION, true);
         return PendingIntent.getActivity(this, 0, mainActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
