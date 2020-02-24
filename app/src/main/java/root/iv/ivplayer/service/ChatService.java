@@ -15,9 +15,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import root.iv.ivplayer.activity.MainActivity;
 import root.iv.ivplayer.notification.NotificationPublisher;
@@ -50,7 +47,7 @@ public class ChatService extends Service {
 
     public ChatService() {
         this.notificationPublisher = new NotificationPublisher(this);
-        this.wsHolder = new WSHolder(WSUtil.templateURL(), new EchoWSListener());
+        this.wsHolder = new WSHolder(WSUtil.springWSURL(), new EchoWSListener());
         chatBinder = new ChatBinder();
         msgQueue = new ArrayDeque<>();
         countClient = 0;

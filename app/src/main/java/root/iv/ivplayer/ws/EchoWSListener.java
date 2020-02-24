@@ -43,7 +43,7 @@ public class EchoWSListener extends WebSocketListener {
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        Log.i(WS_TAG, "WS: Error", t);
+        Log.e(WS_TAG, "WS: Error", t);
     }
 
     @Override

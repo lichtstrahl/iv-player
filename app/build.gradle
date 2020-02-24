@@ -11,6 +11,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "WS_IV_TOKEN", "\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImYwYzMyYmYyNTUwNDI0NzU4N2VjNjAxMGVjM2UyZWVmZGM4Y2M0YjM1NWZlMDAzYTRjZWY3MWY0MjZjMDU0NTNlNzg5YmI0MWJlZDEzZDJkIn0.eyJhdWQiOiI4IiwianRpIjoiZjBjMzJiZjI1NTA0MjQ3NTg3ZWM2MDEwZWMzZTJlZWZkYzhjYzRiMzU1ZmUwMDNhNGNlZjcxZjQyNmMwNTQ1M2U3ODliYjQxYmVkMTNkMmQiLCJpYXQiOjE1ODExODU4NDYsIm5iZiI6MTU4MTE4NTg0NiwiZXhwIjoxNjEyODA4MjQ2LCJzdWIiOiI0ODEiLCJzY29wZXMiOltdfQ.dAaEMXn47UbMCdlP22gXfTYfmgqH8tG7_3-7DDumaexakln2WEPxPoRCi6OIrQCC0K2UseDq9Od25sgTFlavMPXoRZNgKv6a2FE6QaRrmVnygagbfFy8o6i9HEjb512rr1kscaKT8D3MhbGY85VZOeaXHo9ddmw73wlk4bpoAC4wlmDygt2tZm76oY1oAwDQDiv5_hIohTvCLEdrKFfC6QiEiqawmpIGKWuGwC6xCv_6lP5hN7thaRoxN_KmHW2T0GsBk13mKYIst1o7zNNXBR5xoAydBAjHnvgxeMbj1d7EwE91-oVXiyOwNXkpMu_N2qOlMqAY_L5huu_jXxQNVgTrlcTwkzIHYikcVvfDIewVes5bfe6XBeAoMFCyO_gr7lXDo8HjAgnHDHW-QicUCF5zWyZkqIryHcPJ0_OffNgbwlBsISIdccw92XqUTpJ_Na2V8zOZHSx3ovK3xQ4nJHRab6uzZu7lzvOYnw5cCrViSv5cu91JaEiV8EcrOxSqKYCHZsvRFp4P7xxv9ZmZw_XvX50u3Rh2wNS4fByibqFfMcJqCZJ5zT5_lvEEIAB_lB8gp8MP8P4KdjsFt44xCxOlDBuYXn0w_MxZKmAGalvregZdnOmw_vn7PlTjdqTU0FvBVelo3Sv7tZRtXQbPqmYnYkz35m1vLgA6faPBr3w\"")
         buildConfigField("int", "WS_IV_CHANNEL", "1")
+        buildConfigField("String", "URL_WS_IN", "\"connect.websocket.in\"")
+        buildConfigField("String", "URL_WS_SPRING", "\"206.81.20.220\"")
     }
     buildTypes {
         release {
