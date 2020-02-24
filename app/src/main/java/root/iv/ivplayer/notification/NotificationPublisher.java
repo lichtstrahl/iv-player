@@ -67,7 +67,6 @@ public class NotificationPublisher {
 
         NotificationCompat.Builder notificationBuilder = builderCompat(CHANNEL_SERVICE)
                 .setSmallIcon(R.drawable.ic_chat)
-                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
                 .setCategory(NotificationCompat.CATEGORY_PROGRESS)
                 .setOngoing(true)
                 .setContentIntent(clickIntent)
