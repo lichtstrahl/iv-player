@@ -25,11 +25,11 @@ import root.iv.ivplayer.service.ChatServiceConnection;
 
 public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
-    private static final String SAVE_VIEW = "save:view";
+    private static final String SAVE_VIEW = "save:viewMsg";
     private static final String SAVE_INPUT = "save:input";
 
     @BindView(R.id.view)
-    protected TextView view;
+    protected TextView viewMsg;
     @BindView(R.id.input)
     protected EditText input;
     @BindView(R.id.statusService)
@@ -72,7 +72,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(SAVE_VIEW, view.getText().toString());
+        outState.putString(SAVE_VIEW, viewMsg.getText().toString());
         outState.putString(SAVE_INPUT, input.getText().toString());
     }
 
@@ -110,18 +110,18 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
 
     @OnClick(R.id.buttonClear)
     protected void clickClear() {
-        view.setText("");
+        viewMsg.setText("");
     }
 
     private void appendMsg(String msg) {
-        String str = view.getText().toString();
+        String str = viewMsg.getText().toString();
         str = str.concat(msg).concat("\n");
-        view.setText(str);
+        viewMsg.setText(str);
     }
 
     private void reload(@NonNull Bundle bundle) {
         String saveMsg = bundle.getString(SAVE_VIEW);
-        view.setText(saveMsg);
+        viewMsg.setText(saveMsg);
         String saveInput = bundle.getString(SAVE_INPUT);
         input.setText(saveInput);
     }
