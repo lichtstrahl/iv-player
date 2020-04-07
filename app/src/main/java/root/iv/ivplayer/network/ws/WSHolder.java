@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ws;
+package root.iv.ivplayer.network.ws;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;

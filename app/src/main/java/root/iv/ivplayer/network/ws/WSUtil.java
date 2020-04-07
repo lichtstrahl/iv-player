@@ -1,10 +1,11 @@
-package root.iv.ivplayer.ws;
+package root.iv.ivplayer.network.ws;
 
 import root.iv.ivplayer.BuildConfig;
 
 public abstract class WSUtil {
     private static final String WS = "ws";
     private static final String WSS = "wss";
+    private static final String HTTP = "http";
 
     // Составление URL по шаблону
     // wss://connect.websocket.in/v2/YOUR_CHANNEL_ID?token=YOUR_ACCESS_TOKEN
@@ -21,6 +22,10 @@ public abstract class WSUtil {
     public static String springWSURL() {
         String url = url(WS, BuildConfig.URL_WS_SPRING, "9010");
         return String.format("%s/ws-handler", url);
+    }
+
+    public static String baseSpringURL() {
+        return url(HTTP, BuildConfig.URL_WS_SPRING, "9010");
     }
 
     private static String url(String protocol, String baseURL, String port) {

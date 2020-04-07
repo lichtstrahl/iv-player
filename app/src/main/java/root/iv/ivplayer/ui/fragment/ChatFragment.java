@@ -25,7 +25,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.ws.pubnub.PNSubscribeCallback;
+import root.iv.ivplayer.network.ws.pubnub.PNSubscribeCallback;
 
 public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";

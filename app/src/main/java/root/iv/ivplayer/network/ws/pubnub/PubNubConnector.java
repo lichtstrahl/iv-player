@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ws.pubnub;
+package root.iv.ivplayer.network.ws.pubnub;
 
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;

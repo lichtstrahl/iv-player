@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ws;
+package root.iv.ivplayer.network.ws;
 
 import android.util.Log;
 

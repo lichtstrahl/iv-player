@@ -4,4 +4,8 @@
     <string name="label_status_service">Приём сообщений (вкл/выкл):</string>
     <string name="button_clear">очистить</string>
     <string name="button_test">test</string>
+    <string name="label_first_name">Имя</string>
+    <string name="label_last_name">Фамилия</string>
+    <string name="label_register">Регистрация</string>
+    <string name="label_login">Логин</string>
 </resources>

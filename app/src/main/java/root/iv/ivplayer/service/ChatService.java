@@ -14,19 +14,17 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.pubnub.api.PubNub;
-
 import java.util.ArrayDeque;
 
 import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.ui.fragment.ChatFragment;
 import root.iv.ivplayer.notification.NotificationPublisher;
-import root.iv.ivplayer.ws.EchoWSListener;
-import root.iv.ivplayer.ws.WSHolder;
-import root.iv.ivplayer.ws.WSUtil;
-import root.iv.ivplayer.ws.pubnub.PNPublishCallback;
-import root.iv.ivplayer.ws.pubnub.PNSubscribeCallback;
-import root.iv.ivplayer.ws.pubnub.PubNubConnector;
+import root.iv.ivplayer.network.ws.EchoWSListener;
+import root.iv.ivplayer.network.ws.WSHolder;
+import root.iv.ivplayer.network.ws.WSUtil;
+import root.iv.ivplayer.network.ws.pubnub.PNPublishCallback;
+import root.iv.ivplayer.network.ws.pubnub.PNSubscribeCallback;
+import root.iv.ivplayer.network.ws.pubnub.PubNubConnector;
 
 public class ChatService extends Service {
     // ACTION
