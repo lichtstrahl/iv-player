@@ -3,4 +3,5 @@
     <string name="send">Отправить</string>
     <string name="label_status_service">Приём сообщений (вкл/выкл):</string>
     <string name="button_clear">очистить</string>
+    <string name="button_test">test</string>
 </resources>

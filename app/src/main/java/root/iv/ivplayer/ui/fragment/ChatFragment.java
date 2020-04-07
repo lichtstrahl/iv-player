@@ -9,15 +9,30 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.pubnub.api.PNConfiguration;
+import com.pubnub.api.PubNub;
+import com.pubnub.api.callbacks.PNCallback;
+import com.pubnub.api.callbacks.SubscribeCallback;
+import com.pubnub.api.models.consumer.PNPublishResult;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Locale;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
+import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
@@ -38,6 +53,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private CompositeDisposable disposable;
     private MsgReceiver msgReceiver;
     private ChatServiceConnection serviceConnection;
+    private PubNub pnConnect;
 
     public static ChatFragment getInstance() {
         return new ChatFragment();
@@ -65,6 +81,8 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
             changeSwitch(true);
             ChatService.bind(this.getContext(), serviceConnection);
         }
+
+        initPubNub();
 
         return view;
     }
@@ -112,6 +130,57 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     protected void clickClear() {
         viewMsg.setText("");
     }
+
+    @OnClick(R.id.buttonTest)
+    protected void clickTest() {
+        publishMessage(input.getText().toString());
+    }
+
+    private void initPubNub() {
+        PNConfiguration config = new PNConfiguration();
+        config.setPublishKey(BuildConfig.PUB_KEY);
+        config.setSubscribeKey(BuildConfig.SUB_KEY);
+        config.setSecure(true);
+        pnConnect = new PubNub(config);
+
+        pnConnect.addListener(new SubscribeCallback() {
+            @Override
+            public void status(PubNub pubnub, PNStatus status) {
+                Log.i(TAG, String.format(Locale.ENGLISH, "Status: origin=%s", status.getOrigin()));
+            }
+
+            @Override
+            public void message(PubNub pubnub, PNMessageResult message) {
+                final String msg = message.getMessage().toString();
+                ChatFragment.this.getActivity().runOnUiThread(
+                        () -> Toast.makeText(ChatFragment.this.getContext(), msg, Toast.LENGTH_SHORT).show()
+                );
+            }
+
+            @Override
+            public void presence(PubNub pubnub, PNPresenceEventResult presence) {
+
+            }
+        });
+
+        pnConnect
+                .subscribe()
+                .channels(Collections.singletonList("global_channel"))
+                .execute();
+    }
+
+    private void publishMessage(String msg) {
+        pnConnect.publish()
+                .message(msg)
+                .channel("global_channel")
+                .async(new PNCallback<PNPublishResult>() {
+                    @Override
+                    public void onResponse(PNPublishResult result, PNStatus status) {
+                        Log.i(TAG, String.format(Locale.ENGLISH, "Status: %s", status.getStatusCode()));
+                    }
+                });
+    }
+
 
     private void appendMsg(String msg) {
         String str = viewMsg.getText().toString();

@@ -20,6 +20,14 @@
         android:layout_below="@id/buttonSend"
         android:text="@string/button_clear"/>
 
+    <Button
+        android:id="@+id/buttonTest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/buttonClear"
+        android:text="@string/button_test"/>
+
     <EditText
         android:id="@+id/input"
         android:layout_width="match_parent"

@@ -13,6 +13,8 @@ android {
         buildConfigField("int", "WS_IV_CHANNEL", "1")
         buildConfigField("String", "URL_WS_IN", "\"connect.websocket.in\"")
         buildConfigField("String", "URL_WS_SPRING", "\"206.81.20.220\"")
+        buildConfigField("String", "PUB_KEY", "\"pub-c-bce5f096-9446-49bf-aeed-cceac7972a5e\"")
+        buildConfigField("String", "SUB_KEY", "\"sub-c-439bebdc-78c1-11ea-b5c3-ce1367e69237\"")
     }
     buildTypes {
         release {
@@ -33,6 +35,7 @@ dependencies {
     def rxBinding = '3.1.0'
     def butterKnife = '10.2.1'
     def androidXVersion = '1.1.0'
+    def pubNubVersion = '4.25.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "androidx.appcompat:appcompat:$androidXVersion"
@@ -55,4 +58,7 @@ dependencies {
     // ButterKnife
     implementation "com.jakewharton:butterknife:$butterKnife"
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife"
+
+    // PubNub
+    implementation ("com.pubnub:pubnub-gson:$pubNubVersion")
 }
