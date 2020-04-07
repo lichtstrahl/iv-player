@@ -15,33 +15,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.pubnub.api.PNConfiguration;
-import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.PNCallback;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.models.consumer.PNPublishResult;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
-import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
+import root.iv.ivplayer.ws.pubnub.PNSubscribeCallback;
 
 public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
     private static final String SAVE_VIEW = "save:viewMsg";
     private static final String SAVE_INPUT = "save:input";
+    private static final String CHANNEL_NAME = "ch:global";
 
     @BindView(R.id.view)
     protected TextView viewMsg;
@@ -53,7 +43,6 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private CompositeDisposable disposable;
     private MsgReceiver msgReceiver;
     private ChatServiceConnection serviceConnection;
-    private PubNub pnConnect;
 
     public static ChatFragment getInstance() {
         return new ChatFragment();
@@ -81,8 +70,6 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
             changeSwitch(true);
             ChatService.bind(this.getContext(), serviceConnection);
         }
-
-        initPubNub();
 
         return view;
     }
@@ -133,54 +120,9 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
 
     @OnClick(R.id.buttonTest)
     protected void clickTest() {
-        publishMessage(input.getText().toString());
+        String msg = input.getText().toString();
+        serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
     }
-
-    private void initPubNub() {
-        PNConfiguration config = new PNConfiguration();
-        config.setPublishKey(BuildConfig.PUB_KEY);
-        config.setSubscribeKey(BuildConfig.SUB_KEY);
-        config.setSecure(true);
-        pnConnect = new PubNub(config);
-
-        pnConnect.addListener(new SubscribeCallback() {
-            @Override
-            public void status(PubNub pubnub, PNStatus status) {
-                Log.i(TAG, String.format(Locale.ENGLISH, "Status: origin=%s", status.getOrigin()));
-            }
-
-            @Override
-            public void message(PubNub pubnub, PNMessageResult message) {
-                final String msg = message.getMessage().toString();
-                ChatFragment.this.getActivity().runOnUiThread(
-                        () -> Toast.makeText(ChatFragment.this.getContext(), msg, Toast.LENGTH_SHORT).show()
-                );
-            }
-
-            @Override
-            public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-
-            }
-        });
-
-        pnConnect
-                .subscribe()
-                .channels(Collections.singletonList("global_channel"))
-                .execute();
-    }
-
-    private void publishMessage(String msg) {
-        pnConnect.publish()
-                .message(msg)
-                .channel("global_channel")
-                .async(new PNCallback<PNPublishResult>() {
-                    @Override
-                    public void onResponse(PNPublishResult result, PNStatus status) {
-                        Log.i(TAG, String.format(Locale.ENGLISH, "Status: %s", status.getStatusCode()));
-                    }
-                });
-    }
-
 
     private void appendMsg(String msg) {
         String str = viewMsg.getText().toString();
@@ -216,6 +158,29 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private void executeChatService() {
         ChatService.start(this.getContext());
         ChatService.bind(this.getContext(), serviceConnection);
+
+        // PubNub: Подписываемся на канал. Добавляем callback
+        PNSubscribeCallback callback = new PNSubscribeCallback(
+                (pn, pnMsg) -> {
+                    this.getActivity().runOnUiThread(() -> {
+                        String msg = pnMsg.getMessage().toString();
+                        Log.i(TAG, pnMsg.toString());
+                        Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
+                    });
+                    return null;
+                    },
+                (pn, status) -> {
+                    this.getActivity().runOnUiThread(() -> {
+                        String msg = String.format(Locale.ENGLISH, "Status: %d from %s",
+                                status.getStatusCode(), status.getUuid());
+                        Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
+                    });
+                    return null;
+                    },
+                error -> Log.w(TAG, error)
+        );
+        serviceConnection.addListener(callback);
+        serviceConnection.subscribeToChannel(CHANNEL_NAME);
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound

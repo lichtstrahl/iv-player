@@ -14,13 +14,19 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.pubnub.api.PubNub;
+
 import java.util.ArrayDeque;
 
+import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.ui.fragment.ChatFragment;
 import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.ws.EchoWSListener;
 import root.iv.ivplayer.ws.WSHolder;
 import root.iv.ivplayer.ws.WSUtil;
+import root.iv.ivplayer.ws.pubnub.PNPublishCallback;
+import root.iv.ivplayer.ws.pubnub.PNSubscribeCallback;
+import root.iv.ivplayer.ws.pubnub.PubNubConnector;
 
 public class ChatService extends Service {
     // ACTION
@@ -44,6 +50,7 @@ public class ChatService extends Service {
     private ChatBinder chatBinder;
     private ArrayDeque<String> msgQueue;        // Очередь сообщений (на приём)
     private int countClient;
+    private PubNubConnector pnConnector;
 
     public ChatService() {
         this.notificationPublisher = new NotificationPublisher(this);
@@ -109,6 +116,9 @@ public class ChatService extends Service {
                 mainActivityIntent(),
                 closeIntent());
         startForeground(NOTIFICATION_ID, notification);
+
+        // Создание подключения к PN
+        pnConnector = PubNubConnector.create(BuildConfig.PUB_KEY, BuildConfig.SUB_KEY);
     }
 
     @Override
@@ -122,6 +132,9 @@ public class ChatService extends Service {
             sendBroadcast(new Intent(ACTION_END));
             stopSelf();
         }
+
+        // Запускаем подписку на канал
+
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -187,6 +200,21 @@ public class ChatService extends Service {
 
         public void unbind() {
             countClient--;
+        }
+
+        public void addListenerForPNConnect(PNSubscribeCallback callback) {
+            pnConnector.addListener(callback);
+        }
+
+        public void subscribeToChannels(String ... channels) {
+            pnConnector.subscribe(channels);
+        }
+
+        public void sendMessageToPNChannel(String msg, String channel, @Nullable PNPublishCallback publishCallback) {
+            if (publishCallback != null)
+                pnConnector.sendMessage(msg, channel, publishCallback);
+            else
+                pnConnector.sendMessage(msg, channel);
         }
     }
 }
