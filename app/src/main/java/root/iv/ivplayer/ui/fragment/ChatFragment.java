@@ -177,7 +177,8 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
                     });
                     return null;
                     },
-                error -> Log.w(TAG, error)
+                error -> Log.w(TAG, error),
+                true
         );
         serviceConnection.addListener(callback);
         serviceConnection.subscribeToChannel(CHANNEL_NAME);
