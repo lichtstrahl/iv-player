@@ -51,6 +51,12 @@ public class GameFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        listener.stopGameFragment();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         listener = null;
@@ -58,5 +64,6 @@ public class GameFragment extends Fragment {
 
     public interface Listener {
         void createGameFragment();
+        void stopGameFragment();
     }
 }
