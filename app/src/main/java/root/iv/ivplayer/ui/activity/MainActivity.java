@@ -3,23 +3,32 @@ package root.iv.ivplayer.ui.activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.UserEntityDTO;
 import root.iv.ivplayer.ui.fragment.ChatFragment;
+import root.iv.ivplayer.ui.fragment.GameFragment;
 import root.iv.ivplayer.ui.fragment.RegisterFragment;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
-    implements RegisterFragment.Listener
+    implements
+        RegisterFragment.Listener,
+        GameFragment.Listener,
+        ChatFragment.Listener
 {
     private static final String SHARED_LOGIN_KEY = "shared:login";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         setFragment();
     }
@@ -50,5 +59,21 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
 
         setFragment();
+    }
+
+    @Override
+    public void createGameFragment() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+
+    @Override
+    public void chatServiceStarted() {
+        // Показываем игровой фрагмент
+        Timber.tag(App.getTag()).i("Добавление нового фрагмента");
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(null)
+                .add(R.id.mainFrame, GameFragment.getInstance())
+                .commit();
     }
 }

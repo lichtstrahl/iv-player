@@ -1,5 +1,6 @@
 package root.iv.ivplayer.ui.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -51,6 +52,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private CompositeDisposable disposable;
     private MsgReceiver msgReceiver;
     private ChatServiceConnection serviceConnection;
+    private Listener listener;
 
     public static ChatFragment getInstance() {
         return new ChatFragment();
@@ -94,6 +96,21 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
         super.onStart();
         readMsgFromQueue();
         this.getContext().registerReceiver(msgReceiver, ChatService.getIntentFilter());
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Listener)
+            listener = (Listener) context;
+        else
+            Timber.tag(App.getTag()).w("Не реализован нужный интерфейс слушателя");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 
     @Override
@@ -254,16 +271,21 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
                 break;
 
             case ChatService.ACTION_END:
-                Timber.tag(App.getTag()).i("Activity: END");
+                Timber.tag(App.getTag()).i("ChatFragment: END");
                 stopChatService();
                 changeSwitch(false);
                 break;
 
             case ChatService.ACTION_START:
-                Timber.tag(App.getTag()).i("Activity: START");
+                Timber.tag(App.getTag()).i("ChatFragment: START");
+                listener.chatServiceStarted();
                 changeSwitch(true);
                 break;
             default:
         }
+    }
+
+    public interface Listener {
+        void chatServiceStarted();
     }
 }
