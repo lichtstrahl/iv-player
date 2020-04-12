@@ -30,7 +30,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
@@ -40,7 +39,6 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
     private static final String SAVE_VIEW = "save:viewMsg";
     private static final String SAVE_INPUT = "save:input";
-    private static final String CHANNEL_NAME = "ch:global";
 
     @BindView(R.id.view)
     protected TextView viewMsg;
@@ -146,7 +144,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     @OnClick(R.id.buttonTest)
     protected void clickTest() {
         String msg = input.getText().toString();
-        serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
+        listener.publishMessage(msg);
     }
 
     private void appendMsg(String msg) {
@@ -195,47 +193,8 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private void executeChatService(@NonNull String login) {
         ChatService.start(this.getContext(), login);
         ChatService.bind(this.getContext(), serviceConnection);
-
-        // PubNub: Подписываемся на канал. Добавляем callback
-        PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
-                this::processPNmsg,
-                this::processPNstatus,
-                this::processPNpresence,
-                App::logE,
-                true
-        );
-        serviceConnection.addListener(callback);
-        serviceConnection.subscribeToChannel(CHANNEL_NAME);
-    }
-
-    private Void processPNmsg(PubNub pn, PNMessageResult pnMsg) {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> {
-            String msg = pnMsg.getMessage().toString();
-            Timber.tag(App.getTag()).i(pnMsg.toString());
-            Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
-        });
-        return null;
-    }
-
-    private Void processPNstatus(PubNub pn, PNStatus status) {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> {
-            String msg = String.format(Locale.ENGLISH, "Status: %d from %s",
-                    status.getStatusCode(), status.getUuid());
-            Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
-        });
-        return null;
-    }
-
-    private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
-        String event = presenceEvent.getEvent();
-        Timber.tag(App.getTag()).i("Event: %s", event);
-
-        if (event.equals("join")) {
-            String uuid = presenceEvent.getUuid();
-            Timber.tag(App.getTag()).i("Join user %s", PNUtilUUID.parseLogin(uuid));
-        }
+        listener.chatServiceStarted();
+        listener.serviceBind();
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound
@@ -287,5 +246,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
 
     public interface Listener {
         void chatServiceStarted();
+        void serviceBind();
+        void publishMessage(String msg);
     }
 }

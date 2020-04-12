@@ -5,13 +5,26 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.pubnub.api.PubNub;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+
+import java.util.Locale;
+import java.util.Objects;
+
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.UserEntityDTO;
+import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
+import root.iv.ivplayer.service.ChatService;
+import root.iv.ivplayer.service.ChatServiceConnection;
 import root.iv.ivplayer.ui.fragment.ChatFragment;
 import root.iv.ivplayer.ui.fragment.GameFragment;
 import root.iv.ivplayer.ui.fragment.RegisterFragment;
@@ -23,9 +36,9 @@ public class MainActivity extends AppCompatActivity
         GameFragment.Listener,
         ChatFragment.Listener
 {
+    private static final String CHANNEL_NAME = "ch:global";
     private static final String SHARED_LOGIN_KEY = "shared:login";
-
-    private int defaultFlags;
+    private ChatServiceConnection serviceConnection;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -33,7 +46,8 @@ public class MainActivity extends AppCompatActivity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         setFragment();
-        defaultFlags = getWindow().getAttributes().flags;
+
+        serviceConnection = new ChatServiceConnection();
     }
 
     private void setFragment() {
@@ -85,5 +99,50 @@ public class MainActivity extends AppCompatActivity
                 .addToBackStack(null)
                 .add(R.id.mainFrame, GameFragment.getInstance())
                 .commit();
+    }
+
+    @Override
+    public void serviceBind() {
+        ChatService.bind(this, serviceConnection);
+
+
+        // PubNub: Подписываемся на канал. Добавляем callback
+        PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
+                this::processPNmsg,
+                this::processPNstatus,
+                this::processPNpresence,
+                App::logE,
+                true
+        );
+        serviceConnection.addListener(callback);
+        serviceConnection.subscribeToChannel(CHANNEL_NAME);
+    }
+
+    @Override
+    public void publishMessage(String msg) {
+        serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
+    }
+
+    private Void processPNmsg(PubNub pn, PNMessageResult pnMsg) {
+        runOnUiThread(() -> {
+                    String msg = pnMsg.getMessage().toString();
+                    Timber.tag(App.getTag()).i(pnMsg.toString());
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                });
+        return null;
+    }
+
+    private Void processPNstatus(PubNub pn, PNStatus status) {
+        return null;
+    }
+
+    private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
+        String event = presenceEvent.getEvent();
+        Timber.tag(App.getTag()).i("Event: %s", event);
+
+        if (event.equals("join")) {
+            String uuid = presenceEvent.getUuid();
+            Timber.tag(App.getTag()).i("Join user %s", PNUtilUUID.parseLogin(uuid));
+        }
     }
 }
