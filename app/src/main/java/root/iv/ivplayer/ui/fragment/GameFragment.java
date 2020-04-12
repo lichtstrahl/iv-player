@@ -127,9 +127,15 @@ public class GameFragment extends Fragment {
         // Создаём игровой объект и помещаем его в контроллер для управления движением
         switch (event) {
             case PresenceEvent.JOIN:
+                String selfUUID = serviceConnection.getSelfUUID();
+                String joinUUID = presenceEvent.getUuid();
+
                 Actor newActor = objectGenerator.buildActor(10, 100);
                 scene.addDrawableObject(newActor);
-                moveController.grabObject(newActor);
+
+                if (selfUUID.equalsIgnoreCase(joinUUID)) {
+                    moveController.grabObject(newActor);
+                }
                 break;
         }
     }
