@@ -83,4 +83,8 @@ public class PubNubConnector {
     private void loadConfig() {
         pnConnect = new PubNub(pnConfiguration);
     }
+
+    public String getUUID() {
+        return pnConfiguration.getUuid();
+    }
 }

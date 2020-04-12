@@ -84,4 +84,8 @@ public class ChatServiceConnection implements ServiceConnection {
     public void publishMessageToChannel(String msg, String channel, @Nullable PNPublishCallback callback) {
         chatBinder.sendMessageToPNChannel(msg, channel, callback);
     }
+
+    public String getSelfUUID() {
+        return chatBinder.getPNuuid();
+    }
 }

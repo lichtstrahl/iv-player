@@ -221,5 +221,9 @@ public class ChatService extends Service {
             else
                 pnConnector.sendMessage(msg, channel);
         }
+
+        public String getPNuuid() {
+            return pnConnector.getUUID();
+        }
     }
 }
