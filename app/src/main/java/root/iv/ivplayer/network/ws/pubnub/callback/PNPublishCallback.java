@@ -1,4 +1,4 @@
-package root.iv.ivplayer.network.ws.pubnub;
+package root.iv.ivplayer.network.ws.pubnub.callback;
 
 import androidx.annotation.NonNull;
 

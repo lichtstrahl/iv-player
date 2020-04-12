@@ -22,8 +22,8 @@ import root.iv.ivplayer.notification.NotificationPublisher;
 import root.iv.ivplayer.network.ws.EchoWSListener;
 import root.iv.ivplayer.network.ws.WSHolder;
 import root.iv.ivplayer.network.ws.WSUtil;
-import root.iv.ivplayer.network.ws.pubnub.PNPublishCallback;
-import root.iv.ivplayer.network.ws.pubnub.PNSubscribeCallback;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 import root.iv.ivplayer.network.ws.pubnub.PubNubConnector;
 
 public class ChatService extends Service {

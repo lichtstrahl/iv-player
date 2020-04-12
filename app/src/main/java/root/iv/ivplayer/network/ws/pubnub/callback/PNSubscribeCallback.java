@@ -1,4 +1,4 @@
-package root.iv.ivplayer.network.ws.pubnub;
+package root.iv.ivplayer.network.ws.pubnub.callback;
 
 
 import androidx.annotation.NonNull;
@@ -20,7 +20,7 @@ public class PNSubscribeCallback extends SubscribeCallback {
     @Nullable
     private Function2<PubNub, PNStatus, Void> receiverStatus;
     @NonNull
-    private Consumer<String> errorHandler;
+    protected Consumer<String> errorHandler;
     private boolean ignoreSelfMessage;
 
     public PNSubscribeCallback(

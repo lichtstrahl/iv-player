@@ -7,8 +7,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import root.iv.ivplayer.network.ws.pubnub.PNPublishCallback;
-import root.iv.ivplayer.network.ws.pubnub.PNSubscribeCallback;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 
 public class ChatServiceConnection implements ServiceConnection {
     private static final String TAG = "tag:ws";

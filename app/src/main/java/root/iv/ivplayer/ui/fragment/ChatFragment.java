@@ -15,6 +15,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.pubnub.api.PubNub;
+import com.pubnub.api.PubNubUtil;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -22,10 +28,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.network.ws.pubnub.PNSubscribeCallback;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
+import timber.log.Timber;
 
 public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private static final String TAG = "tag:ws";
@@ -160,28 +168,38 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
         ChatService.bind(this.getContext(), serviceConnection);
 
         // PubNub: Подписываемся на канал. Добавляем callback
-        PNSubscribeCallback callback = new PNSubscribeCallback(
-                (pn, pnMsg) -> {
-                    this.getActivity().runOnUiThread(() -> {
-                        String msg = pnMsg.getMessage().toString();
-                        Log.i(TAG, pnMsg.toString());
-                        Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
-                    });
-                    return null;
-                    },
-                (pn, status) -> {
-                    this.getActivity().runOnUiThread(() -> {
-                        String msg = String.format(Locale.ENGLISH, "Status: %d from %s",
-                                status.getStatusCode(), status.getUuid());
-                        Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
-                    });
-                    return null;
-                    },
-                error -> Log.w(TAG, error),
+        PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
+                this::processPNmsg,
+                this::processPNstatus,
+                this::processPNpresence,
+                Timber::e,
                 true
         );
         serviceConnection.addListener(callback);
         serviceConnection.subscribeToChannel(CHANNEL_NAME);
+    }
+
+    private Void processPNmsg(PubNub pn, PNMessageResult pnMsg) {
+        this.getActivity().runOnUiThread(() -> {
+            String msg = pnMsg.getMessage().toString();
+            Timber.i(pnMsg.toString());
+            Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
+        });
+        return null;
+    }
+
+    private Void processPNstatus(PubNub pn, PNStatus status) {
+        this.getActivity().runOnUiThread(() -> {
+            String msg = String.format(Locale.ENGLISH, "Status: %d from %s",
+                    status.getStatusCode(), status.getUuid());
+            Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
+        });
+        return null;
+    }
+
+    private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
+        String event = presenceEvent.getEvent();
+        Timber.i(event);
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound

@@ -29,17 +29,17 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         String currentLogin = sharedPreferences.getString(SHARED_LOGIN_KEY, "");
 
-        if (currentLogin != null && !currentLogin.isEmpty()) {
+//        if (currentLogin != null && !currentLogin.isEmpty()) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.mainFrame, ChatFragment.getInstance())
                     .commit();
-        } else {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.mainFrame, RegisterFragment.getInstance())
-                    .commit();
-        }
+//        } else {
+//            getSupportFragmentManager()
+//                    .beginTransaction()
+//                    .replace(R.id.mainFrame, RegisterFragment.getInstance())
+//                    .commit();
+//        }
     }
 
     @Override

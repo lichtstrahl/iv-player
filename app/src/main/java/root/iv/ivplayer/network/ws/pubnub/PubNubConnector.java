@@ -6,6 +6,10 @@ import com.pubnub.api.PubNub;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+
+import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 
 public class PubNubConnector {
     private static final PNPublishCallback defaultPublishCallback =
@@ -29,6 +33,7 @@ public class PubNubConnector {
         pnConnect
                 .subscribe()
                 .channels(channelsList)
+                .withPresence()
                 .execute();
     }
 
@@ -54,7 +59,7 @@ public class PubNubConnector {
         pnConfiguration = new PNConfiguration();
         pnConfiguration.setPublishKey(pubKey);
         pnConfiguration.setSubscribeKey(subKey);
-        pnConfiguration.setSecure(true);
+        pnConfiguration.setUuid(UUID.randomUUID().toString());
     }
 
     private void loadConfig() {
