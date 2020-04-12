@@ -2,11 +2,14 @@ package root.iv.ivplayer.app;
 
 import android.app.Application;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import root.iv.ivplayer.network.http.IvPlayerAPI;
 import root.iv.ivplayer.network.ws.WSUtil;
+import timber.log.Timber;
 
 public class App extends Application {
     private static IvPlayerAPI playerAPI;
@@ -15,7 +18,17 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        Timber.plant(new Timber.DebugTree());
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(loggingInterceptor)
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl(WSUtil.baseSpringURL())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())

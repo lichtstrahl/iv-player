@@ -24,6 +24,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.UserCreateDTO;
 import root.iv.ivplayer.network.http.dto.UserEntityDTO;
+import timber.log.Timber;
 
 public class RegisterFragment extends Fragment {
     @BindView(R.id.inputFirstName)
@@ -86,7 +87,7 @@ public class RegisterFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         listener::registerSuccessful,
-                        error -> {}
+                        Timber::e
                 );
         disposable.add(d);
     }
