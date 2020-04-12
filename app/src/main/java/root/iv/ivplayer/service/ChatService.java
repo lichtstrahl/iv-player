@@ -21,6 +21,7 @@ import root.iv.ivplayer.network.ws.EchoWSListener;
 import root.iv.ivplayer.network.ws.WSHolder;
 import root.iv.ivplayer.network.ws.WSUtil;
 import root.iv.ivplayer.network.ws.pubnub.PubNubConnector;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 import root.iv.ivplayer.notification.NotificationPublisher;
@@ -224,6 +225,10 @@ public class ChatService extends Service {
 
         public String getPNuuid() {
             return pnConnector.getUUID();
+        }
+
+        public void hereNow(PNHereNowCallback callback, String ... channels) {
+            pnConnector.hereNow(callback, channels);
         }
     }
 }

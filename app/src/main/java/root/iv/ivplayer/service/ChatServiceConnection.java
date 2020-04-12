@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 import timber.log.Timber;
@@ -87,5 +88,9 @@ public class ChatServiceConnection implements ServiceConnection {
 
     public String getSelfUUID() {
         return chatBinder.getPNuuid();
+    }
+
+    public void hereNow(PNHereNowCallback callback, String ... channels) {
+        chatBinder.hereNow(callback, channels);
     }
 }

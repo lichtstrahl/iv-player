@@ -4,10 +4,12 @@ import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 
@@ -86,5 +88,13 @@ public class PubNubConnector {
 
     public String getUUID() {
         return pnConfiguration.getUuid();
+    }
+
+    public void hereNow(PNHereNowCallback callback, String ... channel) {
+        pnConnect
+                .hereNow()
+                .channels(Arrays.asList(channel))
+                .includeUUIDs(true)
+                .async(callback);
     }
 }
