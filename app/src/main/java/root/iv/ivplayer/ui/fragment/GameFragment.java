@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
@@ -23,15 +24,17 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TestScene;
 import root.iv.ivplayer.game.controller.MoveController;
-import root.iv.ivplayer.game.object.Actor;
+import root.iv.ivplayer.game.controller.PlayerController;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.Player;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
+import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
+import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment {
@@ -43,7 +46,7 @@ public class GameFragment extends Fragment {
     private ChatServiceConnection serviceConnection;
     private ObjectGenerator objectGenerator;
     private TestScene scene;
-    private MoveController moveController;
+    private PlayerController playerController;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -62,10 +65,10 @@ public class GameFragment extends Fragment {
         objectGenerator.setFixSize(200, 200);
 
         scene = new TestScene(new ArrayList<>());
-        moveController = new MoveController();
+        playerController = new PlayerController(this::processPosition);
 
         gameView.loadScene(scene);
-        gameView.setOnClickListener(moveController);
+        gameView.setOnClickListener(playerController);
         serviceConnection = new ChatServiceConnection();
         return view;
     }
@@ -109,7 +112,13 @@ public class GameFragment extends Fragment {
     }
 
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {
-        Timber.tag(App.getTag()).i("GAME: msg");
+        PlayerPositionDTO positionDTO = new Gson().fromJson(msg.getMessage().getAsString(), PlayerPositionDTO.class);
+        Timber.tag(App.getTag()).i("Позиция %s изменилась", PNUtilUUID.parseLogin(positionDTO.getUuid()));
+        scene.movePlayer(
+                positionDTO.getUuid(),
+                Math.round(positionDTO.getX0()),
+                Math.round(positionDTO.getY0())
+        );
         return null;
     }
 
@@ -136,10 +145,17 @@ public class GameFragment extends Fragment {
                 scene.addDrawableObject(newPlayer);
 
                 if (selfUUID.equalsIgnoreCase(joinUUID)) {
-                    moveController.grabObject(newPlayer);
+                    playerController.grabObject(newPlayer);
                 }
                 break;
         }
+    }
+
+    // Отправка информации о своих координатах в канал
+    private void processPosition(PlayerPositionDTO positionDTO) {
+        serviceConnection.publishMessageToChannel(
+                new Gson().toJson(positionDTO), MainActivity.CHANNEL_NAME, null
+        );
     }
 
     public interface Listener {

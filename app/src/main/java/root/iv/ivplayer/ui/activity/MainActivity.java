@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity
         GameFragment.Listener,
         ChatFragment.Listener
 {
-    private static final String CHANNEL_NAME = "ch:global";
+    public static final String CHANNEL_NAME = "ch:global";
     private static final String SHARED_LOGIN_KEY = "shared:login";
     private ChatServiceConnection serviceConnection;
 

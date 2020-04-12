@@ -19,4 +19,10 @@ public class Actor extends StaticObject2 implements MovableObject {
         position.x += dx;
         position.y += dy;
     }
+
+    @Override
+    public void moveTo(int x, int y) {
+        position.x = x;
+        position.y = y;
+    }
 }
