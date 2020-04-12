@@ -1,6 +1,7 @@
 package root.iv.ivplayer.ui.fragment;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +16,22 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TestScene;
+import root.iv.ivplayer.game.object.DrawableObject2;
+import root.iv.ivplayer.game.object.ObjectGenerator;
+import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
+import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
+import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
@@ -33,6 +44,8 @@ public class GameFragment extends Fragment {
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
+    private ObjectGenerator objectGenerator;
+    private TestScene scene;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -45,7 +58,14 @@ public class GameFragment extends Fragment {
         ButterKnife.bind(this, view);
         listener.createGameFragment();
 
-        gameView.loadScene(new TestScene());
+
+        objectGenerator = new ObjectGenerator();
+        objectGenerator.setDrawable(this.getContext(), R.drawable.iv_yonatan_mid);
+        objectGenerator.setFixSize(200, 200);
+
+        scene = new TestScene(new ArrayList<>());
+
+        gameView.loadScene(scene);
         serviceConnection = new ChatServiceConnection();
         return view;
     }
@@ -99,7 +119,16 @@ public class GameFragment extends Fragment {
     }
 
     private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
-        Timber.tag(App.getTag()).i("GAME: event");
+        String uuid = presenceEvent.getUuid();
+        String login = PNUtilUUID.parseLogin(uuid);
+        String event = presenceEvent.getEvent();
+        Timber.tag(App.getTag()).i("GAME: event: %s user %s", event, login);
+
+        switch (event) {
+            case PresenceEvent.JOIN:
+                scene.addObject(objectGenerator.build(10, 100));
+                break;
+        }
     }
 
     public interface Listener {

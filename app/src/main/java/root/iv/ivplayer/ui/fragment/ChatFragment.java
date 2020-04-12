@@ -193,7 +193,6 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private void executeChatService(@NonNull String login) {
         ChatService.start(this.getContext(), login);
         ChatService.bind(this.getContext(), serviceConnection);
-        listener.chatServiceStarted();
         listener.serviceBind();
     }
 
