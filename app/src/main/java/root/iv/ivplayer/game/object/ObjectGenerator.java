@@ -24,8 +24,11 @@ public class ObjectGenerator {
         height = h;
     }
 
-    public DrawableObject2 build(int x0, int y0) {
-        return new DrawableObject2(Point2.point(x0, y0), drawable, width, height);
+    public StaticObject2 buildStatic(int x0, int y0) {
+        return new StaticObject2(Point2.point(x0, y0), drawable, width, height);
     }
 
+    public Actor buildActor(int x0, int y0) {
+        return new Actor(Point2.point(x0, y0), drawable, width, height);
+    }
 }

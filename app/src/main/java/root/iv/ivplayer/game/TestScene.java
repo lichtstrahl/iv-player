@@ -5,13 +5,14 @@ import android.graphics.Color;
 
 import java.util.List;
 
-import root.iv.ivplayer.game.object.DrawableObject2;
+import root.iv.ivplayer.game.object.DrawableObject;
 
 public class TestScene implements Scene {
     private Long lastFrameMS = 0L;
-    private List<DrawableObject2> drawableObjects;
+    // Список объектов, которые можно отрисовать
+    private List<DrawableObject> drawableObjects;
 
-    public TestScene(List<DrawableObject2> objects) {
+    public TestScene(List<DrawableObject> objects) {
         drawableObjects = objects;
     }
 
@@ -26,7 +27,7 @@ public class TestScene implements Scene {
         lastFrameMS = finishRender;
     }
 
-    public void addObject(DrawableObject2 object2) {
+    public void addDrawableObject(DrawableObject object2) {
         drawableObjects.add(object2);
     }
 }
