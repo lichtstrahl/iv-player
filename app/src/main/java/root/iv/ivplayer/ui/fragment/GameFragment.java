@@ -27,6 +27,7 @@ import root.iv.ivplayer.game.controller.MoveController;
 import root.iv.ivplayer.game.controller.PlayerController;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.Player;
+import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -64,7 +65,7 @@ public class GameFragment extends Fragment {
         objectGenerator.setDrawable(this.getContext(), R.drawable.iv_yonatan_mid);
         objectGenerator.setFixSize(200, 200);
 
-        scene = new TestScene(new ArrayList<>());
+        scene = new TestScene();
         playerController = new PlayerController(this::processPosition);
 
         gameView.loadScene(scene);
@@ -114,11 +115,20 @@ public class GameFragment extends Fragment {
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {
         PlayerPositionDTO positionDTO = new Gson().fromJson(msg.getMessage().getAsString(), PlayerPositionDTO.class);
         Timber.tag(App.getTag()).i("Позиция %s изменилась", PNUtilUUID.parseLogin(positionDTO.getUuid()));
-        scene.movePlayer(
-                positionDTO.getUuid(),
-                Math.round(positionDTO.getX0()),
-                Math.round(positionDTO.getY0())
-        );
+        // Если такой игрок существует, то сдвигаем его, иначе создаём
+        if (scene.findPlayer(positionDTO.getUuid())) {
+            scene.movePlayer(
+                    positionDTO.getUuid(),
+                    Math.round(positionDTO.getX0()),
+                    Math.round(positionDTO.getY0())
+            );
+        } else {
+            Player newPlayer = new Player(objectGenerator.buildActor(
+                    Math.round(positionDTO.getX0()),
+                    Math.round(positionDTO.getY0())
+            ), positionDTO.getUuid());
+            scene.addDrawableObject(newPlayer);
+        }
         return null;
     }
 

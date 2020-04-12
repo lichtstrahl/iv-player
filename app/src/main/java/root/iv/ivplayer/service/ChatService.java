@@ -125,7 +125,7 @@ public class ChatService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String action = intent.getAction();
+        String action = intent != null ? intent.getAction() : null;
         Timber.tag(App.getTag()).i("Service start. Action: %s", action);
 
         // Если пришла команда закончить работу. То отправляем сообщение Activity, если оно ещё живое
