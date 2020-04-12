@@ -87,7 +87,7 @@ public class RegisterFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         listener::registerSuccessful,
-                        Timber::e
+                        App::logE
                 );
         disposable.add(d);
     }

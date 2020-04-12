@@ -12,6 +12,7 @@ import root.iv.ivplayer.network.ws.WSUtil;
 import timber.log.Timber;
 
 public class App extends Application {
+    private static final String TAG = "tag:ws";
     private static IvPlayerAPI playerAPI;
 
     @Override
@@ -39,5 +40,17 @@ public class App extends Application {
 
     public static IvPlayerAPI getPlayerAPI() {
         return playerAPI;
+    }
+
+    public static void logE(Throwable t) {
+        Timber.tag(TAG).e(t);
+    }
+
+    public static void logE(String msg) {
+        Timber.tag(TAG).e(msg);
+    }
+
+    public static String getTag() {
+        return TAG;
     }
 }

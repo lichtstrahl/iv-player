@@ -10,21 +10,22 @@ import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
 import java.util.ArrayDeque;
 
 import root.iv.ivplayer.BuildConfig;
-import root.iv.ivplayer.ui.fragment.ChatFragment;
-import root.iv.ivplayer.notification.NotificationPublisher;
+import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.ws.EchoWSListener;
 import root.iv.ivplayer.network.ws.WSHolder;
 import root.iv.ivplayer.network.ws.WSUtil;
+import root.iv.ivplayer.network.ws.pubnub.PubNubConnector;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
-import root.iv.ivplayer.network.ws.pubnub.PubNubConnector;
+import root.iv.ivplayer.notification.NotificationPublisher;
+import root.iv.ivplayer.ui.fragment.ChatFragment;
+import timber.log.Timber;
 
 public class ChatService extends Service {
     // ACTION
@@ -84,27 +85,27 @@ public class ChatService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.i(TAG, "Service bind");
+        Timber.tag(App.getTag()).i("Service bind");
         return chatBinder;
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.i(TAG, "Service unbind");
+        Timber.tag(App.getTag()).i("Service unbind");
         return false;
     }
 
     @Override
     public void onRebind(Intent intent) {
         super.onRebind(intent);
-        Log.i(TAG, "Service rebind");
+        Timber.tag(App.getTag()).i("Service rebind");
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Log.i(TAG, "Service create");
+        Timber.tag(App.getTag()).i("Service create");
         wsHolder.open(this::receiveMsg);
         Intent startIntent = new Intent(ACTION_START);
         sendBroadcast(startIntent);
@@ -122,7 +123,7 @@ public class ChatService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
-        Log.i(TAG, "Service start. Action: " + action);
+        Timber.tag(App.getTag()).i("Service start. Action: %s", action);
 
         // Если пришла команда закончить работу. То отправляем сообщение Activity, если оно ещё живое
         // И убираем нотификацию
@@ -140,7 +141,7 @@ public class ChatService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "Service destroy");
+        Timber.tag(App.getTag()).i("Service destroy");
         wsHolder.close();
     }
 

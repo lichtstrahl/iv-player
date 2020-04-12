@@ -7,8 +7,10 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
+import timber.log.Timber;
 
 public class ChatServiceConnection implements ServiceConnection {
     private static final String TAG = "tag:ws";
@@ -21,7 +23,7 @@ public class ChatServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        Log.i(TAG, "connected");
+        Timber.tag(App.getTag()).i("connected");
         bind = true;
         chatBinder = (ChatService.ChatBinder) service;
         chatBinder.bind();
@@ -38,7 +40,7 @@ public class ChatServiceConnection implements ServiceConnection {
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        Log.i(TAG, "disconnected");
+        Timber.tag(App.getTag()).i("disconnected");
         bind = false;
         chatBinder.unbind();
     }

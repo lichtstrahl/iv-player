@@ -16,23 +16,23 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.pubnub.api.PubNub;
-import com.pubnub.api.PubNubUtil;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
 import timber.log.Timber;
 
 public class ChatFragment extends Fragment implements MsgReceiver.Listener {
@@ -172,7 +172,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
                 this::processPNmsg,
                 this::processPNstatus,
                 this::processPNpresence,
-                Timber::e,
+                App::logE,
                 true
         );
         serviceConnection.addListener(callback);
@@ -180,16 +180,18 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     }
 
     private Void processPNmsg(PubNub pn, PNMessageResult pnMsg) {
-        this.getActivity().runOnUiThread(() -> {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> {
             String msg = pnMsg.getMessage().toString();
-            Timber.i(pnMsg.toString());
+            Timber.tag(App.getTag()).i(pnMsg.toString());
             Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
         });
         return null;
     }
 
     private Void processPNstatus(PubNub pn, PNStatus status) {
-        this.getActivity().runOnUiThread(() -> {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> {
             String msg = String.format(Locale.ENGLISH, "Status: %d from %s",
                     status.getStatusCode(), status.getUuid());
             Toast.makeText(this.getContext(), msg, Toast.LENGTH_SHORT).show();
@@ -199,14 +201,14 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
 
     private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
         String event = presenceEvent.getEvent();
-        Timber.i(event);
+        Timber.tag(App.getTag()).i("Event: %s", event);
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound
     private void unbindChatService() {
         if (serviceConnection.isBind()) {
             serviceConnection.unbound();
-            ChatService.unbind(this.getContext(), serviceConnection);
+            ChatService.unbind(Objects.requireNonNull(this.getContext()), serviceConnection);
         }
     }
 
@@ -225,7 +227,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     // interface Listener (MsgReceiver)
     @Override
     public void receive(Intent intent) {
-        String action = intent.getAction();
+        String action = Objects.requireNonNull(intent.getAction());
 
         switch (action) {
             case ChatService.ACTION_MSG:
@@ -235,13 +237,13 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
                 break;
 
             case ChatService.ACTION_END:
-                Log.i(TAG, "Activity: END");
+                Timber.tag(App.getTag()).i("Activity: END");
                 stopChatService();
                 changeSwitch(false);
                 break;
 
             case ChatService.ACTION_START:
-                Log.i(TAG, "Activity: START");
+                Timber.tag(App.getTag()).i("Activity: START");
                 changeSwitch(true);
                 break;
             default:

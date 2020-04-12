@@ -3,10 +3,9 @@ package root.iv.ivplayer.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.widget.Toast;
 
-import java.util.List;
+import root.iv.ivplayer.app.App;
+import timber.log.Timber;
 
 public class MsgReceiver extends BroadcastReceiver {
     private static final String TAG = "tag:ws";
@@ -15,7 +14,7 @@ public class MsgReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG, "MsgReceiver");
+        Timber.tag(App.getTag()).i("MsgReceiver");
         if (listener != null)
             listener.receive(intent);
     }

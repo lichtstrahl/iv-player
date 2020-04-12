@@ -9,6 +9,8 @@ import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
 import okio.ByteString;
+import root.iv.ivplayer.app.App;
+import timber.log.Timber;
 
 public class EchoWSListener extends WebSocketListener {
     private static final String WS_TAG = "tag:ws";
@@ -21,33 +23,32 @@ public class EchoWSListener extends WebSocketListener {
 
     @Override
     public void onOpen(WebSocket webSocket, Response response) {
-        Log.i(WS_TAG, "WS: Open");
+        Timber.tag(App.getTag()).i("WS: Open");
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String text) {
-        Log.i(WS_TAG,"WS: Recv: " + text);
+        Timber.tag(App.getTag()).i("WS: Recv: %s", text);
         publish.onNext(text);
     }
 
     @Override
     public void onMessage(WebSocket webSocket, ByteString bytes) {
-        Log.i(WS_TAG, "WS: Recv: " + bytes.hex());
+        Timber.tag(App.getTag()).i("WS: Recv: %s", bytes.hex());
     }
 
     @Override
     public void onClosing(WebSocket webSocket, int code, String reason) {
-
-        Log.i(WS_TAG, "WS: Close ");
+        Timber.tag(App.getTag()).i("WS: Close ");
     }
 
     @Override
     public void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        Log.e(WS_TAG, "WS: Error", t);
+        Timber.tag(App.getTag()).e(t,"WS: Error");
     }
 
     @Override
     public void onClosed(WebSocket webSocket, int code, String reason) {
-        Log.i(WS_TAG, "WS: Closed");
+        Timber.tag(App.getTag()).i("WS: Closed");
     }
 }
