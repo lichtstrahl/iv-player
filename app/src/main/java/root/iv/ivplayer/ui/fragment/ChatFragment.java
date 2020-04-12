@@ -2,7 +2,6 @@ package root.iv.ivplayer.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +28,7 @@ import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
@@ -146,8 +146,20 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     }
 
     private void changeStatus(View view, boolean status) {
-        if (status)
-            executeChatService();
+        if (status) {
+            // Если мы подключаемся, то необходимо проверить введенное имя в поле
+            String login = input.getText().toString();
+            if (PNUtilUUID.valid(login)) {
+                executeChatService(login);
+            } else {
+                Toast.makeText(
+                                Objects.requireNonNull(this.getActivity()),
+                                "Некорректное имя",
+                                Toast.LENGTH_LONG)
+                        .show();
+                changeSwitch(false);
+            }
+        }
         else
             stopChatService();
     }
@@ -163,8 +175,8 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     }
 
     // Запуск сервиса и привязка к нему
-    private void executeChatService() {
-        ChatService.start(this.getContext());
+    private void executeChatService(@NonNull String login) {
+        ChatService.start(this.getContext(), login);
         ChatService.bind(this.getContext(), serviceConnection);
 
         // PubNub: Подписываемся на канал. Добавляем callback
@@ -202,6 +214,11 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
         String event = presenceEvent.getEvent();
         Timber.tag(App.getTag()).i("Event: %s", event);
+
+        if (event.equals("join")) {
+            String uuid = presenceEvent.getUuid();
+            Timber.tag(App.getTag()).i("Join user %s", PNUtilUUID.parseLogin(uuid));
+        }
     }
 
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound

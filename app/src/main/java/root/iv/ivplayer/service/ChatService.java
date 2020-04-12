@@ -37,6 +37,7 @@ public class ChatService extends Service {
     private static final String INTENT_FINISH_CODE = "intent:finish-code";
     private static final String INTENT_MSG = "intent:msg";
     private static final String INTENT_FROM_NOTIFICATION = "intent:from-notification";
+    private static final String INTENT_CREATE_LOGIN = "intent:login";
 
     private static final String TAG = "tag:ws";
     private static final String NAME = "ChatService";
@@ -59,8 +60,10 @@ public class ChatService extends Service {
         countClient = 0;
     }
 
-    public static void start(Context context) {
+    public static void start(Context context, String login) {
         Intent intent = new Intent(context, ChatService.class);
+        intent.setAction(ACTION_START);
+        intent.putExtra(INTENT_CREATE_LOGIN, login);
         context.startService(intent);
     }
 
@@ -116,8 +119,7 @@ public class ChatService extends Service {
                 closeIntent());
         startForeground(NOTIFICATION_ID, notification);
 
-        // Создание подключения к PN
-        pnConnector = PubNubConnector.create(BuildConfig.PUB_KEY, BuildConfig.SUB_KEY);
+
     }
 
     @Override
@@ -132,8 +134,12 @@ public class ChatService extends Service {
             stopSelf();
         }
 
-        // Запускаем подписку на канал
-
+        // Если это команда на запуск сервиса:
+        if (action != null && action.equalsIgnoreCase(ACTION_START)) {
+            String login = intent.getStringExtra(INTENT_CREATE_LOGIN);
+            // Создание подключения к PN
+            pnConnector = PubNubConnector.create(BuildConfig.PUB_KEY, BuildConfig.SUB_KEY, login);
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }

@@ -18,9 +18,18 @@ public class PubNubConnector {
     private PNConfiguration pnConfiguration;
 
 
+    @Deprecated
     public static PubNubConnector create(String pubKey, String subKey) {
         PubNubConnector connector = new PubNubConnector();
         connector.initConfig(pubKey, subKey);
+        connector.loadConfig();
+
+        return connector;
+    }
+
+    public static PubNubConnector create(String pubKey, String subKey, String login) {
+        PubNubConnector connector = new PubNubConnector();
+        connector.initConfig(pubKey, subKey, login);
         connector.loadConfig();
 
         return connector;
@@ -55,11 +64,20 @@ public class PubNubConnector {
                 .async(defaultPublishCallback);
     }
 
+    /** @deprecated Потому что не передаётся login */
+    @Deprecated
     private void initConfig(String pubKey, String subKey) {
         pnConfiguration = new PNConfiguration();
         pnConfiguration.setPublishKey(pubKey);
         pnConfiguration.setSubscribeKey(subKey);
         pnConfiguration.setUuid(UUID.randomUUID().toString());
+    }
+
+    private void initConfig(String pubKey, String subKey, String login) {
+        pnConfiguration = new PNConfiguration();
+        pnConfiguration.setPublishKey(pubKey);
+        pnConfiguration.setSubscribeKey(subKey);
+        pnConfiguration.setUuid(PNUtilUUID.genereateUUID(login));
     }
 
     private void loadConfig() {
