@@ -2,10 +2,12 @@ package root.iv.ivplayer.game.object;
 
 import android.graphics.drawable.Drawable;
 
+import lombok.Getter;
 import root.iv.ivplayer.game.object.simple.Point2;
 
 // Класс актера. Он обладает всем свойствами статичного объекта.
 // При этом обладает вощможностью двигаться
+@Getter
 public class Actor extends StaticObject2 implements MovableObject {
 
     public Actor(Point2 position, Drawable drawable, int w, int h) {

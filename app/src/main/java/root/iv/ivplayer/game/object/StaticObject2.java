@@ -3,10 +3,12 @@ package root.iv.ivplayer.game.object;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
+import lombok.Getter;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.object.simple.Point2;
 
 
+@Getter
 public class StaticObject2 extends Object2 implements DrawableObject {
     protected Drawable drawable;
     protected int width;

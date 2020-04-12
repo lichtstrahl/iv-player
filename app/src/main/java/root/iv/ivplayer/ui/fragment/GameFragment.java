@@ -25,6 +25,7 @@ import root.iv.ivplayer.game.TestScene;
 import root.iv.ivplayer.game.controller.MoveController;
 import root.iv.ivplayer.game.object.Actor;
 import root.iv.ivplayer.game.object.ObjectGenerator;
+import root.iv.ivplayer.game.object.Player;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -124,17 +125,18 @@ public class GameFragment extends Fragment {
         Timber.tag(App.getTag()).i("GAME: event: %s user %s", event, login);
 
         // При входе нового игрока:
-        // Создаём игровой объект и помещаем его в контроллер для управления движением
+        // Если пришло сообщение о собственном входе, то оповещаем об этом остальных игроков.
+        // И помещаем данного актера под своё управление
         switch (event) {
             case PresenceEvent.JOIN:
                 String selfUUID = serviceConnection.getSelfUUID();
                 String joinUUID = presenceEvent.getUuid();
 
-                Actor newActor = objectGenerator.buildActor(10, 100);
-                scene.addDrawableObject(newActor);
+                Player newPlayer = new Player(objectGenerator.buildActor(10, 100), joinUUID);
+                scene.addDrawableObject(newPlayer);
 
                 if (selfUUID.equalsIgnoreCase(joinUUID)) {
-                    moveController.grabObject(newActor);
+                    moveController.grabObject(newPlayer);
                 }
                 break;
         }
