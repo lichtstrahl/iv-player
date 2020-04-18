@@ -235,5 +235,9 @@ public class ChatService extends Service {
         public String getDeviceLogin() {
             return loginDevice;
         }
+
+        public void stopPNConnection() {
+            pnConnector.finish();
+        }
     }
 }

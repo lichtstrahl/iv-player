@@ -97,4 +97,10 @@ public class PubNubConnector {
                 .includeUUIDs(true)
                 .async(callback);
     }
+
+    public void finish() {
+        pnConnect.unsubscribeAll();
+        pnConnect.disconnect();
+    }
+
 }

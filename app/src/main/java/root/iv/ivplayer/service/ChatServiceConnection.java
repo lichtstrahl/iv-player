@@ -3,7 +3,6 @@ package root.iv.ivplayer.service;
 import android.content.ComponentName;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -111,5 +110,9 @@ public class ChatServiceConnection implements ServiceConnection {
 
     public String getLoginDevice() {
         return chatBinder.getDeviceLogin();
+    }
+
+    public void stopPNConnection() {
+        chatBinder.stopPNConnection();
     }
 }

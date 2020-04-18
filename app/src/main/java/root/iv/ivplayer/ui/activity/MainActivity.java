@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity
                     .noneMatch(login -> login.equals(deviceLogin));
 
             if (!loginFree) {
+                serviceConnection.stopPNConnection();
                 ChatService.unbind(this, serviceConnection);
                 ChatService.stop(this);
                 removeLastFragment();
