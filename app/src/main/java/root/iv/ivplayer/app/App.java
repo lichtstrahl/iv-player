@@ -28,14 +28,14 @@ public class App extends Application {
                 .addInterceptor(loggingInterceptor)
                 .build();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(WSUtil.baseSpringURL())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        playerAPI = retrofit.create(IvPlayerAPI.class);
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .client(client)
+//                .baseUrl(WSUtil.baseSpringURL())
+//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        playerAPI = retrofit.create(IvPlayerAPI.class);
     }
 
     public static IvPlayerAPI getPlayerAPI() {
