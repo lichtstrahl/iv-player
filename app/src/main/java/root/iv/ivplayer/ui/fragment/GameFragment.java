@@ -106,6 +106,7 @@ public class GameFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         listener = null;
+        serviceConnection.unsubscribe(MainActivity.CHANNEL_NAME);
     }
 
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {

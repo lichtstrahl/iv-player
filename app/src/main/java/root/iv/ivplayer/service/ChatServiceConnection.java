@@ -115,4 +115,8 @@ public class ChatServiceConnection implements ServiceConnection {
     public void stopPNConnection() {
         chatBinder.stopPNConnection();
     }
+
+    public void unsubscribe(String ... channels) {
+        chatBinder.unsubscribe(channels);
+    }
 }

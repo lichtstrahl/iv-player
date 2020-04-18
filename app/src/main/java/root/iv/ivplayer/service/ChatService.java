@@ -239,5 +239,9 @@ public class ChatService extends Service {
         public void stopPNConnection() {
             pnConnector.finish();
         }
+
+        public void unsubscribe(String ... channels) {
+            pnConnector.unsubscribe(channels);
+        }
     }
 }

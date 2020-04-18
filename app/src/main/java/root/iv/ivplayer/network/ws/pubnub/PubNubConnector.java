@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
@@ -101,6 +102,12 @@ public class PubNubConnector {
     public void finish() {
         pnConnect.unsubscribeAll();
         pnConnect.disconnect();
+    }
+
+    public void unsubscribe(String ... channels) {
+        pnConnect.unsubscribe()
+                .channels(Arrays.stream(channels).collect(Collectors.toList()))
+                .execute();
     }
 
 }
