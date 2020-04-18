@@ -21,6 +21,10 @@ public class ChatServiceConnection implements ServiceConnection {
     private PNSubscribeCallback subscribeCallback;
     @Nullable
     private String[] channels;
+    @Nullable
+    private PNHereNowCallback hereNowCallback;
+    @Nullable
+    private String[] channelsForHereNow;
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
@@ -36,6 +40,12 @@ public class ChatServiceConnection implements ServiceConnection {
         if (channels != null) {
             chatBinder.subscribeToChannels(channels);
             channels = null;
+        }
+
+        if (hereNowCallback != null && channelsForHereNow != null) {
+            chatBinder.hereNow(hereNowCallback, channelsForHereNow);
+            channelsForHereNow = null;
+            hereNowCallback = null;
         }
     }
 
@@ -91,6 +101,15 @@ public class ChatServiceConnection implements ServiceConnection {
     }
 
     public void hereNow(PNHereNowCallback callback, String ... channels) {
-        chatBinder.hereNow(callback, channels);
+        if (chatBinder != null)
+            chatBinder.hereNow(callback, channels);
+        else {
+            this.hereNowCallback = callback;
+            this.channelsForHereNow = channels;
+        }
+    }
+
+    public String getLoginDevice() {
+        return chatBinder.getDeviceLogin();
     }
 }

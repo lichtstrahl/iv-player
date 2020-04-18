@@ -52,6 +52,7 @@ public class ChatService extends Service {
     private ArrayDeque<String> msgQueue;        // Очередь сообщений (на приём)
     private int countClient;
     private PubNubConnector pnConnector;
+    private String loginDevice;
 
     public ChatService() {
         this.notificationPublisher = new NotificationPublisher(this);
@@ -137,9 +138,9 @@ public class ChatService extends Service {
 
         // Если это команда на запуск сервиса:
         if (action != null && action.equalsIgnoreCase(ACTION_START)) {
-            String login = intent.getStringExtra(INTENT_CREATE_LOGIN);
+            loginDevice = intent.getStringExtra(INTENT_CREATE_LOGIN);
             // Создание подключения к PN
-            pnConnector = PubNubConnector.create(BuildConfig.PUB_KEY, BuildConfig.SUB_KEY, login);
+            pnConnector = PubNubConnector.create(BuildConfig.PUB_KEY, BuildConfig.SUB_KEY, loginDevice);
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -229,6 +230,10 @@ public class ChatService extends Service {
 
         public void hereNow(PNHereNowCallback callback, String ... channels) {
             pnConnector.hereNow(callback, channels);
+        }
+
+        public String getDeviceLogin() {
+            return loginDevice;
         }
     }
 }

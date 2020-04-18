@@ -9,9 +9,14 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.pubnub.api.PubNub;
 import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
+import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
+import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
@@ -22,6 +27,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.UserEntityDTO;
 import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
@@ -116,6 +122,13 @@ public class MainActivity extends AppCompatActivity
         );
         serviceConnection.addListener(callback);
         serviceConnection.subscribeToChannel(CHANNEL_NAME);
+
+        PNHereNowCallback hereNowCallback = new PNHereNowCallback(
+                this::processPNHereNow,
+                App::logE
+        );
+
+        serviceConnection.hereNow(hereNowCallback, CHANNEL_NAME);
     }
 
     @Override
@@ -131,6 +144,28 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
+    private void processPNHereNow(PNHereNowResult hereNowResult, PNStatus status) {
+        PNHereNowChannelData channelData = hereNowResult.getChannels().get(CHANNEL_NAME);
+
+        if (channelData != null) {
+            String deviceLogin = serviceConnection.getLoginDevice();
+
+            boolean loginFree = channelData
+                    .getOccupants()
+                    .stream()
+                    .map(PNHereNowOccupantData::getUuid)
+                    .map(PNUtilUUID::parseLogin)
+                    .noneMatch(login -> login.equals(deviceLogin));
+
+            if (!loginFree) {
+                ChatService.unbind(this, serviceConnection);
+                ChatService.stop(this);
+                removeLastFragment();
+                Toast.makeText(this, "Логин занят", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private Void processPNstatus(PubNub pn, PNStatus status) {
         return null;
     }
@@ -143,5 +178,17 @@ public class MainActivity extends AppCompatActivity
             String uuid = presenceEvent.getUuid();
             Timber.tag(App.getTag()).i("Join user %s", PNUtilUUID.parseLogin(uuid));
         }
+    }
+
+    // Удаление последнего отображенного фрагмента. Используется для ручного удаление игрового фрагмента
+    private void removeLastFragment() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        int countFragments = fragmentManager.getBackStackEntryCount();
+        Fragment removedFragment = fragmentManager.getFragments().get(countFragments-1);
+        fragmentManager
+                .beginTransaction()
+                .remove(removedFragment)
+                .commit();
+        fragmentManager.popBackStack();
     }
 }
