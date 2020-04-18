@@ -132,6 +132,15 @@ public class MainActivity extends AppCompatActivity
         ChatService.bind(this.getClass(), this, serviceConnection);
 
 
+
+    }
+
+    @Override
+    public void executeChatService(String login) {
+        Timber.i("start");
+        ChatService.start(this, login);
+        serviceBind();
+
         // PubNub: Подписываемся на канал. Добавляем callback
         PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
                 this::processPNmsg,
@@ -152,13 +161,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void executeChatService(String login) {
-        Timber.i("start");
-        ChatService.start(this, login);
-        serviceBind();
-    }
-
-    @Override
     public void publishMessage(String msg) {
         serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
     }
@@ -172,6 +174,8 @@ public class MainActivity extends AppCompatActivity
 
     // Прекращение любого взаимодействия с сервисом. Отписка и отключение
     private void finishChatService() {
+        serviceConnection.unsubscribe(CHANNEL_NAME);
+
         if (serviceConnection.isBind()) {
             Timber.i("unbind");
             serviceConnection.unbound();
@@ -203,7 +207,6 @@ public class MainActivity extends AppCompatActivity
                     .noneMatch(login -> login.equals(deviceLogin));
 
             if (!loginFree) {
-                serviceConnection.unsubscribe(CHANNEL_NAME);
                 this.onBackPressed();
                 Toast.makeText(this, "Логин занят", Toast.LENGTH_SHORT).show();
             }

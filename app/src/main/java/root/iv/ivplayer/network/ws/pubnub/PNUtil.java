@@ -12,11 +12,19 @@ public class PNUtil {
 
     // Генерируем UUID не только слоучайным числом, но и добавляем login
     // Пример: igor_01, sveta_02
-    public static String genereateUUID(String login) {
+    public static String randomUUID(String login) {
+        return generateUUID(login, new Random().nextInt(10));
+    }
+
+    public static String constantUUID(String login) {
+        return generateUUID(login, 0);
+    }
+
+    private static String generateUUID(String login, int random) {
         return String.format(
                 Locale.ENGLISH,
                 "%s%s%02d",
-                login, LOGIN_SEPARATOR, new Random().nextInt(10)
+                login, LOGIN_SEPARATOR, random
         );
     }
 

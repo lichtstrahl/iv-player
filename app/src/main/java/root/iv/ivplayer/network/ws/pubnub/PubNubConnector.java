@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNPublishCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribeCallback;
+import timber.log.Timber;
 
 public class PubNubConnector {
     private static final PNPublishCallback defaultPublishCallback =
@@ -41,6 +42,8 @@ public class PubNubConnector {
     public void subscribe(String ... channels) {
         List<String> channelsList = new ArrayList<>();
         Collections.addAll(channelsList, channels);
+
+        Timber.i("subscribe %s", channels[0]);
 
         pnConnect
                 .subscribe()
@@ -80,7 +83,7 @@ public class PubNubConnector {
         pnConfiguration = new PNConfiguration();
         pnConfiguration.setPublishKey(pubKey);
         pnConfiguration.setSubscribeKey(subKey);
-        pnConfiguration.setUuid(PNUtil.genereateUUID(login));
+        pnConfiguration.setUuid(PNUtil.randomUUID(login));
     }
 
     private void loadConfig() {
@@ -105,6 +108,7 @@ public class PubNubConnector {
     }
 
     public void unsubscribe(String ... channels) {
+        Timber.i("unsubscribe %s", channels[0]);
         pnConnect.unsubscribe()
                 .channels(Arrays.stream(channels).collect(Collectors.toList()))
                 .execute();
