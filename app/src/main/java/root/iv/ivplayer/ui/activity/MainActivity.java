@@ -20,13 +20,10 @@ import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import java.util.Locale;
-import java.util.Objects;
-
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.UserEntityDTO;
-import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
+import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.service.ChatService;
@@ -154,7 +151,7 @@ public class MainActivity extends AppCompatActivity
                     .getOccupants()
                     .stream()
                     .map(PNHereNowOccupantData::getUuid)
-                    .map(PNUtilUUID::parseLogin)
+                    .map(PNUtil::parseLogin)
                     .noneMatch(login -> login.equals(deviceLogin));
 
             if (!loginFree) {
@@ -174,9 +171,14 @@ public class MainActivity extends AppCompatActivity
         String event = presenceEvent.getEvent();
         Timber.tag(App.getTag()).i("Event: %s", event);
 
-        if (event.equals("join")) {
+        if (event.equals(PNUtil.PN_EVENT_JOIN)) {
             String uuid = presenceEvent.getUuid();
-            Timber.tag(App.getTag()).i("Join user %s", PNUtilUUID.parseLogin(uuid));
+            Timber.tag(App.getTag()).i("Join user %s", PNUtil.parseLogin(uuid));
+        }
+
+        if (event.equals(PNUtil.PN_EVENT_LEAVE)) {
+            String login = PNUtil.parseLogin(presenceEvent.getUuid());
+            Timber.tag(App.getTag()).i("Leave user %s", login);
         }
     }
 

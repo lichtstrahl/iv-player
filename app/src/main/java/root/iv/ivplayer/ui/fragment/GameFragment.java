@@ -16,20 +16,16 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
-import java.util.ArrayList;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TestScene;
-import root.iv.ivplayer.game.controller.MoveController;
 import root.iv.ivplayer.game.controller.PlayerController;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.Player;
-import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
-import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
+import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
@@ -114,7 +110,7 @@ public class GameFragment extends Fragment {
 
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {
         PlayerPositionDTO positionDTO = new Gson().fromJson(msg.getMessage().getAsString(), PlayerPositionDTO.class);
-        Timber.tag(App.getTag()).i("Позиция %s изменилась", PNUtilUUID.parseLogin(positionDTO.getUuid()));
+        Timber.tag(App.getTag()).i("Позиция %s изменилась", PNUtil.parseLogin(positionDTO.getUuid()));
         // Если такой игрок существует, то сдвигаем его, иначе создаём
         if (scene.findPlayer(positionDTO.getUuid())) {
             scene.movePlayer(
@@ -139,7 +135,7 @@ public class GameFragment extends Fragment {
 
     private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
         String uuid = presenceEvent.getUuid();
-        String login = PNUtilUUID.parseLogin(uuid);
+        String login = PNUtil.parseLogin(uuid);
         String event = presenceEvent.getEvent();
         Timber.tag(App.getTag()).i("GAME: event: %s user %s", event, login);
 

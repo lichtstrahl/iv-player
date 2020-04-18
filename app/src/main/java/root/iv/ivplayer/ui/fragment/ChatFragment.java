@@ -15,12 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.pubnub.api.PubNub;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-
-import java.util.Locale;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -29,7 +23,7 @@ import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.network.ws.pubnub.PNUtilUUID;
+import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.receiver.MsgReceiver;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
@@ -164,7 +158,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
         if (status) {
             // Если мы подключаемся, то необходимо проверить введенное имя в поле
             String login = input.getText().toString();
-            if (PNUtilUUID.valid(login)) {
+            if (PNUtil.valid(login)) {
                 executeChatService(login);
             } else {
                 Toast.makeText(
