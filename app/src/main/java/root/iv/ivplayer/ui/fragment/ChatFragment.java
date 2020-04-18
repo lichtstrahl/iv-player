@@ -70,7 +70,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
 
         if (ChatService.fromNotification(this.getActivity().getIntent())) {
             changeSwitch(true);
-            ChatService.bind(this.getContext(), serviceConnection);
+            ChatService.bind(this.getClass(), this.getContext(), serviceConnection);
         }
 
         return view;
@@ -161,7 +161,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
             String login = input.getText().toString();
             if (PNUtil.valid(login)) {
                 listener.executeChatService(login);
-                ChatService.bind(this.getContext(), serviceConnection);
+                ChatService.bind(this.getClass(), this.getContext(), serviceConnection);
             } else {
                 Toast.makeText(
                                 Objects.requireNonNull(this.getActivity()),
@@ -191,7 +191,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     private void unbindChatService() {
         if (serviceConnection.isBind()) {
             serviceConnection.unbound();
-            ChatService.unbind(Objects.requireNonNull(this.getContext()), serviceConnection);
+            ChatService.unbind(this.getClass(), Objects.requireNonNull(this.getContext()), serviceConnection);
         }
     }
 

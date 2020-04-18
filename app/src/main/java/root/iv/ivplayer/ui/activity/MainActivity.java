@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void serviceBind() {
         Timber.i("bind");
-        ChatService.bind(this, serviceConnection);
+        ChatService.bind(this.getClass(), this, serviceConnection);
 
 
         // PubNub: Подписываемся на канал. Добавляем callback
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
         if (serviceConnection.isBind()) {
             Timber.i("unbind");
             serviceConnection.unbound();
-            ChatService.unbind(this, serviceConnection);
+            ChatService.unbind(this.getClass(), this, serviceConnection);
         }
         Timber.i("stop");
         ChatService.stop(this);

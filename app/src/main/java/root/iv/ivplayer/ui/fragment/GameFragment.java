@@ -79,7 +79,7 @@ public class GameFragment extends Fragment {
         if (context instanceof Listener) {
             listener = (Listener) context;
             serviceConnection = new ChatServiceConnection();
-            ChatService.bind(this.getContext(), serviceConnection);
+            ChatService.bind(this.getClass(), this.getContext(), serviceConnection);
         } else
             Timber.tag(App.getTag()).w("Не раализован нужный интерфейс слушателя");
     }
@@ -112,7 +112,7 @@ public class GameFragment extends Fragment {
         super.onDetach();
         Timber.i("detach");
         Context context = Objects.requireNonNull(this.getContext());
-        ChatService.unbind(context, serviceConnection);
+        ChatService.unbind(this.getClass(), context, serviceConnection);
         listener.exitFromGameFragment();
         listener = null;
     }

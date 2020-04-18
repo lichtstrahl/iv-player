@@ -69,16 +69,24 @@ public class ChatService extends Service {
         context.startService(intent);
     }
 
-    public static void bind(Context context, ServiceConnection connection) {
-        String contextName = context.getClass().getName();
-        Timber.i("bind %s", contextName);
+    private static void bind(Context context, ServiceConnection connection) {
         Intent intent = new Intent(context, ChatService.class);
         context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
-    public static void unbind(Context context, ServiceConnection connection) {
-        String contextName = context.getClass().getName();
-        Timber.i("unbind %s", contextName);
+    public static void bind(Class host, Context context, ServiceConnection connection) {
+        String hostName = host.getName();
+        Timber.i("bind %s", hostName);
+        bind(context, connection);
+    }
+
+    public static void unbind(Class host, Context context, ServiceConnection connection) {
+        String hostName = host.getName();
+        Timber.i("unbind %s", hostName);
+        unbind(context, connection);
+    }
+
+    private static void unbind(Context context, ServiceConnection connection) {
         context.unbindService(connection);
     }
 
