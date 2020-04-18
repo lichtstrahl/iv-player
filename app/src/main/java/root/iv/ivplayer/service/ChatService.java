@@ -70,11 +70,15 @@ public class ChatService extends Service {
     }
 
     public static void bind(Context context, ServiceConnection connection) {
+        String contextName = context.getClass().getName();
+        Timber.i("bind %s", contextName);
         Intent intent = new Intent(context, ChatService.class);
         context.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     public static void unbind(Context context, ServiceConnection connection) {
+        String contextName = context.getClass().getName();
+        Timber.i("unbind %s", contextName);
         context.unbindService(connection);
     }
 

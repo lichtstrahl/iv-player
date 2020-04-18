@@ -102,6 +102,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
     @Override
     public void onDetach() {
         super.onDetach();
+        unbindChatService();
         listener = null;
     }
 
@@ -159,7 +160,8 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
             // Если мы подключаемся, то необходимо проверить введенное имя в поле
             String login = input.getText().toString();
             if (PNUtil.valid(login)) {
-                executeChatService(login);
+                listener.executeChatService(login);
+                ChatService.bind(this.getContext(), serviceConnection);
             } else {
                 Toast.makeText(
                                 Objects.requireNonNull(this.getActivity()),
@@ -169,8 +171,10 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
                 changeSwitch(false);
             }
         }
-        else
+        else {
+            unbindChatService();
             listener.switchToFalse();
+        }
     }
 
     // Чтение сообщений из очереди сервиса
@@ -183,25 +187,12 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
         }
     }
 
-    // Запуск сервиса и привязка к нему
-    private void executeChatService(@NonNull String login) {
-        ChatService.start(this.getContext(), login);
-        ChatService.bind(this.getContext(), serviceConnection);
-        listener.serviceBind();
-    }
-
     // Отвязаться от сервиса. Нужно пометить флаг bind = false вручную, вызвав метов unbound
     private void unbindChatService() {
         if (serviceConnection.isBind()) {
             serviceConnection.unbound();
             ChatService.unbind(Objects.requireNonNull(this.getContext()), serviceConnection);
         }
-    }
-
-    // Отвязаться и остановить сервис
-    private void stopChatService() {
-        unbindChatService();
-        ChatService.stop(this.getContext());
     }
 
     private void changeSwitch(boolean value) {
@@ -243,5 +234,6 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
         void serviceBind();
         void publishMessage(String msg);
         void switchToFalse();
+        void executeChatService(String login);
     }
 }

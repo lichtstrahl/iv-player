@@ -75,6 +75,7 @@ public class GameFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        Timber.i("attach");
         if (context instanceof Listener) {
             listener = (Listener) context;
             serviceConnection = new ChatServiceConnection();
@@ -109,7 +110,7 @@ public class GameFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        serviceConnection.unsubscribe(MainActivity.CHANNEL_NAME);
+        Timber.i("detach");
         Context context = Objects.requireNonNull(this.getContext());
         ChatService.unbind(context, serviceConnection);
         listener.exitFromGameFragment();

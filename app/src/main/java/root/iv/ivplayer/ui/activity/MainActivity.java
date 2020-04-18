@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity
         Intent stopServiceIntent = new Intent(ChatService.ACTION_END);
         Objects.requireNonNull(fragment).receive(stopServiceIntent);
         // И останавливаем сервис
-        ChatService.stop(this);
+        finishChatService();
     }
 
     @Override
@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void serviceBind() {
+        Timber.i("bind");
         ChatService.bind(this, serviceConnection);
 
 
@@ -151,6 +152,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void executeChatService(String login) {
+        Timber.i("start");
+        ChatService.start(this, login);
+        serviceBind();
+    }
+
+    @Override
     public void publishMessage(String msg) {
         serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
     }
@@ -159,6 +167,17 @@ public class MainActivity extends AppCompatActivity
     public void switchToFalse() {
         // Посылать в ChatFragment уже не нужно ничего. Переключатель перешел в положение false
         // Просто остановить сервис
+        finishChatService();
+    }
+
+    // Прекращение любого взаимодействия с сервисом. Отписка и отключение
+    private void finishChatService() {
+        if (serviceConnection.isBind()) {
+            Timber.i("unbind");
+            serviceConnection.unbound();
+            ChatService.unbind(this, serviceConnection);
+        }
+        Timber.i("stop");
         ChatService.stop(this);
     }
 
