@@ -16,6 +16,8 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
@@ -66,23 +68,25 @@ public class GameFragment extends Fragment {
 
         gameView.loadScene(scene);
         gameView.setOnClickListener(playerController);
-        serviceConnection = new ChatServiceConnection();
+
         return view;
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        if (context instanceof Listener)
+        if (context instanceof Listener) {
             listener = (Listener) context;
-        else
+            serviceConnection = new ChatServiceConnection();
+            ChatService.bind(this.getContext(), serviceConnection);
+        } else
             Timber.tag(App.getTag()).w("Не раализован нужный интерфейс слушателя");
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        ChatService.bind(this.getContext(), serviceConnection);
+
 
         // PubNub: Подписываемся на канал. Добавляем callback
         PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
@@ -105,8 +109,11 @@ public class GameFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        listener = null;
         serviceConnection.unsubscribe(MainActivity.CHANNEL_NAME);
+        Context context = Objects.requireNonNull(this.getContext());
+        ChatService.unbind(context, serviceConnection);
+        listener.exitFromGameFragment();
+        listener = null;
     }
 
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {
@@ -168,5 +175,6 @@ public class GameFragment extends Fragment {
     public interface Listener {
         void createGameFragment();
         void stopGameFragment();
+        void exitFromGameFragment();
     }
 }

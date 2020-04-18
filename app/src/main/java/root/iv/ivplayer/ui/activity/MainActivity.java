@@ -1,6 +1,7 @@
 package root.iv.ivplayer.ui.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Window;
@@ -19,6 +20,8 @@ import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+
+import java.util.Objects;
 
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
@@ -41,6 +44,19 @@ public class MainActivity extends AppCompatActivity
 {
     public static final String CHANNEL_NAME = "ch:global";
     private static final String SHARED_LOGIN_KEY = "shared:login";
+
+    private static final FragmentTag FRAGMENT_CHAT = FragmentTag
+            .builder()
+            .fragment(ChatFragment.getInstance())
+            .tag("fragment:chat")
+            .build();
+
+    private static final FragmentTag FRAGMENT_GAME = FragmentTag
+            .builder()
+            .fragment(GameFragment.getInstance())
+            .tag("fragment:game")
+            .build();
+
     private ChatServiceConnection serviceConnection;
 
     @Override
@@ -58,17 +74,11 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
         String currentLogin = sharedPreferences.getString(SHARED_LOGIN_KEY, "");
 
-//        if (currentLogin != null && !currentLogin.isEmpty()) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.mainFrame, ChatFragment.getInstance())
-                    .commit();
-//        } else {
-//            getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .replace(R.id.mainFrame, RegisterFragment.getInstance())
-//                    .commit();
-//        }
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFrame, FRAGMENT_CHAT.getFragment(), FRAGMENT_CHAT.getTag())
+                .commit();
+
     }
 
     @Override
@@ -94,13 +104,25 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void exitFromGameFragment() {
+        // При выходе из игрового фрагмента отправляем в ChatFragment событие "как будто закрылась нотификация"
+        // Чтобы переключить в нормально положение switch
+        ChatFragment fragment = (ChatFragment) getSupportFragmentManager()
+                .findFragmentByTag(FRAGMENT_CHAT.getTag());
+        Intent stopServiceIntent = new Intent(ChatService.ACTION_END);
+        Objects.requireNonNull(fragment).receive(stopServiceIntent);
+        // И останавливаем сервис
+        ChatService.stop(this);
+    }
+
+    @Override
     public void chatServiceStarted() {
         // Показываем игровой фрагмент
         Timber.tag(App.getTag()).i("Добавление нового фрагмента");
         getSupportFragmentManager()
                 .beginTransaction()
+                .add(R.id.mainFrame, FRAGMENT_GAME.getFragment(), FRAGMENT_GAME.getTag())
                 .addToBackStack(null)
-                .add(R.id.mainFrame, GameFragment.getInstance())
                 .commit();
     }
 
@@ -133,6 +155,13 @@ public class MainActivity extends AppCompatActivity
         serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
     }
 
+    @Override
+    public void switchToFalse() {
+        // Посылать в ChatFragment уже не нужно ничего. Переключатель перешел в положение false
+        // Просто остановить сервис
+        ChatService.stop(this);
+    }
+
     private Void processPNmsg(PubNub pn, PNMessageResult pnMsg) {
         runOnUiThread(() -> {
                     String msg = pnMsg.getMessage().toString();
@@ -155,10 +184,8 @@ public class MainActivity extends AppCompatActivity
                     .noneMatch(login -> login.equals(deviceLogin));
 
             if (!loginFree) {
-                serviceConnection.stopPNConnection();
-                ChatService.unbind(this, serviceConnection);
-                ChatService.stop(this);
-                removeLastFragment();
+                serviceConnection.unsubscribe(CHANNEL_NAME);
+                this.onBackPressed();
                 Toast.makeText(this, "Логин занят", Toast.LENGTH_SHORT).show();
             }
         }

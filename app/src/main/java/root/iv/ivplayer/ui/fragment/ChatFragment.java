@@ -170,7 +170,7 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
             }
         }
         else
-            stopChatService();
+            listener.switchToFalse();
     }
 
     // Чтение сообщений из очереди сервиса
@@ -222,9 +222,10 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
                 appendMsg("Некто: " + msg);
                 break;
 
+            // При остановке сервиса необходимо отвязаться от него
             case ChatService.ACTION_END:
                 Timber.tag(App.getTag()).i("ChatFragment: END");
-                stopChatService();
+                unbindChatService();
                 changeSwitch(false);
                 break;
 
@@ -241,5 +242,6 @@ public class ChatFragment extends Fragment implements MsgReceiver.Listener {
         void chatServiceStarted();
         void serviceBind();
         void publishMessage(String msg);
+        void switchToFalse();
     }
 }

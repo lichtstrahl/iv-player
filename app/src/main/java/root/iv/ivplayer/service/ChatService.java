@@ -133,6 +133,7 @@ public class ChatService extends Service {
         // И убираем нотификацию
         if (action != null && action.equalsIgnoreCase(ACTION_END)) {
             sendBroadcast(new Intent(ACTION_END));
+            stopForeground(true);
             stopSelf();
         }
 
@@ -155,7 +156,8 @@ public class ChatService extends Service {
 
     public static void stop(Context context) {
         Intent intent = new Intent(context, ChatService.class);
-        context.stopService(intent);
+        intent.setAction(ACTION_END);
+        context.startService(intent);
     }
 
     public static String getMessage(Intent intent) {
