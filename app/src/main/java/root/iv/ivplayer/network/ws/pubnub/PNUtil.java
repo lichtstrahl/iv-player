@@ -7,8 +7,6 @@ import java.util.Random;
 
 public class PNUtil {
     public static final String LOGIN_SEPARATOR = "_";
-    public static final String PN_EVENT_JOIN = "join";
-    public static final String PN_EVENT_LEAVE = "leave";
 
     // Генерируем UUID не только слоучайным числом, но и добавляем login
     // Пример: igor_01, sveta_02

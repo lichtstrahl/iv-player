@@ -24,6 +24,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.scene.MPScene;
+import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -40,7 +41,7 @@ public class GameFragment extends Fragment {
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
-    private MPScene scene;
+    private Scene scene;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -129,12 +130,13 @@ public class GameFragment extends Fragment {
         String event = presenceEvent.getEvent();
         Timber.tag(App.getTag()).i("GAME: event: %s user %s", event, login);
 
-        // При входе нового игрока:
-        // Если пришло сообщение о собственном входе, то оповещаем об этом остальных игроков.
-        // И помещаем данного актера под своё управление
+        // Сообщаем об изменении количества игроков сцене
         switch (event) {
             case PresenceEvent.JOIN:
                 scene.joinPlayer(presenceEvent.getUuid(), 10, 100);
+                break;
+            case PresenceEvent.LEAVE:
+                scene.leavePlayer(presenceEvent.getUuid());
                 break;
         }
     }

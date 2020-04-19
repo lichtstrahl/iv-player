@@ -3,6 +3,8 @@ package root.iv.ivplayer.game.scene;
 import android.graphics.Canvas;
 import android.graphics.Color;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -95,6 +97,15 @@ public class MPScene implements Scene {
         }
     }
 
+    @Override
+    public void leavePlayer(String uuid) {
+        Integer index = getIndexPlayer(uuid);
+        if (index != null) {
+            players.remove(uuid);
+            drawableObjects.remove(index.intValue());
+        }
+    }
+
     private void sendPosition(PlayerPositionDTO positionDTO) {
         serviceConnection.publishMessageToChannel(
                 new Gson().toJson(positionDTO), MainActivity.CHANNEL_NAME, null
@@ -114,5 +125,17 @@ public class MPScene implements Scene {
 
     private boolean findPlayer(String uuid) {
         return players.contains(uuid);
+    }
+
+    @Nullable
+    private Integer getIndexPlayer(String uuid) {
+        for (int i = 0; i < drawableObjects.size(); i++) {
+            DrawableObject object = drawableObjects.get(i);
+            if (object instanceof Player && ((Player)object).getUuid().equals(uuid)) {
+                return i;
+            }
+        }
+
+        return null;
     }
 }

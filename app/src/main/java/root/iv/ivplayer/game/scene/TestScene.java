@@ -63,6 +63,10 @@ public class TestScene implements Scene {
     @Override
     @Deprecated
     public void moveOnObject(int index, float dx, float dy) {
+    }
 
+    @Override
+    @Deprecated
+    public void leavePlayer(String uuid) {
     }
 }

@@ -27,6 +27,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.UserEntityDTO;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
+import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.service.ChatService;
@@ -221,12 +222,12 @@ public class MainActivity extends AppCompatActivity
         String event = presenceEvent.getEvent();
         Timber.tag(App.getTag()).i("Event: %s", event);
 
-        if (event.equals(PNUtil.PN_EVENT_JOIN)) {
+        if (event.equals(PresenceEvent.JOIN)) {
             String uuid = presenceEvent.getUuid();
             Timber.tag(App.getTag()).i("Join user %s", PNUtil.parseLogin(uuid));
         }
 
-        if (event.equals(PNUtil.PN_EVENT_LEAVE)) {
+        if (event.equals(PresenceEvent.LEAVE)) {
             String login = PNUtil.parseLogin(presenceEvent.getUuid());
             Timber.tag(App.getTag()).i("Leave user %s", login);
         }

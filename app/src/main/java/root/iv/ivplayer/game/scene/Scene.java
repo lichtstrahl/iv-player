@@ -15,6 +15,7 @@ import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
     5 Добавлять отрисовываемый объект
     6 Обрабатывать пришедшую информацию о новых позициях
     7 Пермещать объект с выбранным индексом
+    8 Выход игрока
  **/
 public interface Scene {
     void render(Canvas canvas);
@@ -23,4 +24,5 @@ public interface Scene {
     void addDrawableObject(DrawableObject object2);
     void processPlayerPositionDTO(PlayerPositionDTO position);
     void moveOnObject(int index, float dx, float dy);
+    void leavePlayer(String uuid);
 }
