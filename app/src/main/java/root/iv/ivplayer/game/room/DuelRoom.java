@@ -1,11 +1,8 @@
 package root.iv.ivplayer.game.room;
 
-import com.google.gson.Gson;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
 import root.iv.ivplayer.game.scene.Scene;
-import root.iv.ivplayer.network.ws.pubnub.PNUtil;
-import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
