@@ -1,5 +1,6 @@
 package root.iv.ivplayer.game.controller;
 
+import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -38,5 +39,10 @@ public class MoveController implements View.OnClickListener,Controller {
     @Override
     public boolean isReleased() {
         return object == null;
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        return false;
     }
 }
