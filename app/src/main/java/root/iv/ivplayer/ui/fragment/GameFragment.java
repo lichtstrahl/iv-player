@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.pubnub.api.PubNub;
@@ -26,8 +27,6 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
-import root.iv.ivplayer.game.tictac.TicTacEngine;
-import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -40,6 +39,8 @@ public class GameFragment extends Fragment {
 
     @BindView(R.id.gameView)
     protected GameView gameView;
+    @BindView(R.id.switchRoomState)
+    protected SwitchCompat switchRoomState;
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
@@ -65,11 +66,12 @@ public class GameFragment extends Fragment {
                 .circle(resources.getDrawable(R.drawable.ic_circle, context.getTheme()))
                 .cross(resources.getDrawable(R.drawable.ic_cross, context.getTheme()))
                 .square(resources.getDrawable(R.drawable.ic_square, context.getTheme()))
-                .background(Color.WHITE)
+                .background(Color.GRAY)
                 .build();
 
-        room = new DuelRoom(serviceConnection, textures);
-
+        DuelRoom duelRoom = new DuelRoom(serviceConnection, textures);
+        duelRoom.addChangeStatusListener(this::changeSwitchRoomStatus);
+        this.room = duelRoom;
 
         gameView.loadScene(room.getScene());
         gameView.setOnClickListener(room.getScene().getMainController());
@@ -130,6 +132,11 @@ public class GameFragment extends Fragment {
     private Void processPNstatus(PubNub pn, PNStatus status) {
         Timber.tag(App.getTag()).i("GAME: status");
         return null;
+    }
+
+    private void changeSwitchRoomStatus(Boolean active) {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> switchRoomState.setChecked(active));
     }
 
     private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {

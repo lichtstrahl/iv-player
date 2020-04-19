@@ -2,7 +2,6 @@ package root.iv.ivplayer.game.room;
 
 import android.view.MotionEvent;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.pubnub.api.models.consumer.PNStatus;
@@ -10,8 +9,11 @@ import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
@@ -33,6 +35,8 @@ public class DuelRoom extends Room implements PlayerRoom {
     private ChatServiceConnection serviceConnection;
     private TicTacEngine engine;
     private GsonBuilder gsonBuilder;
+    @Nullable
+    private Consumer<Boolean> changeStatusListener;
 
 
     public DuelRoom(ChatServiceConnection serviceConnection, TicTacTextures textures) {
@@ -54,22 +58,30 @@ public class DuelRoom extends Room implements PlayerRoom {
             currentPlayers++;
 
             // Если игроков достаточно, пробуем перейти в состояние "GAME"
-            if (currentPlayers > minPlauers && currentPlayers < maxPlayers) {
+            if (currentPlayers >= minPlauers && currentPlayers <= maxPlayers) {
                 changeState(RoomState.GAME);
             }
         }
     }
 
     // Первый вошедший играет крестиками
+    // Если игрок вошел не первым в комнату, то отыгрываем событие "второй игрок" подключился
+    // Ведь он уже здесь
     private void hereNowProcess(PNHereNowResult result, PNStatus status) {
         PNHereNowChannelData channelData = Objects.requireNonNull(
                 result.getChannels().get(MainActivity.CHANNEL_NAME)
         );
 
-        engine.setCurrentState(channelData.getOccupants().isEmpty()
-                ? BlockState.CROSS
-                : BlockState.CIRCLE
-        );
+        if (channelData.getOccupants().isEmpty()) {
+            engine.setCurrentState(BlockState.CROSS);
+            Timber.i("Вход в пустую комнату");
+        } else {
+            String uuid = channelData.getOccupants().get(0).getUuid();
+            engine.setCurrentState(BlockState.CIRCLE);
+            joinPlayer(uuid);
+            Timber.i("В комнате уже %s", uuid);
+        }
+
     }
 
     @Override
@@ -103,10 +115,13 @@ public class DuelRoom extends Room implements PlayerRoom {
                 TicTacDTO<TicTacWinDTO> win = gsonBuilder.create().fromJson(body, type);
                 Timber.i("Игрок %s выиграл: %s",
                         win.getData().getUuid(), String.valueOf(win.getData().isWin()));
+                changeState(RoomState.CLOSE);
                 break;
         }
+    }
 
-
+    public void addChangeStatusListener(Consumer<Boolean> listener) {
+        this.changeStatusListener = listener;
     }
 
     @Override
@@ -115,15 +130,21 @@ public class DuelRoom extends Room implements PlayerRoom {
     }
 
     private void changeState(RoomState newState) {
-
             boolean transit = RoomStateJump.of(this.state).possibleTransit(newState);
-            if (transit)
-                this.state = RoomState.GAME;
+            if (transit) {
+                this.state = newState;
+                if (changeStatusListener != null) {
+                    changeStatusListener.accept(this.state == RoomState.GAME);
+                }
+            }
             else
-                Timber.w("Переход в состояние GAME невозможен");
+                Timber.w("Переход в состояние %s невозможен", newState.name());
     }
 
     private void touchHandler(MotionEvent event) {
+        // Взаимодействие с игрой возможно только при статусе GAME
+        if (state != RoomState.GAME) return;
+
         String selfUUID = serviceConnection.getSelfUUID();
 
         switch (event.getAction()) {
@@ -148,6 +169,7 @@ public class DuelRoom extends Room implements PlayerRoom {
                         String jsonWin = gsonBuilder.create().toJson(winMessage);
                         serviceConnection
                                 .publishMessageToChannel(jsonWin, MainActivity.CHANNEL_NAME, null);
+                        changeState(RoomState.CLOSE);
                     }
                 }
                 break;
