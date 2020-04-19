@@ -83,7 +83,7 @@ public class PubNubConnector {
         pnConfiguration = new PNConfiguration();
         pnConfiguration.setPublishKey(pubKey);
         pnConfiguration.setSubscribeKey(subKey);
-        pnConfiguration.setUuid(PNUtil.randomUUID(login));
+        pnConfiguration.setUuid(PNUtil.constantUUID(login));
     }
 
     private void loadConfig() {
