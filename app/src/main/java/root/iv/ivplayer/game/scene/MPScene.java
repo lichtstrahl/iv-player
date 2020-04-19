@@ -5,10 +5,9 @@ import android.graphics.Color;
 
 import androidx.annotation.Nullable;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import root.iv.ivplayer.game.controller.Controller;
 import root.iv.ivplayer.game.controller.PlayerController;
@@ -16,9 +15,8 @@ import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.MovableObject;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.Player;
+import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
-import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
 
 
@@ -26,17 +24,15 @@ import timber.log.Timber;
 public class MPScene implements Scene {
 
     private ObjectGenerator playerGenerator;
-    private ChatServiceConnection serviceConnection;
     private PlayerController playerController;
     // Список объектов, которые можно отрисовать
     private List<DrawableObject> drawableObjects;
     private List<String> players;
 
 
-    public MPScene(ObjectGenerator playerGenerator, ChatServiceConnection serviceConnection) {
+    public MPScene(Consumer<PlayerPositionDTO> sendPosition, ObjectGenerator playerGenerator) {
         this.playerGenerator = playerGenerator;
-        this.serviceConnection = serviceConnection;
-        this.playerController = new PlayerController(this::sendPosition);
+        this.playerController = new PlayerController(sendPosition);
         drawableObjects = new ArrayList<>();
         players = new ArrayList<>();
     }
@@ -49,12 +45,7 @@ public class MPScene implements Scene {
 
     @Override
     public void joinPlayer(String joinUUID, float x, float y) {
-        Player newPlayer = new Player(playerGenerator.buildActor(Math.round(x), Math.round(y)), joinUUID);
-        addDrawableObject(newPlayer);
 
-        if (serviceConnection.getSelfUUID().equalsIgnoreCase(joinUUID)) {
-            playerController.grabObject(newPlayer);
-        }
     }
 
     @Override
@@ -72,7 +63,13 @@ public class MPScene implements Scene {
                     Math.round(position.getY0())
             );
         } else {
-            joinPlayer(position.getUuid(), position.getX0(), position.getY0());
+
+            Player newPlayer = playerGenerator.buildPlayer(
+                    Math.round(position.getX0()),
+                    Math.round(position.getY0()),
+                    position.getUuid()
+            );
+            addDrawableObject(newPlayer);
         }
     }
 
@@ -87,6 +84,13 @@ public class MPScene implements Scene {
     }
 
     @Override
+    public Player addPlayer(int x0, int y0, String uuid) {
+        Player newPlayer = playerGenerator.buildPlayer(x0, y0, uuid);
+        addDrawableObject(newPlayer);
+        return newPlayer;
+    }
+
+    @Override
     public void moveOnObject(int index, float dx, float dy) {
         DrawableObject object = drawableObjects.get(index);
 
@@ -98,7 +102,7 @@ public class MPScene implements Scene {
     }
 
     @Override
-    public void leavePlayer(String uuid) {
+    public void removePlayer(String uuid) {
         Integer index = getIndexPlayer(uuid);
         if (index != null) {
             players.remove(uuid);
@@ -106,10 +110,9 @@ public class MPScene implements Scene {
         }
     }
 
-    private void sendPosition(PlayerPositionDTO positionDTO) {
-        serviceConnection.publishMessageToChannel(
-                new Gson().toJson(positionDTO), MainActivity.CHANNEL_NAME, null
-        );
+    @Override
+    public void grabObjectControl(Object2 object) {
+        playerController.grabObject(object);
     }
 
     private void movePlayer(String uuid, int x, int y) {

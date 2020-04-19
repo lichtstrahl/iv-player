@@ -19,6 +19,10 @@ public class ObjectGenerator {
         );
     }
 
+    public void setDrawable(Drawable drawable) {
+        this.drawable = drawable;
+    }
+
     public void setFixSize(int w, int h) {
         width = w;
         height = h;
@@ -30,5 +34,9 @@ public class ObjectGenerator {
 
     public Actor buildActor(int x0, int y0) {
         return new Actor(Point2.point(x0, y0), drawable, width, height);
+    }
+
+    public Player buildPlayer(int x0, int y0, String uuid) {
+        return new Player(buildActor(x0, y0), uuid);
     }
 }

@@ -1,6 +1,7 @@
 package root.iv.ivplayer.ui.fragment;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.Gson;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
@@ -22,14 +22,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.game.object.ObjectGenerator;
-import root.iv.ivplayer.game.scene.MPScene;
-import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.room.PlayerRoom;
+import root.iv.ivplayer.game.room.YonathanRoom;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
-import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import timber.log.Timber;
@@ -41,7 +39,7 @@ public class GameFragment extends Fragment {
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
-    private Scene scene;
+    private PlayerRoom room;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -55,14 +53,14 @@ public class GameFragment extends Fragment {
         listener.createGameFragment();
 
 
-        ObjectGenerator objectGenerator = new ObjectGenerator();
-        objectGenerator.setDrawable(this.getContext(), R.drawable.iv_yonatan_mid);
-        objectGenerator.setFixSize(200, 200);
+        Drawable heroIcon = this
+                .getResources()
+                .getDrawable(R.drawable.iv_yonatan_mid, this.getContext().getTheme());
 
-        scene = new MPScene(objectGenerator, serviceConnection);
+        room = new YonathanRoom(heroIcon, serviceConnection);
 
-        gameView.loadScene(scene);
-        gameView.setOnClickListener(scene.getMainController());
+        gameView.loadScene(room.getScene());
+        gameView.setOnClickListener(room.getScene().getMainController());
 
         return view;
     }
@@ -82,7 +80,6 @@ public class GameFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
 
         // PubNub: Подписываемся на канал. Добавляем callback
         PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
@@ -113,9 +110,7 @@ public class GameFragment extends Fragment {
     }
 
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {
-        PlayerPositionDTO positionDTO = new Gson().fromJson(msg.getMessage().getAsString(), PlayerPositionDTO.class);
-        Timber.tag(App.getTag()).i("Позиция %s изменилась", PNUtil.parseLogin(positionDTO.getUuid()));
-        scene.processPlayerPositionDTO(positionDTO);
+        room.receiveMsg(msg);
         return null;
     }
 
@@ -133,10 +128,10 @@ public class GameFragment extends Fragment {
         // Сообщаем об изменении количества игроков сцене
         switch (event) {
             case PresenceEvent.JOIN:
-                scene.joinPlayer(presenceEvent.getUuid(), 10, 100);
+                room.joinPlayer(presenceEvent.getUuid());
                 break;
             case PresenceEvent.LEAVE:
-                scene.leavePlayer(presenceEvent.getUuid());
+                room.leavePlayer(presenceEvent.getUuid());
                 break;
         }
     }
