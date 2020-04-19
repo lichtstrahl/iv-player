@@ -17,6 +17,7 @@ import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
+import root.iv.ivplayer.network.ws.pubnub.dto.TicTacStateDTO;
 import timber.log.Timber;
 
 public class TicTacToeScene implements Scene {
@@ -35,13 +36,11 @@ public class TicTacToeScene implements Scene {
     // Элменты управления
     private TicTacController controller;
 
-    //
-    private TicTacEngine engine;
 
-    public TicTacToeScene(TicTacTextures textures) {
+
+    public TicTacToeScene(TicTacTextures textures, TicTacEngine engine) {
         this.textures = textures;
-        this.engine = new TicTacEngine();
-        engine.setCurrentState(BlockState.CROSS);
+
 
         // Генератор для фона
         backgroundGenerator = new ObjectGenerator();
@@ -63,7 +62,7 @@ public class TicTacToeScene implements Scene {
         // Прочие отрисовываемые объекты
         this.drawableObjects = new ArrayList<>();
         // Контроллер для управления касаниями
-        this.controller = new TicTacController(this::clickConsumer, this::touchConsumer);
+        this.controller = new TicTacController();
     }
 
     @Override
@@ -114,17 +113,5 @@ public class TicTacToeScene implements Scene {
     @Override
     public void grabObjectControl(Object2 object) {
 
-    }
-
-    private void clickConsumer(View v) {
-        Timber.i("click");
-    }
-
-    private void touchConsumer(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_UP:
-                engine.touchUp(event.getX(), event.getY());
-                break;
-        }
     }
 }

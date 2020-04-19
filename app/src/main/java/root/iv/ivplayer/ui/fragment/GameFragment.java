@@ -26,6 +26,7 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
+import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
@@ -67,7 +68,7 @@ public class GameFragment extends Fragment {
                 .background(Color.WHITE)
                 .build();
 
-        room = new DuelRoom(new TicTacToeScene(textures));
+        room = new DuelRoom(serviceConnection, textures);
 
 
         gameView.loadScene(room.getScene());

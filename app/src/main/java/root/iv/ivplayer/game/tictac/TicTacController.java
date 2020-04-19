@@ -3,15 +3,16 @@ package root.iv.ivplayer.game.tictac;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
-import lombok.AllArgsConstructor;
 import root.iv.ivplayer.game.controller.Controller;
 import root.iv.ivplayer.game.object.simple.Object2;
 
-@AllArgsConstructor
 public class TicTacController implements Controller {
+    @Nullable
     private Consumer<View> clickConsumer;
+    @Nullable
     private Consumer<MotionEvent> touchConsumer;
 
     @Override
@@ -29,12 +30,22 @@ public class TicTacController implements Controller {
 
     @Override
     public void onClick(View v) {
-        clickConsumer.accept(v);
+        if (clickConsumer != null) clickConsumer.accept(v);
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        touchConsumer.accept(event);
+        if (touchConsumer != null) touchConsumer.accept(event);
         return false;
+    }
+
+    @Override
+    public void setClickHandler(Consumer<View> handler) {
+        clickConsumer = handler;
+    }
+
+    @Override
+    public void setTouchHandler(Consumer<MotionEvent> handler) {
+        touchConsumer = handler;
     }
 }

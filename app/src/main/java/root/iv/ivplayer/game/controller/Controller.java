@@ -1,6 +1,9 @@
 package root.iv.ivplayer.game.controller;
 
+import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.core.util.Consumer;
 
 import root.iv.ivplayer.game.object.simple.Object2;
 
@@ -12,4 +15,6 @@ public interface Controller extends View.OnClickListener, View.OnTouchListener {
     void grabObject(Object2 object);
     void releaseObject();
     boolean isReleased();
+    void setClickHandler(Consumer<View> handler);
+    void setTouchHandler(Consumer<MotionEvent> event);
 }
