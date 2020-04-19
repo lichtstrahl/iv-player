@@ -3,14 +3,20 @@ package root.iv.ivplayer.game.room;
 import android.view.MotionEvent;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
+import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
+
+import java.util.Objects;
 
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
+import root.iv.ivplayer.game.tictac.PlayerState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.dto.TicTacProgressDTO;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import root.iv.ivplayer.ui.activity.MainActivity;
@@ -29,7 +35,7 @@ public class DuelRoom extends Room implements PlayerRoom {
         this.serviceConnection = serviceConnection;
 
         this.engine = new TicTacEngine();
-        engine.setCurrentState(BlockState.CROSS);
+        serviceConnection.hereNow(new PNHereNowCallback(this::hereNowProcess, Timber::e), MainActivity.CHANNEL_NAME);
 
         this.scene = new TicTacToeScene(textures, engine);
         scene.getMainController().setTouchHandler(this::touchHandler);
@@ -47,6 +53,18 @@ public class DuelRoom extends Room implements PlayerRoom {
                 changeState(RoomState.GAME);
             }
         }
+    }
+
+    // Первый вошедший играет крестиками
+    private void hereNowProcess(PNHereNowResult result, PNStatus status) {
+        PNHereNowChannelData channelData = Objects.requireNonNull(
+                result.getChannels().get(MainActivity.CHANNEL_NAME)
+        );
+
+        engine.setCurrentState(channelData.getOccupants().isEmpty()
+                ? BlockState.CROSS
+                : BlockState.CIRCLE
+        );
     }
 
     @Override
@@ -89,6 +107,11 @@ public class DuelRoom extends Room implements PlayerRoom {
                 int oldHistorySize = engine.getHistorySize();
                 engine.touchUp(event.getX(), event.getY());
                 if (engine.getHistorySize() > oldHistorySize) {
+                    if (engine.win()) {
+                        Timber.i("Победа!");
+                        break;
+                    }
+
                     TicTacProgressDTO progress = engine.getLastState();
                     progress.setUuid(serviceConnection.getSelfUUID());
                     log("send:", progress);
