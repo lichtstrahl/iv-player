@@ -1,7 +1,8 @@
-package root.iv.ivplayer.game.scene;
+package root.iv.ivplayer.game.tictac;
 
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,37 +13,57 @@ import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.Player;
+import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Object2;
+import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
+import timber.log.Timber;
 
 public class TicTacToeScene implements Scene {
     private static final int SQUARE_SIZE = 150;
 
     // Генераторы для создания объектов
     private ObjectGenerator backgroundGenerator;
+    private ObjectGenerator crossGenerator;
 
     private TicTacTextures textures;
 
     // Объекты для отрисовки
     private List<DrawableObject> drawableObjects;
-    private Group background;
+    private Group grid;
+
+    // Элменты управления
+    private TicTacController controller;
+
+    //
+    private TicTacEngine engine;
 
     public TicTacToeScene(TicTacTextures textures) {
         this.textures = textures;
-        // Подготовка для фона
+        this.engine = new TicTacEngine();
+
+        // Генератор для фона
         backgroundGenerator = new ObjectGenerator();
         backgroundGenerator.setDrawable(textures.getSquare());
         backgroundGenerator.setFixSize(SQUARE_SIZE, SQUARE_SIZE);
 
+
+        // Формирование сетки
         int startMargin = 100;
         int topMargin = 100;
-        background = Group.empty();
+        grid = Group.empty();
         for (int i = 0; i < 9; i++) {
-            DrawableObject square = backgroundGenerator.buildStatic(startMargin + (i % 3)*SQUARE_SIZE, topMargin + (i /3) * SQUARE_SIZE);
-            background.add(square);
+            StaticObject2 square = backgroundGenerator.buildStatic(startMargin + (i % 3)*SQUARE_SIZE, topMargin + (i /3) * SQUARE_SIZE);
+            Block block = Block.of(square, textures.getCross(), textures.getCircle());
+            if (i % 3 == 0) block.mark(BlockState.CROSS);
+            if (i % 3 == 1) block.mark(BlockState.CIRCLE);
+            grid.add(block);
         }
 
+        // Прочие отрисовываемые объекты
         this.drawableObjects = new ArrayList<>();
+        // Контроллер для управления касаниями
+        this.controller = new TicTacController(this::clickConsumer, this::touchConsumer);
     }
 
     @Override
@@ -50,7 +71,7 @@ public class TicTacToeScene implements Scene {
         // Заливка фона
         canvas.drawColor(textures.getBackground());
         // Отрисовка поля
-        background.getObjects().forEach(obj -> obj.render(canvas));
+        grid.getObjects().forEach(obj -> obj.render(canvas));
 
         drawableObjects.forEach(obj -> obj.render(canvas));
     }
@@ -62,7 +83,7 @@ public class TicTacToeScene implements Scene {
 
     @Override
     public Controller getMainController() {
-        return null;
+        return controller;
     }
 
     @Override
@@ -93,5 +114,13 @@ public class TicTacToeScene implements Scene {
     @Override
     public void grabObjectControl(Object2 object) {
 
+    }
+
+    private void clickConsumer(View v) {
+        Timber.i("click");
+    }
+
+    private void touchConsumer(MotionEvent event) {
+        Timber.i("touch: %d", event.getAction());
     }
 }

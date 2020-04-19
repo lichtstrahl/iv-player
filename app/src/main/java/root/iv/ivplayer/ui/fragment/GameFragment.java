@@ -26,7 +26,7 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
-import root.iv.ivplayer.game.scene.TicTacToeScene;
+import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -72,6 +72,7 @@ public class GameFragment extends Fragment {
 
         gameView.loadScene(room.getScene());
         gameView.setOnClickListener(room.getScene().getMainController());
+        gameView.setOnTouchListener(room.getScene().getMainController());
 
         return view;
     }

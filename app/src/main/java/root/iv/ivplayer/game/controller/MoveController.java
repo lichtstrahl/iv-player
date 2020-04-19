@@ -11,7 +11,7 @@ import timber.log.Timber;
 
 // Контроллер, служит для управления каким-либо объектом
 // Для этого он как минимум должен быть движимым
-public class MoveController implements View.OnClickListener,Controller {
+public abstract class MoveController implements View.OnClickListener,Controller {
     @Nullable
     private MovableObject object;
 

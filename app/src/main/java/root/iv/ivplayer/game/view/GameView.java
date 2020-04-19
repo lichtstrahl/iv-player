@@ -37,4 +37,9 @@ public class GameView extends View {
     public void loadScene(Scene scene) {
         this.scene = scene;
     }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
 }
