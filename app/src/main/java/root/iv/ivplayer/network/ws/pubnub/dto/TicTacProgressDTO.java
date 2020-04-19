@@ -14,7 +14,7 @@ import root.iv.ivplayer.game.tictac.BlockState;
  */
 @Data
 @AllArgsConstructor
-public class TicTacStateDTO implements Serializable {
+public class TicTacProgressDTO implements Serializable {
     private String uuid;
     private BlockState state;
     private int blockIndex;

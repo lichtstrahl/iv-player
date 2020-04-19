@@ -5,14 +5,14 @@ import android.graphics.RectF;
 import java.util.ArrayList;
 import java.util.List;
 
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacStateDTO;
+import root.iv.ivplayer.network.ws.pubnub.dto.TicTacProgressDTO;
 
 // Непосредственно движок игры
 // Здесь будут храниться необходимые данные для рассчетов
 public class TicTacEngine {
     private Block[] blocks;
     private BlockState currentState;
-    private List<TicTacStateDTO> history;
+    private List<TicTacProgressDTO> history;
 
     public TicTacEngine() {
         this.blocks = new Block[9];
@@ -22,6 +22,10 @@ public class TicTacEngine {
 
     public void loadBlock(int index, Block block) {
         this.blocks[index] = block;
+    }
+
+    public void markBlock(int index, BlockState state) {
+        this.blocks[index].mark(state);
     }
 
     public void setCurrentState(BlockState state) {
@@ -36,7 +40,7 @@ public class TicTacEngine {
             boolean click = bounds.contains(x, y);
             if (click) {
                 b.mark(currentState);
-                history.add(new TicTacStateDTO(null, currentState, i));
+                history.add(new TicTacProgressDTO(null, currentState, i));
             }
         }
     }
@@ -45,7 +49,7 @@ public class TicTacEngine {
         return history.size();
     }
 
-    public TicTacStateDTO getLastState() {
+    public TicTacProgressDTO getLastState() {
         return history.get(history.size()-1);
     }
 }

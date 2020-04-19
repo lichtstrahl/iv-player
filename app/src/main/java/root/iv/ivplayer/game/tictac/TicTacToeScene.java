@@ -1,8 +1,6 @@
 package root.iv.ivplayer.game.tictac;
 
 import android.graphics.Canvas;
-import android.view.MotionEvent;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,6 @@ import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacStateDTO;
-import timber.log.Timber;
 
 public class TicTacToeScene implements Scene {
     private static final int SQUARE_SIZE = 150;

@@ -2,6 +2,8 @@ package root.iv.ivplayer.game.room;
 
 import android.view.MotionEvent;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
 import root.iv.ivplayer.game.TicTacTextures;
@@ -9,8 +11,9 @@ import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacStateDTO;
+import root.iv.ivplayer.network.ws.pubnub.dto.TicTacProgressDTO;
 import root.iv.ivplayer.service.ChatServiceConnection;
+import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
@@ -18,6 +21,7 @@ public class DuelRoom extends Room implements PlayerRoom {
     private Scene scene;
     private ChatServiceConnection serviceConnection;
     private TicTacEngine engine;
+    private Gson gson;
 
 
     public DuelRoom(ChatServiceConnection serviceConnection, TicTacTextures textures) {
@@ -28,8 +32,9 @@ public class DuelRoom extends Room implements PlayerRoom {
         engine.setCurrentState(BlockState.CROSS);
 
         this.scene = new TicTacToeScene(textures, engine);
-
         scene.getMainController().setTouchHandler(this::touchHandler);
+
+        this.gson = new Gson();
     }
 
     @Override
@@ -58,7 +63,10 @@ public class DuelRoom extends Room implements PlayerRoom {
 
     @Override
     public void receiveMsg(PNMessageResult msg) {
-
+        String body = msg.getMessage().getAsString();
+        TicTacProgressDTO progress = gson.fromJson(body, TicTacProgressDTO.class);
+        log("receive:", progress);
+        engine.markBlock(progress.getBlockIndex(), progress.getState());
     }
 
     @Override
@@ -81,12 +89,17 @@ public class DuelRoom extends Room implements PlayerRoom {
                 int oldHistorySize = engine.getHistorySize();
                 engine.touchUp(event.getX(), event.getY());
                 if (engine.getHistorySize() > oldHistorySize) {
-                    TicTacStateDTO state = engine.getLastState();
-                    state.setUuid(serviceConnection.getSelfUUID());
-
-                    Timber.i("Ход %s: %d %s", state.getUuid(), state.getBlockIndex(), state.getState().name());
+                    TicTacProgressDTO progress = engine.getLastState();
+                    progress.setUuid(serviceConnection.getSelfUUID());
+                    log("send:", progress);
+                    String jsonState = gson.toJson(progress);
+                    serviceConnection.publishMessageToChannel(jsonState, MainActivity.CHANNEL_NAME, null);
                 }
                 break;
         }
+    }
+
+    private void log(String prefix, TicTacProgressDTO progress) {
+        Timber.i("%s Ход %s: %d %s", prefix, progress.getUuid(), progress.getBlockIndex(), progress.getState().name());
     }
 }
