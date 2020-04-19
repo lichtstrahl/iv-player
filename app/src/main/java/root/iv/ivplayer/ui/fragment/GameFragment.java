@@ -22,10 +22,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.game.TestScene;
-import root.iv.ivplayer.game.controller.PlayerController;
 import root.iv.ivplayer.game.object.ObjectGenerator;
-import root.iv.ivplayer.game.object.Player;
+import root.iv.ivplayer.game.scene.MPScene;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -33,7 +31,6 @@ import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
 import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
 import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment {
@@ -43,9 +40,7 @@ public class GameFragment extends Fragment {
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
-    private ObjectGenerator objectGenerator;
-    private TestScene scene;
-    private PlayerController playerController;
+    private MPScene scene;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -59,15 +54,14 @@ public class GameFragment extends Fragment {
         listener.createGameFragment();
 
 
-        objectGenerator = new ObjectGenerator();
+        ObjectGenerator objectGenerator = new ObjectGenerator();
         objectGenerator.setDrawable(this.getContext(), R.drawable.iv_yonatan_mid);
         objectGenerator.setFixSize(200, 200);
 
-        scene = new TestScene();
-        playerController = new PlayerController(this::processPosition);
+        scene = new MPScene(objectGenerator, serviceConnection);
 
         gameView.loadScene(scene);
-        gameView.setOnClickListener(playerController);
+        gameView.setOnClickListener(scene.getMainController());
 
         return view;
     }
@@ -120,20 +114,7 @@ public class GameFragment extends Fragment {
     private Void processPNmsg(PubNub pn, PNMessageResult msg) {
         PlayerPositionDTO positionDTO = new Gson().fromJson(msg.getMessage().getAsString(), PlayerPositionDTO.class);
         Timber.tag(App.getTag()).i("Позиция %s изменилась", PNUtil.parseLogin(positionDTO.getUuid()));
-        // Если такой игрок существует, то сдвигаем его, иначе создаём
-        if (scene.findPlayer(positionDTO.getUuid())) {
-            scene.movePlayer(
-                    positionDTO.getUuid(),
-                    Math.round(positionDTO.getX0()),
-                    Math.round(positionDTO.getY0())
-            );
-        } else {
-            Player newPlayer = new Player(objectGenerator.buildActor(
-                    Math.round(positionDTO.getX0()),
-                    Math.round(positionDTO.getY0())
-            ), positionDTO.getUuid());
-            scene.addDrawableObject(newPlayer);
-        }
+        scene.processPlayerPositionDTO(positionDTO);
         return null;
     }
 
@@ -153,24 +134,9 @@ public class GameFragment extends Fragment {
         // И помещаем данного актера под своё управление
         switch (event) {
             case PresenceEvent.JOIN:
-                String selfUUID = serviceConnection.getSelfUUID();
-                String joinUUID = presenceEvent.getUuid();
-
-                Player newPlayer = new Player(objectGenerator.buildActor(10, 100), joinUUID);
-                scene.addDrawableObject(newPlayer);
-
-                if (selfUUID.equalsIgnoreCase(joinUUID)) {
-                    playerController.grabObject(newPlayer);
-                }
+                scene.joinPlayer(presenceEvent.getUuid(), 10, 100);
                 break;
         }
-    }
-
-    // Отправка информации о своих координатах в канал
-    private void processPosition(PlayerPositionDTO positionDTO) {
-        serviceConnection.publishMessageToChannel(
-                new Gson().toJson(positionDTO), MainActivity.CHANNEL_NAME, null
-        );
     }
 
     public interface Listener {

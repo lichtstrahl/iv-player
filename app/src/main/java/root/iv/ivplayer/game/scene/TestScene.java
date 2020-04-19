@@ -1,4 +1,4 @@
-package root.iv.ivplayer.game;
+package root.iv.ivplayer.game.scene;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -6,8 +6,10 @@ import android.graphics.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import root.iv.ivplayer.game.controller.Controller;
 import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Player;
+import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
 
 public class TestScene implements Scene {
     private Long lastFrameMS = 0L;
@@ -31,6 +33,19 @@ public class TestScene implements Scene {
         lastFrameMS = finishRender;
     }
 
+    @Override
+    @Deprecated
+    public void joinPlayer(String joinUUID, float x, float y) {
+
+    }
+
+    @Override
+    @Deprecated
+    public Controller getMainController() {
+        return null;
+    }
+
+    @Override
     public void addDrawableObject(DrawableObject object2) {
         drawableObjects.add(object2);
 
@@ -40,18 +55,14 @@ public class TestScene implements Scene {
         }
     }
 
-    public void movePlayer(String uuid, int x, int y) {
-        // Перебираем объекты на сцене. Ищем только среди игроков
-        // Выбираем нужный нам uuid и сдвигаем его в указанную позицию
-        drawableObjects
-                .stream()
-                .filter(obj -> obj instanceof Player)
-                .map(obj -> (Player)obj)
-                .filter(p -> p.getUuid().equalsIgnoreCase(uuid))
-                .forEach(player -> player.moveTo(x, y));
+    @Override
+    @Deprecated
+    public void processPlayerPositionDTO(PlayerPositionDTO position) {
     }
 
-    public boolean findPlayer(String uuid) {
-        return players.contains(uuid);
+    @Override
+    @Deprecated
+    public void moveOnObject(int index, float dx, float dy) {
+
     }
 }

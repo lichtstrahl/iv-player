@@ -7,7 +7,7 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import root.iv.ivplayer.game.Scene;
+import root.iv.ivplayer.game.scene.Scene;
 
 public class GameView extends View {
     @Nullable
