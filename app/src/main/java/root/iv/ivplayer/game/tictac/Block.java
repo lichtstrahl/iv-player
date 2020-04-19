@@ -1,6 +1,8 @@
 package root.iv.ivplayer.game.tictac;
 
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
 import lombok.Getter;
@@ -45,6 +47,11 @@ public class Block extends StaticObject2 {
 
     public void mark(BlockState state) {
         this.state = state;
+    }
+
+    public RectF getBounds() {
+        int size = getWidth();
+        return new RectF(position.x, position.y, position.x + size, position.y + size);
     }
 
     // После отрисовки самого блока в зависимости от состояния будет нарисована метка

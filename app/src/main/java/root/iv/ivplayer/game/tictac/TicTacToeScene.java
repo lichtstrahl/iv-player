@@ -41,6 +41,7 @@ public class TicTacToeScene implements Scene {
     public TicTacToeScene(TicTacTextures textures) {
         this.textures = textures;
         this.engine = new TicTacEngine();
+        engine.setCurrentState(BlockState.CROSS);
 
         // Генератор для фона
         backgroundGenerator = new ObjectGenerator();
@@ -55,8 +56,7 @@ public class TicTacToeScene implements Scene {
         for (int i = 0; i < 9; i++) {
             StaticObject2 square = backgroundGenerator.buildStatic(startMargin + (i % 3)*SQUARE_SIZE, topMargin + (i /3) * SQUARE_SIZE);
             Block block = Block.of(square, textures.getCross(), textures.getCircle());
-            if (i % 3 == 0) block.mark(BlockState.CROSS);
-            if (i % 3 == 1) block.mark(BlockState.CIRCLE);
+            engine.loadBlock(i, block);
             grid.add(block);
         }
 
@@ -121,6 +121,10 @@ public class TicTacToeScene implements Scene {
     }
 
     private void touchConsumer(MotionEvent event) {
-        Timber.i("touch: %d", event.getAction());
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_UP:
+                engine.touchUp(event.getX(), event.getY());
+                break;
+        }
     }
 }
