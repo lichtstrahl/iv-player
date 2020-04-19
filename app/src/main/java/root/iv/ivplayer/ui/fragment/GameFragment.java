@@ -3,10 +3,13 @@ package root.iv.ivplayer.ui.fragment;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,6 +21,7 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -41,10 +45,17 @@ public class GameFragment extends Fragment {
     protected GameView gameView;
     @BindView(R.id.switchRoomState)
     protected SwitchCompat switchRoomState;
+    @BindView(R.id.labelRoomStatus)
+    protected TextView labelRoomStatus;
+    @BindView(R.id.bottomBlock)
+    protected LinearLayout layout;
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
     private PlayerRoom room;
+    private Drawable square;
+    private Drawable circle;
+    private Drawable cross;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -61,16 +72,21 @@ public class GameFragment extends Fragment {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
+        square = resources.getDrawable(R.drawable.ic_square, context.getTheme());
+        cross = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
+        circle = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
+
         TicTacTextures textures = TicTacTextures
                 .builder()
-                .circle(resources.getDrawable(R.drawable.ic_circle, context.getTheme()))
-                .cross(resources.getDrawable(R.drawable.ic_cross, context.getTheme()))
-                .square(resources.getDrawable(R.drawable.ic_square, context.getTheme()))
-                .background(Color.GRAY)
+                .circle(circle)
+                .cross(cross)
+                .square(square)
+                .background(Color.WHITE)
                 .build();
 
         DuelRoom duelRoom = new DuelRoom(serviceConnection, textures);
         duelRoom.addChangeStatusListener(this::changeSwitchRoomStatus);
+        duelRoom.addWinListener(this::win);
         this.room = duelRoom;
 
         gameView.loadScene(room.getScene());
@@ -134,11 +150,6 @@ public class GameFragment extends Fragment {
         return null;
     }
 
-    private void changeSwitchRoomStatus(Boolean active) {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> switchRoomState.setChecked(active));
-    }
-
     private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
         String uuid = presenceEvent.getUuid();
         String login = PNUtil.parseLogin(uuid);
@@ -154,6 +165,24 @@ public class GameFragment extends Fragment {
                 room.leavePlayer(presenceEvent.getUuid());
                 break;
         }
+    }
+
+    private void changeSwitchRoomStatus(Boolean active) {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> switchRoomState.setChecked(active));
+    }
+
+    private void win(String uuid) {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> {
+                    String winMsg = String.format(Locale.ENGLISH, "Игрок %s победил!", PNUtil.parseLogin(uuid));
+                    labelRoomStatus.setText(winMsg);
+
+                    int color = (serviceConnection.getSelfUUID().equals(uuid))
+                            ? Color.GREEN
+                            : Color.RED;
+                    layout.setBackgroundColor(color);
+                });
     }
 
     public interface Listener {

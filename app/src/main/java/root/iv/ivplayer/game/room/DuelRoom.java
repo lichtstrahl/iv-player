@@ -37,6 +37,8 @@ public class DuelRoom extends Room implements PlayerRoom {
     private GsonBuilder gsonBuilder;
     @Nullable
     private Consumer<Boolean> changeStatusListener;
+    @Nullable
+    private Consumer<String> winListener;
 
 
     public DuelRoom(ChatServiceConnection serviceConnection, TicTacTextures textures) {
@@ -116,12 +118,17 @@ public class DuelRoom extends Room implements PlayerRoom {
                 Timber.i("Игрок %s выиграл: %s",
                         win.getData().getUuid(), String.valueOf(win.getData().isWin()));
                 changeState(RoomState.CLOSE);
+                win(win.getData().getUuid());
                 break;
         }
     }
 
     public void addChangeStatusListener(Consumer<Boolean> listener) {
         this.changeStatusListener = listener;
+    }
+
+    public void addWinListener(Consumer<String> winListener) {
+        this.winListener = winListener;
     }
 
     @Override
@@ -170,10 +177,15 @@ public class DuelRoom extends Room implements PlayerRoom {
                         serviceConnection
                                 .publishMessageToChannel(jsonWin, MainActivity.CHANNEL_NAME, null);
                         changeState(RoomState.CLOSE);
+                        win(selfUUID);
                     }
                 }
                 break;
         }
+    }
+
+    private void win(String uuid) {
+        if (winListener != null) winListener.accept(uuid);
     }
 
     private void log(String prefix, TicTacProgressDTO progress) {
