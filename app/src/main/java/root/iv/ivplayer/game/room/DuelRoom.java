@@ -103,12 +103,13 @@ public class DuelRoom extends Room implements PlayerRoom {
         PNHereNowChannelData channelData = Objects.requireNonNull(
                 result.getChannels().get(MainActivity.CHANNEL_NAME)
         );
+        String selfUUID = serviceConnection.getSelfUUID();
 
         if (channelData.getOccupants().isEmpty()) {
             engine.setCurrentState(BlockState.CROSS);
             Timber.i("Вход в пустую комнату");
             if (roomListener != null)
-                roomListener.updatePlayers(serviceConnection.getSelfUUID(), null
+                roomListener.updatePlayers(PNUtil.parseLogin(selfUUID), null
                 );
         } else {
             String uuid = channelData.getOccupants().get(0).getUuid();
@@ -117,7 +118,7 @@ public class DuelRoom extends Room implements PlayerRoom {
             Timber.i("В комнате уже %s", uuid);
             changeState(RoomState.WAIT_PROGRESS);
             if (roomListener != null) {
-                roomListener.updatePlayers(PNUtil.parseLogin(uuid), serviceConnection.getSelfUUID());
+                roomListener.updatePlayers(PNUtil.parseLogin(uuid), PNUtil.parseLogin(selfUUID));
             }
         }
     }
@@ -129,7 +130,7 @@ public class DuelRoom extends Room implements PlayerRoom {
             currentPlayers--;
 
             // Если вышел важный для игры игрок, то пробуем перейти в состояние"закрыта"
-            if (currentPlayers < minPlauers) {
+            if (currentPlayers < minPlauers && (state == RoomState.GAME || state == RoomState.WAIT_PROGRESS)) {
                 changeState(RoomState.CLOSE);
             }
         }

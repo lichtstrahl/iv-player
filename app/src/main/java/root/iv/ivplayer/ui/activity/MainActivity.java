@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity
                 true
         );
         serviceConnection.addListener(callback);
-        serviceConnection.subscribeToChannel(CHANNEL_NAME);
+
 
         PNHereNowCallback hereNowCallback = new PNHereNowCallback(
                 this::processPNHereNow,
@@ -198,18 +198,18 @@ public class MainActivity extends AppCompatActivity
         PNHereNowChannelData channelData = hereNowResult.getChannels().get(CHANNEL_NAME);
 
         if (channelData != null) {
-            String deviceLogin = serviceConnection.getLoginDevice();
+            String login = PNUtil.parseLogin(serviceConnection.getSelfUUID());
 
-            boolean loginFree = channelData
-                    .getOccupants()
+            boolean loginFree = channelData.getOccupants()
                     .stream()
                     .map(PNHereNowOccupantData::getUuid)
-                    .map(PNUtil::parseLogin)
-                    .noneMatch(login -> login.equals(deviceLogin));
+                    .noneMatch(uuid -> PNUtil.parseLogin(uuid).equals(login));
 
             if (!loginFree) {
                 this.onBackPressed();
                 Toast.makeText(this, "Логин занят", Toast.LENGTH_SHORT).show();
+            } else {
+                serviceConnection.subscribeToChannel(CHANNEL_NAME);
             }
         }
     }

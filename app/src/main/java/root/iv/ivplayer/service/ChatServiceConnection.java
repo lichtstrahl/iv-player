@@ -108,10 +108,6 @@ public class ChatServiceConnection implements ServiceConnection {
         }
     }
 
-    public String getLoginDevice() {
-        return chatBinder.getDeviceLogin();
-    }
-
     public void stopPNConnection() {
         chatBinder.stopPNConnection();
     }

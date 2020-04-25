@@ -185,7 +185,8 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
 
     @Override
     public void updatePlayers(@Nullable String login1, @Nullable String login2) {
-        Objects.requireNonNull(this.getActivity()).runOnUiThread(() -> {
+        if (this.getActivity() != null)
+            this.getActivity().runOnUiThread(() -> {
             viewLogin1.setText((login1 != null) ? login1 : "");
 
             viewLogin2.setText((login2 != null) ? login2 : "");
@@ -200,7 +201,8 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
 
     @Override
     public void changeStatus(RoomState roomState) {
-        Objects.requireNonNull(this.getActivity())
+        if (this.getActivity() != null)
+            this.getActivity()
                 .runOnUiThread(() -> {
                     switchRoomState.setChecked(roomState == RoomState.GAME);
                     labelRoomStatus.setText(roomState.getDescription());

@@ -246,10 +246,6 @@ public class ChatService extends Service {
             pnConnector.hereNow(callback, channels);
         }
 
-        public String getDeviceLogin() {
-            return loginDevice;
-        }
-
         public void stopPNConnection() {
             pnConnector.finish();
         }
