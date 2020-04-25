@@ -20,6 +20,7 @@ import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
+import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
@@ -36,7 +37,7 @@ public class DuelRoom extends Room implements PlayerRoom {
     private Scene scene;
     private ChatServiceConnection serviceConnection;
     private TicTacEngine engine;
-    private GsonBuilder gsonBuilder;
+    private TicTacJsonProcessor jsonProcessor;
     @Nullable
     private Listener roomListener;
     private DrawableBlockState icons;
@@ -52,7 +53,7 @@ public class DuelRoom extends Room implements PlayerRoom {
         this.scene = new TicTacToeScene(textures, engine);
         scene.getMainController().setTouchHandler(this::touchHandler);
 
-        this.gsonBuilder = new GsonBuilder();
+        this.jsonProcessor = new TicTacJsonProcessor();
         this.icons = DrawableBlockState.create(textures.getCross(), textures.getCircle());
     }
 
@@ -124,24 +125,20 @@ public class DuelRoom extends Room implements PlayerRoom {
     @Override
     public void receiveMsg(PNMessageResult msg) {
         String body = msg.getMessage().getAsString();
-        Type type = new TypeToken<TicTacDTO>(){}.getType();
-        TicTacDTO dto = gsonBuilder.create().fromJson(body, type);
+        TicTacDTOType dtoType = jsonProcessor.dtoType(body);
 
-        switch (dto.getType()) {
+        switch (dtoType) {
             case PROGRESS:
-                type = new TypeToken<TicTacDTO<TicTacProgressDTO>>(){}.getType();
-                TicTacDTO<TicTacProgressDTO> progress = gsonBuilder.create().fromJson(body, type);
-                log("receive:", progress.getData());
-                engine.markBlock(progress.getData().getBlockIndex(), progress.getData().getState());
+                TicTacProgressDTO progress = jsonProcessor.receiveProgressDTO(body);
+                log("receive:", progress);
+                engine.markBlock(progress.getBlockIndex(), progress.getState());
                 break;
 
             case WIN:
-                type = new TypeToken<TicTacDTO<TicTacWinDTO>>(){}.getType();
-                TicTacDTO<TicTacWinDTO> win = gsonBuilder.create().fromJson(body, type);
-                Timber.i("Игрок %s выиграл: %s",
-                        win.getData().getUuid(), String.valueOf(win.getData().isWin()));
+                TicTacWinDTO win = jsonProcessor.receiveWinDTO(body);
+                Timber.i("Игрок %s выиграл: %s", win.getUuid(), String.valueOf(win.isWin()));
                 changeState(RoomState.CLOSE);
-                win(win.getData().getUuid());
+                win(win.getUuid());
                 break;
         }
     }
@@ -176,21 +173,14 @@ public class DuelRoom extends Room implements PlayerRoom {
                 if (engine.getHistorySize() > oldHistorySize) {
                     TicTacProgressDTO progress = engine.getLastState();
                     progress.setUuid(selfUUID);
-                    log("send:", progress);
-                    TicTacDTO<TicTacProgressDTO> message = new TicTacDTO<>(
-                            TicTacDTOType.PROGRESS, progress
-                    );
-                    String jsonState = gsonBuilder.create().toJson(message);
+                    String jsonState = jsonProcessor.buildProgressDTO(progress);
                     serviceConnection
                             .publishMessageToChannel(jsonState, MainActivity.CHANNEL_NAME, null);
+                    log("send:", progress);
 
                     if (engine.win()) {
-                        TicTacDTO<TicTacWinDTO> winMessage = new TicTacDTO<>(
-                                TicTacDTOType.WIN, new TicTacWinDTO(selfUUID, true)
-                        );
-                        String jsonWin = gsonBuilder.create().toJson(winMessage);
-                        serviceConnection
-                                .publishMessageToChannel(jsonWin, MainActivity.CHANNEL_NAME, null);
+                        String winMsg = jsonProcessor.buildWinDTO(selfUUID);
+                        serviceConnection.publishMessageToChannel(winMsg, MainActivity.CHANNEL_NAME, null);
                         changeState(RoomState.CLOSE);
                         win(selfUUID);
                     }
