@@ -69,7 +69,7 @@ public class DuelRoom extends Room implements PlayerRoom {
 
             String selfID = serviceConnection.getSelfUUID();
             if (!selfID.equals(uuid) && roomListener != null) {
-                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid), null, null);
+                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid), icons.getCross(), icons.getCross());
             }
         }
     }
