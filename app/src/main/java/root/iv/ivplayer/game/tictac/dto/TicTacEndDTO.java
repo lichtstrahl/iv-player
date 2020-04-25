@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicTacWinDTO implements Serializable {
+public class TicTacEndDTO implements Serializable {
     private String uuid;
     private boolean win;
 }

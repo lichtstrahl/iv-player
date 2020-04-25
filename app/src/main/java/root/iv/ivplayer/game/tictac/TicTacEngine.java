@@ -3,6 +3,7 @@ package root.iv.ivplayer.game.tictac;
 import android.graphics.RectF;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
@@ -41,7 +42,7 @@ public class TicTacEngine {
             Block b = blocks[i];
             RectF bounds = b.getBounds();
             boolean click = bounds.contains(x, y);
-            if (click) {
+            if (click && b.getState() == BlockState.FREE) {
                 b.mark(currentState);
                 history.add(new TicTacProgressDTO(null, currentState, i));
             }
@@ -64,6 +65,10 @@ public class TicTacEngine {
         boolean winSecondDiagonal = winSecondDiagonal();
 
         return winColumns || winRows || winMainDiagonal || winSecondDiagonal;
+    }
+
+    public boolean hasFreeBlocks() {
+        return Arrays.stream(blocks).anyMatch(b -> b.getState() == BlockState.FREE);
     }
 
     private boolean winColumns() {

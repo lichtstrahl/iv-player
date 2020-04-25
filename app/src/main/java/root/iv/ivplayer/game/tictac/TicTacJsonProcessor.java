@@ -10,7 +10,7 @@ import root.iv.ivplayer.game.tictac.dto.TicTacDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
-import root.iv.ivplayer.game.tictac.dto.TicTacWinDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
 
 
 public class TicTacJsonProcessor {
@@ -32,9 +32,9 @@ public class TicTacJsonProcessor {
         return progress.getData();
     }
 
-    public TicTacWinDTO receiveWinDTO(String json) {
-        Type type = new TypeToken<TicTacDTO<TicTacWinDTO>>(){}.getType();
-        TicTacDTO<TicTacWinDTO> win = gsonBuilder.create().fromJson(json, type);
+    public TicTacEndDTO receiveWinDTO(String json) {
+        Type type = new TypeToken<TicTacDTO<TicTacEndDTO>>(){}.getType();
+        TicTacDTO<TicTacEndDTO> win = gsonBuilder.create().fromJson(json, type);
         return win.getData();
     }
 
@@ -45,10 +45,18 @@ public class TicTacJsonProcessor {
     }
 
     public String buildWinDTO(String uuid) {
-        TicTacDTO<TicTacWinDTO> winMessage = new TicTacDTO<>(
-                TicTacDTOType.WIN, new TicTacWinDTO(uuid, true)
+        TicTacDTO<TicTacEndDTO> winMessage = new TicTacDTO<>(
+                TicTacDTOType.END, new TicTacEndDTO(uuid, true)
         );
         return  toJson(winMessage);
+    }
+
+    public String buildEndDTO(String uuid) {
+        TicTacDTO<TicTacEndDTO> endMessage = new TicTacDTO<>(
+                TicTacDTOType.END, new TicTacEndDTO(uuid, false)
+        );
+
+        return toJson(endMessage);
     }
 
     public String buildRoomStatusDTO(String uuid, RoomState roomState) {

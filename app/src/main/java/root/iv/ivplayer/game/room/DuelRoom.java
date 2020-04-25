@@ -21,7 +21,7 @@ import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
-import root.iv.ivplayer.game.tictac.dto.TicTacWinDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.service.ChatServiceConnection;
@@ -149,11 +149,13 @@ public class DuelRoom extends Room implements PlayerRoom {
                 changeState(RoomState.GAME);
                 break;
 
-            case WIN:
-                TicTacWinDTO win = jsonProcessor.receiveWinDTO(body);
-                Timber.i("Игрок %s выиграл: %s", win.getUuid(), String.valueOf(win.isWin()));
+            case END:
+                TicTacEndDTO end = jsonProcessor.receiveWinDTO(body);
                 changeState(RoomState.CLOSE);
-                win(win.getUuid());
+                if (end.isWin())
+                    win(end.getUuid());
+                else
+                    end();
                 break;
 
             case ROOM_STATE:
@@ -215,6 +217,12 @@ public class DuelRoom extends Room implements PlayerRoom {
                         serviceConnection.publishMessageToChannel(winMsg, MainActivity.CHANNEL_NAME, null);
                         changeState(RoomState.CLOSE);
                         win(selfUUID);
+                    } else if (!engine.hasFreeBlocks()) {
+                        Timber.i("Ничья");
+                        String endMsg = jsonProcessor.buildEndDTO(selfUUID);
+                        serviceConnection.publishMessageToChannel(endMsg, MainActivity.CHANNEL_NAME, null);
+                        changeState(RoomState.CLOSE);
+                        end();
                     }
                 }
                 break;
@@ -222,7 +230,13 @@ public class DuelRoom extends Room implements PlayerRoom {
     }
 
     private void win(String uuid) {
+        Timber.i("Игрок %s выиграл", uuid);
         if (roomListener != null) roomListener.win(uuid);
+    }
+
+    private void end() {
+        Timber.i("Игра окончена");
+        if (roomListener != null) roomListener.end();
     }
 
     private void log(String prefix, TicTacProgressDTO progress) {
@@ -232,6 +246,7 @@ public class DuelRoom extends Room implements PlayerRoom {
     public interface Listener extends RoomListener {
         void updatePlayers(@Nullable String login1, @Nullable String login2);
         void win(String uuid);
+        void end();
         void changeStatus(RoomState roomState);
         void exit();
     }

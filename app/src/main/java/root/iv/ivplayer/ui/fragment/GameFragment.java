@@ -231,6 +231,16 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                 });
     }
 
+    @Override
+    public void end() {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> {
+                    labelRoomStatus.setText("Игра окончена");
+                    panelPlayer1.setBackgroundColor(Color.LTGRAY);
+                    panelPlayer2.setBackgroundColor(Color.LTGRAY);
+                });
+    }
+
     public interface Listener {
         void createGameFragment();
         void stopGameFragment();
