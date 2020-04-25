@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -31,6 +32,7 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
+import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -39,7 +41,7 @@ import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import timber.log.Timber;
 
-public class GameFragment extends Fragment {
+public class GameFragment extends Fragment implements DuelRoom.Listener {
 
     @BindView(R.id.gameView)
     protected GameView gameView;
@@ -49,6 +51,14 @@ public class GameFragment extends Fragment {
     protected TextView labelRoomStatus;
     @BindView(R.id.bottomBlock)
     protected LinearLayout layout;
+    @BindView(R.id.viewLoginPlayer1)
+    protected TextView viewLogin1;
+    @BindView(R.id.viewRolePlayer1)
+    protected ImageView viewRole1;
+    @BindView(R.id.viewLoginPlayer2)
+    protected TextView viewLogin2;
+    @BindView(R.id.viewRolePlayer2)
+    protected ImageView viewRole2;
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
@@ -85,8 +95,7 @@ public class GameFragment extends Fragment {
                 .build();
 
         DuelRoom duelRoom = new DuelRoom(serviceConnection, textures);
-        duelRoom.addChangeStatusListener(this::changeSwitchRoomStatus);
-        duelRoom.addWinListener(this::win);
+        duelRoom.addListener(this);
         this.room = duelRoom;
 
         gameView.loadScene(room.getScene());
@@ -167,12 +176,29 @@ public class GameFragment extends Fragment {
         }
     }
 
-    private void changeSwitchRoomStatus(Boolean active) {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> switchRoomState.setChecked(active));
+    @Override
+    public void updatePlayers(@Nullable String login1, @Nullable String login2,
+                              @Nullable Drawable state1, @Nullable Drawable state2) {
+        viewLogin1.setText((login1 != null) ? login1 : "");
+        viewLogin2.setText((login2 != null) ? login2 : "");
+
+        viewRole1.setImageDrawable(state1);
+        viewRole2.setImageDrawable(state2);
     }
 
-    private void win(String uuid) {
+    @Override
+    public void changeStatus(boolean roomState) {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> switchRoomState.setChecked(roomState));
+    }
+
+    @Override
+    public void roomClosed() {
+
+    }
+
+    @Override
+    public void win(String uuid) {
         Objects.requireNonNull(this.getActivity())
                 .runOnUiThread(() -> {
                     String winMsg = String.format(Locale.ENGLISH, "Игрок %s победил!", PNUtil.parseLogin(uuid));

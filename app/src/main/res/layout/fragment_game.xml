@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <root.iv.ivplayer.game.view.GameView
         android:id="@+id/gameView"
@@ -16,19 +16,73 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/stdMargin">
-        <TextView
-            android:id="@+id/labelRoomStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_room_status"
-            android:layout_gravity="center_vertical"/>
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/switchRoomState"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:layout_margin="@dimen/stdMargin"/>
+        android:layout_marginBottom="@dimen/stdMargin"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/labelRoomStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_room_status"
+                android:layout_gravity="center_vertical"/>
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switchRoomState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:layout_margin="@dimen/stdMargin"/>
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/viewLoginPlayer1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/viewRolePlayer1"
+                android:layout_alignTop="@id/viewRolePlayer1"
+                android:layout_alignBottom="@id/viewRolePlayer1"
+                tools:text="@tools:sample/first_names"
+                android:textSize="@dimen/login_text_size"
+                android:textAlignment="gravity"
+                android:gravity="center_vertical"
+                android:layout_marginStart="@dimen/stdMargin"/>
+            <ImageView
+                android:id="@+id/viewRolePlayer1"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="@dimen/stdMargin"
+                android:background="@android:color/darker_gray"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/viewLoginPlayer2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/viewRolePlayer2"
+                android:layout_alignTop="@id/viewRolePlayer2"
+                android:layout_alignBottom="@id/viewRolePlayer2"
+                tools:text="@tools:sample/first_names"
+                android:textSize="@dimen/login_text_size"
+                android:textAlignment="gravity"
+                android:gravity="center_vertical"
+                android:layout_marginStart="@dimen/stdMargin"/>
+
+            <ImageView
+                android:id="@+id/viewRolePlayer2"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="@dimen/stdMargin"
+                android:background="@android:color/darker_gray"/>
+        </RelativeLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -1,6 +1,9 @@
 package root.iv.ivplayer.game.room;
 
+import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
+
+import androidx.annotation.Nullable;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -9,17 +12,16 @@ import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Type;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
+import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
+import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.network.ws.pubnub.dto.TicTacDTO;
 import root.iv.ivplayer.network.ws.pubnub.dto.TicTacDTOType;
@@ -36,9 +38,8 @@ public class DuelRoom extends Room implements PlayerRoom {
     private TicTacEngine engine;
     private GsonBuilder gsonBuilder;
     @Nullable
-    private Consumer<Boolean> changeStatusListener;
-    @Nullable
-    private Consumer<String> winListener;
+    private Listener roomListener;
+    private DrawableBlockState icons;
 
 
     public DuelRoom(ChatServiceConnection serviceConnection, TicTacTextures textures) {
@@ -52,6 +53,7 @@ public class DuelRoom extends Room implements PlayerRoom {
         scene.getMainController().setTouchHandler(this::touchHandler);
 
         this.gsonBuilder = new GsonBuilder();
+        this.icons = DrawableBlockState.create(textures.getCross(), textures.getCircle());
     }
 
     @Override
@@ -63,7 +65,22 @@ public class DuelRoom extends Room implements PlayerRoom {
             if (currentPlayers >= minPlauers && currentPlayers <= maxPlayers) {
                 changeState(RoomState.GAME);
             }
+
+            String selfID = serviceConnection.getSelfUUID();
+            if (!selfID.equals(uuid) && roomListener != null) {
+                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid), null, null);
+            }
         }
+    }
+
+    @Override
+    public void addListener(RoomListener listener) {
+        this.roomListener = (Listener) listener;
+    }
+
+    @Override
+    public void removeListener() {
+        this.roomListener = null;
     }
 
     // Первый вошедший играет крестиками
@@ -77,11 +94,17 @@ public class DuelRoom extends Room implements PlayerRoom {
         if (channelData.getOccupants().isEmpty()) {
             engine.setCurrentState(BlockState.CROSS);
             Timber.i("Вход в пустую комнату");
+            if (roomListener != null)
+                roomListener.updatePlayers(serviceConnection.getSelfUUID(), null,
+                        icons.getIcon(BlockState.CROSS), null);
         } else {
             String uuid = channelData.getOccupants().get(0).getUuid();
             engine.setCurrentState(BlockState.CIRCLE);
             joinPlayer(uuid);
             Timber.i("В комнате уже %s", uuid);
+            if (roomListener != null)
+                roomListener.updatePlayers(serviceConnection.getSelfUUID(), PNUtil.parseLogin(uuid),
+                        icons.getIcon(BlockState.CIRCLE), icons.getIcon(BlockState.CROSS));
         }
 
     }
@@ -123,14 +146,6 @@ public class DuelRoom extends Room implements PlayerRoom {
         }
     }
 
-    public void addChangeStatusListener(Consumer<Boolean> listener) {
-        this.changeStatusListener = listener;
-    }
-
-    public void addWinListener(Consumer<String> winListener) {
-        this.winListener = winListener;
-    }
-
     @Override
     public Scene getScene() {
         return scene;
@@ -140,8 +155,8 @@ public class DuelRoom extends Room implements PlayerRoom {
             boolean transit = RoomStateJump.of(this.state).possibleTransit(newState);
             if (transit) {
                 this.state = newState;
-                if (changeStatusListener != null) {
-                    changeStatusListener.accept(this.state == RoomState.GAME);
+                if (roomListener != null) {
+                    roomListener.changeStatus(this.state == RoomState.GAME);
                 }
             }
             else
@@ -185,10 +200,16 @@ public class DuelRoom extends Room implements PlayerRoom {
     }
 
     private void win(String uuid) {
-        if (winListener != null) winListener.accept(uuid);
+        if (roomListener != null) roomListener.win(uuid);
     }
 
     private void log(String prefix, TicTacProgressDTO progress) {
         Timber.i("%s Ход %s: %d %s", prefix, progress.getUuid(), progress.getBlockIndex(), progress.getState().name());
+    }
+
+    public interface Listener extends RoomListener {
+        void updatePlayers(@Nullable String login1, @Nullable String login2, Drawable state1, Drawable state2);
+        void win(String uuid);
+        void changeStatus(boolean roomState);
     }
 }

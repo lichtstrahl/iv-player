@@ -16,5 +16,7 @@ public interface PlayerRoom {
     void leavePlayer(String uuid);
     void receiveMsg(PNMessageResult msg);
     Scene getScene();
+    void addListener(RoomListener listener);
+    void removeListener();
 }
 
