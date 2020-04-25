@@ -19,13 +19,12 @@ import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
-import root.iv.ivplayer.game.tictac.dto.TicTacDTO;
-import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
-import root.iv.ivplayer.network.ws.pubnub.PNUtil;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacWinDTO;
+import root.iv.ivplayer.network.ws.pubnub.PNUtil;
+import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
@@ -72,8 +71,10 @@ public class DuelRoom extends Room implements PlayerRoom {
             currentPlayers++;
 
             // Если игроков достаточно, пробуем перейти в состояние "GAME"
+            // Определяем свою роль: Если мы 0, то переходим в ожидание хода соперника
             if (currentPlayers >= minPlauers && currentPlayers <= maxPlayers) {
                 changeState(RoomState.GAME);
+                if (engine.getCurrentState() == BlockState.CIRCLE) changeState(RoomState.PAUSE);
             }
 
 
@@ -112,11 +113,12 @@ public class DuelRoom extends Room implements PlayerRoom {
             engine.setCurrentState(BlockState.CIRCLE);
             joinPlayer(uuid);
             Timber.i("В комнате уже %s", uuid);
-            if (roomListener != null)
+            changeState(RoomState.PAUSE);
+            if (roomListener != null) {
                 roomListener.updatePlayers(serviceConnection.getSelfUUID(), PNUtil.parseLogin(uuid),
                         icons.getIcon(BlockState.CIRCLE), icons.getIcon(BlockState.CROSS));
+            }
         }
-
     }
 
     @Override
@@ -142,6 +144,7 @@ public class DuelRoom extends Room implements PlayerRoom {
                 TicTacProgressDTO progress = jsonProcessor.receiveProgressDTO(body);
                 log("receive:", progress);
                 engine.markBlock(progress.getBlockIndex(), progress.getState());
+                changeState(RoomState.GAME);
                 break;
 
             case WIN:
@@ -171,6 +174,7 @@ public class DuelRoom extends Room implements PlayerRoom {
             boolean transit = RoomStateJump.of(this.state).possibleTransit(newState);
             if (transit) {
                 this.state = newState;
+                Timber.i("%s -> %s", this.state.name(), newState.name());
                 if (roomListener != null) {
                     roomListener.changeStatus(this.state == RoomState.GAME);
                 }
@@ -196,8 +200,10 @@ public class DuelRoom extends Room implements PlayerRoom {
                     serviceConnection
                             .publishMessageToChannel(jsonState, MainActivity.CHANNEL_NAME, null);
                     log("send:", progress);
+                    changeState(RoomState.PAUSE);
 
                     if (engine.win()) {
+                        Timber.i("Победа");
                         String winMsg = jsonProcessor.buildWinDTO(selfUUID);
                         serviceConnection.publishMessageToChannel(winMsg, MainActivity.CHANNEL_NAME, null);
                         changeState(RoomState.CLOSE);

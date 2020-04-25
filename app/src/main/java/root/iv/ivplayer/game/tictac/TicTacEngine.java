@@ -5,6 +5,8 @@ import android.graphics.RectF;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 
 // Непосредственно движок игры
@@ -14,6 +16,8 @@ public class TicTacEngine {
     private static final int COUNT_ROWS = 3;
 
     private Block[] blocks;
+    @Getter
+    @Setter
     private BlockState currentState;
     private List<TicTacProgressDTO> history;
 
@@ -29,10 +33,6 @@ public class TicTacEngine {
 
     public void markBlock(int index, BlockState state) {
         this.blocks[index].mark(state);
-    }
-
-    public void setCurrentState(BlockState state) {
-        currentState = state;
     }
 
     // Отрыв пальца от экрана. Должен ли блок реагировать?
