@@ -10,7 +10,7 @@ import root.iv.ivplayer.game.object.Player;
 import root.iv.ivplayer.game.scene.MPScene;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
-import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
+import root.iv.ivplayer.game.tictac.dto.PlayerPositionDTO;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;

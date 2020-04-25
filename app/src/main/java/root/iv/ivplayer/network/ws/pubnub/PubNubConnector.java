@@ -108,10 +108,14 @@ public class PubNubConnector {
     }
 
     public void unsubscribe(String ... channels) {
-        Timber.i("unsubscribe %s", channels[0]);
-        pnConnect.unsubscribe()
-                .channels(Arrays.stream(channels).collect(Collectors.toList()))
-                .execute();
+        if (channels.length != 0) {
+            Timber.i("unsubscribe %s", channels[0]);
+            pnConnect.unsubscribe()
+                    .channels(Arrays.stream(channels).collect(Collectors.toList()))
+                    .execute();
+        } else {
+            Timber.i("unsubscribe all");
+            pnConnect.unsubscribeAll();
+        }
     }
-
 }

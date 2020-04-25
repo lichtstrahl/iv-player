@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
 
     // Прекращение любого взаимодействия с сервисом. Отписка и отключение
     private void finishChatService() {
-        serviceConnection.unsubscribe(CHANNEL_NAME);
+        serviceConnection.unsubscribe();
 
         if (serviceConnection.isBind()) {
             Timber.i("unbind");

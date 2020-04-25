@@ -6,7 +6,7 @@ import root.iv.ivplayer.game.controller.Controller;
 import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Player;
 import root.iv.ivplayer.game.object.simple.Object2;
-import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
+import root.iv.ivplayer.game.tictac.dto.PlayerPositionDTO;
 
 /**
      Что умеет сцена:

@@ -194,6 +194,12 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     }
 
     @Override
+    public void exit() {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> this.getActivity().onBackPressed());
+    }
+
+    @Override
     public void changeStatus(boolean roomState) {
         Objects.requireNonNull(this.getActivity())
                 .runOnUiThread(() -> switchRoomState.setChecked(roomState));

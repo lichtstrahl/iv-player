@@ -5,14 +5,11 @@ import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
-import java.lang.reflect.Type;
 import java.util.Objects;
 
 import root.iv.ivplayer.game.TicTacTextures;
@@ -22,12 +19,13 @@ import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
+import root.iv.ivplayer.game.tictac.dto.TicTacDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacDTO;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacDTOType;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacProgressDTO;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacWinDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
+import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacWinDTO;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
@@ -55,10 +53,21 @@ public class DuelRoom extends Room implements PlayerRoom {
 
         this.jsonProcessor = new TicTacJsonProcessor();
         this.icons = DrawableBlockState.create(textures.getCross(), textures.getCircle());
+        Timber.i("Новая комната создана");
     }
 
     @Override
     public void joinPlayer(String uuid) {
+        Timber.i("Вход %s", PNUtil.parseLogin(uuid));
+
+        String selfID = serviceConnection.getSelfUUID();
+
+        if (state == RoomState.CLOSE) {
+            Timber.i("Отправка сообщения о том, что комната закрыта");
+            String roomStatus = jsonProcessor.buildRoomStatusDTO(selfID, RoomState.CLOSE);
+            serviceConnection.publishMessageToChannel(roomStatus, MainActivity.CHANNEL_NAME, null);
+        }
+
         if (currentPlayers < maxPlayers) {
             currentPlayers++;
 
@@ -67,9 +76,9 @@ public class DuelRoom extends Room implements PlayerRoom {
                 changeState(RoomState.GAME);
             }
 
-            String selfID = serviceConnection.getSelfUUID();
+
             if (!selfID.equals(uuid) && roomListener != null) {
-                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid), icons.getCross(), icons.getCross());
+                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid), icons.getCross(), icons.getCircle());
             }
         }
     }
@@ -112,6 +121,7 @@ public class DuelRoom extends Room implements PlayerRoom {
 
     @Override
     public void leavePlayer(String uuid) {
+        Timber.i("Выход %s", PNUtil.parseLogin(uuid));
         if (currentPlayers > 0) {
             currentPlayers--;
 
@@ -140,6 +150,15 @@ public class DuelRoom extends Room implements PlayerRoom {
                 changeState(RoomState.CLOSE);
                 win(win.getUuid());
                 break;
+
+            case ROOM_STATE:
+                TicTacRoomStatusDTO roomStatusDTO = jsonProcessor.reciveStatusRoomDTO(body);
+                Timber.i("Вход в закрытую комнату");
+                if (roomStatusDTO.getRoomState() == RoomState.CLOSE && roomListener != null) {
+                    roomListener.exit();
+                    removeListener();
+                }
+                break;
         }
     }
 
@@ -157,7 +176,7 @@ public class DuelRoom extends Room implements PlayerRoom {
                 }
             }
             else
-                Timber.w("Переход в состояние %s невозможен", newState.name());
+                Timber.w("Переход %s -> %s невозможен", this.state.name(), newState.name());
     }
 
     private void touchHandler(MotionEvent event) {
@@ -201,5 +220,6 @@ public class DuelRoom extends Room implements PlayerRoom {
         void updatePlayers(@Nullable String login1, @Nullable String login2, Drawable state1, Drawable state2);
         void win(String uuid);
         void changeStatus(boolean roomState);
+        void exit();
     }
 }

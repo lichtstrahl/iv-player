@@ -14,7 +14,7 @@ import root.iv.ivplayer.game.object.Player;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.scene.Scene;
-import root.iv.ivplayer.network.ws.pubnub.dto.PlayerPositionDTO;
+import root.iv.ivplayer.game.tictac.dto.PlayerPositionDTO;
 
 public class TicTacToeScene implements Scene {
     private static final int SQUARE_SIZE = 150;

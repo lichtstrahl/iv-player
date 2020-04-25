@@ -1,4 +1,4 @@
-package root.iv.ivplayer.network.ws.pubnub.dto;
+package root.iv.ivplayer.game.tictac.dto;
 
 import java.io.Serializable;
 

@@ -5,10 +5,12 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacDTO;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacDTOType;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacProgressDTO;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacWinDTO;
+import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.game.tictac.dto.TicTacDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
+import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
+import root.iv.ivplayer.game.tictac.dto.TicTacWinDTO;
 
 
 public class TicTacJsonProcessor {
@@ -36,11 +38,24 @@ public class TicTacJsonProcessor {
         return win.getData();
     }
 
+    public TicTacRoomStatusDTO reciveStatusRoomDTO(String json) {
+        Type type = new TypeToken<TicTacDTO<TicTacRoomStatusDTO>>(){}.getType();
+        TicTacDTO<TicTacRoomStatusDTO> roomStatus = gsonBuilder.create().fromJson(json, type);
+        return roomStatus.getData();
+    }
+
     public String buildWinDTO(String uuid) {
         TicTacDTO<TicTacWinDTO> winMessage = new TicTacDTO<>(
                 TicTacDTOType.WIN, new TicTacWinDTO(uuid, true)
         );
         return  toJson(winMessage);
+    }
+
+    public String buildRoomStatusDTO(String uuid, RoomState roomState) {
+        TicTacDTO<TicTacRoomStatusDTO> roomStatusMsg = new TicTacDTO<>(
+                TicTacDTOType.ROOM_STATE, new TicTacRoomStatusDTO(uuid, roomState)
+        );
+        return toJson(roomStatusMsg);
     }
 
     public String buildProgressDTO(TicTacProgressDTO progress) {

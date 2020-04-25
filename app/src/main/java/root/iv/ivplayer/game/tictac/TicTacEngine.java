@@ -5,9 +5,7 @@ import android.graphics.RectF;
 import java.util.ArrayList;
 import java.util.List;
 
-import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.network.ws.pubnub.dto.TicTacProgressDTO;
-import timber.log.Timber;
+import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 
 // Непосредственно движок игры
 // Здесь будут храниться необходимые данные для рассчетов
