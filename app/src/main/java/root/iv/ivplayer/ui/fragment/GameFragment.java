@@ -179,11 +179,14 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     @Override
     public void updatePlayers(@Nullable String login1, @Nullable String login2,
                               @Nullable Drawable state1, @Nullable Drawable state2) {
-        viewLogin1.setText((login1 != null) ? login1 : "");
-        viewLogin2.setText((login2 != null) ? login2 : "");
+        Objects.requireNonNull(this.getActivity()).runOnUiThread(() -> {
+            viewLogin1.setText((login1 != null) ? login1 : "");
 
-        viewRole1.setImageDrawable(state1);
-        viewRole2.setImageDrawable(state2);
+            viewLogin2.setText((login2 != null) ? login2 : "");
+
+            viewRole1.setImageDrawable(state1);
+            viewRole2.setImageDrawable(state2);
+        });
     }
 
     @Override

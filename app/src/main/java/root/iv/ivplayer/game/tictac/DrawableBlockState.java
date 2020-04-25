@@ -11,8 +11,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class DrawableBlockState {
-    private Drawable circle;
     private Drawable cross;
+    private Drawable circle;
 
     public static DrawableBlockState create(Drawable cross, Drawable circle) {
         return new DrawableBlockState(cross, circle);

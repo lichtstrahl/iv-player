@@ -63,4 +63,14 @@ public class YonathanRoom extends Room implements PlayerRoom {
     public Scene getScene() {
         return scene;
     }
+
+    @Override
+    public void addListener(RoomListener listener) {
+
+    }
+
+    @Override
+    public void removeListener() {
+
+    }
 }
