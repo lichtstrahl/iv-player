@@ -65,6 +65,11 @@ public class YonathanRoom extends Room implements PlayerRoom {
     }
 
     @Override
+    public RoomState getRoomState() {
+        return state;
+    }
+
+    @Override
     public void addListener(RoomListener listener) {
 
     }

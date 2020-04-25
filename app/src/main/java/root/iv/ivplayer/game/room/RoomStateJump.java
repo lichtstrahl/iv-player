@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public enum  RoomStateJump {
+    NEW(RoomState.WAIT_PLAYERS),
     WAIT_PLAYERS(RoomState.GAME),
-    GAME(RoomState.PAUSE, RoomState.CLOSE),
+    GAME(RoomState.PAUSE, RoomState.CLOSE, RoomState.WAIT_PROGRESS),
+    WAIT_PROGRESS(RoomState.GAME, RoomState.CLOSE),
     PAUSE(RoomState.GAME, RoomState.CLOSE),
     CLOSE();
 

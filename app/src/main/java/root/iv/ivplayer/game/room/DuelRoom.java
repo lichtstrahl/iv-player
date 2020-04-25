@@ -53,6 +53,8 @@ public class DuelRoom extends Room implements PlayerRoom {
         this.jsonProcessor = new TicTacJsonProcessor();
         this.icons = DrawableBlockState.create(textures.getCross(), textures.getCircle());
         Timber.i("Новая комната создана");
+        this.roomListener = null;
+        changeState(RoomState.WAIT_PLAYERS);
     }
 
     @Override
@@ -74,7 +76,7 @@ public class DuelRoom extends Room implements PlayerRoom {
             // Определяем свою роль: Если мы 0, то переходим в ожидание хода соперника
             if (currentPlayers >= minPlauers && currentPlayers <= maxPlayers) {
                 changeState(RoomState.GAME);
-                if (engine.getCurrentState() == BlockState.CIRCLE) changeState(RoomState.PAUSE);
+                if (engine.getCurrentState() == BlockState.CIRCLE) changeState(RoomState.WAIT_PROGRESS);
             }
 
 
@@ -113,7 +115,7 @@ public class DuelRoom extends Room implements PlayerRoom {
             engine.setCurrentState(BlockState.CIRCLE);
             joinPlayer(uuid);
             Timber.i("В комнате уже %s", uuid);
-            changeState(RoomState.PAUSE);
+            changeState(RoomState.WAIT_PROGRESS);
             if (roomListener != null) {
                 roomListener.updatePlayers(serviceConnection.getSelfUUID(), PNUtil.parseLogin(uuid),
                         icons.getIcon(BlockState.CIRCLE), icons.getIcon(BlockState.CROSS));
@@ -170,13 +172,18 @@ public class DuelRoom extends Room implements PlayerRoom {
         return scene;
     }
 
+    @Override
+    public RoomState getRoomState() {
+        return state;
+    }
+
     private void changeState(RoomState newState) {
             boolean transit = RoomStateJump.of(this.state).possibleTransit(newState);
             if (transit) {
-                this.state = newState;
                 Timber.i("%s -> %s", this.state.name(), newState.name());
+                this.state = newState;
                 if (roomListener != null) {
-                    roomListener.changeStatus(this.state == RoomState.GAME);
+                    roomListener.changeStatus(this.state);
                 }
             }
             else
@@ -200,7 +207,7 @@ public class DuelRoom extends Room implements PlayerRoom {
                     serviceConnection
                             .publishMessageToChannel(jsonState, MainActivity.CHANNEL_NAME, null);
                     log("send:", progress);
-                    changeState(RoomState.PAUSE);
+                    changeState(RoomState.WAIT_PROGRESS);
 
                     if (engine.win()) {
                         Timber.i("Победа");
@@ -225,7 +232,7 @@ public class DuelRoom extends Room implements PlayerRoom {
     public interface Listener extends RoomListener {
         void updatePlayers(@Nullable String login1, @Nullable String login2, Drawable state1, Drawable state2);
         void win(String uuid);
-        void changeStatus(boolean roomState);
+        void changeStatus(RoomState roomState);
         void exit();
     }
 }

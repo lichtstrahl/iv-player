@@ -33,6 +33,7 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
+import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -105,6 +106,8 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         gameView.loadScene(room.getScene());
         gameView.setOnClickListener(room.getScene().getMainController());
         gameView.setOnTouchListener(room.getScene().getMainController());
+
+        labelRoomStatus.setText(room.getRoomState().getDescription());
 
         return view;
     }
@@ -200,9 +203,12 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     }
 
     @Override
-    public void changeStatus(boolean roomState) {
+    public void changeStatus(RoomState roomState) {
         Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> switchRoomState.setChecked(roomState));
+                .runOnUiThread(() -> {
+                    switchRoomState.setChecked(roomState == RoomState.GAME);
+                    labelRoomStatus.setText(roomState.getDescription());
+                });
     }
 
     @Override

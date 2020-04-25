@@ -14,13 +14,13 @@ public abstract class Room {
         this.maxPlayers = fixPlayer;
         this.minPlauers = fixPlayer;
         this.currentPlayers = 0;
-        this.state = RoomState.WAIT_PLAYERS;
+        this.state = RoomState.NEW;
     }
 
     public Room(int maxPlayers, int minPlauers) {
         this.maxPlayers = maxPlayers;
         this.minPlauers = minPlauers;
         this.currentPlayers = 0;
-        this.state = RoomState.WAIT_PLAYERS;
+        this.state = RoomState.NEW;
     }
 }
