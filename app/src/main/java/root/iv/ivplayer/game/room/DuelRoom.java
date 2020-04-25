@@ -1,6 +1,5 @@
 package root.iv.ivplayer.game.room;
 
-import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
 import androidx.annotation.Nullable;
@@ -80,8 +79,9 @@ public class DuelRoom extends Room implements PlayerRoom {
             }
 
 
+            // Последний вошедший ставится 0
             if (!selfID.equals(uuid) && roomListener != null) {
-                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid), icons.getCross(), icons.getCircle());
+                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid));
             }
         }
     }
@@ -108,8 +108,8 @@ public class DuelRoom extends Room implements PlayerRoom {
             engine.setCurrentState(BlockState.CROSS);
             Timber.i("Вход в пустую комнату");
             if (roomListener != null)
-                roomListener.updatePlayers(serviceConnection.getSelfUUID(), null,
-                        icons.getIcon(BlockState.CROSS), null);
+                roomListener.updatePlayers(serviceConnection.getSelfUUID(), null
+                );
         } else {
             String uuid = channelData.getOccupants().get(0).getUuid();
             engine.setCurrentState(BlockState.CIRCLE);
@@ -117,8 +117,7 @@ public class DuelRoom extends Room implements PlayerRoom {
             Timber.i("В комнате уже %s", uuid);
             changeState(RoomState.WAIT_PROGRESS);
             if (roomListener != null) {
-                roomListener.updatePlayers(serviceConnection.getSelfUUID(), PNUtil.parseLogin(uuid),
-                        icons.getIcon(BlockState.CIRCLE), icons.getIcon(BlockState.CROSS));
+                roomListener.updatePlayers(PNUtil.parseLogin(uuid), serviceConnection.getSelfUUID());
             }
         }
     }
@@ -230,7 +229,7 @@ public class DuelRoom extends Room implements PlayerRoom {
     }
 
     public interface Listener extends RoomListener {
-        void updatePlayers(@Nullable String login1, @Nullable String login2, Drawable state1, Drawable state2);
+        void updatePlayers(@Nullable String login1, @Nullable String login2);
         void win(String uuid);
         void changeStatus(RoomState roomState);
         void exit();
