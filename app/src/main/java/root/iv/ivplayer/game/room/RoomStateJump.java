@@ -8,7 +8,7 @@ public enum  RoomStateJump {
     WAIT_PLAYERS(RoomState.GAME),
     GAME(RoomState.PAUSE, RoomState.CLOSE),
     PAUSE(RoomState.GAME, RoomState.CLOSE),
-    CLOSE(RoomState.GAME);
+    CLOSE();
 
     private List<RoomState> nextStates;
 

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,7 +33,6 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
-import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
@@ -59,6 +59,10 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     protected TextView viewLogin2;
     @BindView(R.id.viewRolePlayer2)
     protected ImageView viewRole2;
+    @BindView(R.id.panelPlayer1)
+    protected RelativeLayout panelPlayer1;
+    @BindView(R.id.panelPlayer2)
+    protected RelativeLayout panelPlayer2;
 
     private Listener listener;
     private ChatServiceConnection serviceConnection;
@@ -207,10 +211,13 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                     String winMsg = String.format(Locale.ENGLISH, "Игрок %s победил!", PNUtil.parseLogin(uuid));
                     labelRoomStatus.setText(winMsg);
 
-                    int color = (serviceConnection.getSelfUUID().equals(uuid))
-                            ? Color.GREEN
-                            : Color.RED;
-                    layout.setBackgroundColor(color);
+                    if (serviceConnection.getSelfUUID().equals(uuid)) {
+                        panelPlayer1.setBackgroundColor(Color.GREEN);
+                        panelPlayer2.setBackgroundColor(Color.RED);
+                    } else {
+                        panelPlayer1.setBackgroundColor(Color.RED);
+                        panelPlayer2.setBackgroundColor(Color.GREEN);
+                    }
                 });
     }
 
