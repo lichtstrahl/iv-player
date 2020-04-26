@@ -18,6 +18,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.network.http.IvPlayerAPI;
 import root.iv.ivplayer.network.ws.WSUtil;
@@ -60,7 +61,9 @@ public class App extends Application {
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
                 .sslSocketFactory(sslContext.getSocketFactory())
-                .hostnameVerifier((hostname, session) -> true)
+                .hostnameVerifier((hostname, session) -> {
+                    return hostname.equals(BuildConfig.URL_SPRING);
+                })
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
