@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayoutLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/stdMargin"
+        android:hint="@string/label_login">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/inputLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonEnter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inputLayoutLogin"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/stdMargin"
+        android:text="@string/label_enter"/>
+
+</RelativeLayout>

@@ -34,6 +34,7 @@ import root.iv.ivplayer.service.ChatService;
 import root.iv.ivplayer.service.ChatServiceConnection;
 import root.iv.ivplayer.ui.fragment.ChatFragment;
 import root.iv.ivplayer.ui.fragment.GameFragment;
+import root.iv.ivplayer.ui.fragment.LoginFragment;
 import root.iv.ivplayer.ui.fragment.RegisterFragment;
 import timber.log.Timber;
 
@@ -58,6 +59,12 @@ public class MainActivity extends AppCompatActivity
             .tag("fragment:game")
             .build();
 
+    private static final FragmentTag FRAGMENT_LOGIN = FragmentTag
+            .builder()
+            .fragment(LoginFragment.getInstance())
+            .tag("fragment:login")
+            .build();
+
     private ChatServiceConnection serviceConnection;
 
     @Override
@@ -71,13 +78,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setFragment() {
-        // Проверяем сохранился ли логин в преференсах. Если это первый вход, то необходимо зарегестрироваться
-        SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        String currentLogin = sharedPreferences.getString(SHARED_LOGIN_KEY, "");
-
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFrame, FRAGMENT_CHAT.getFragment(), FRAGMENT_CHAT.getTag())
+                .replace(R.id.mainFrame, FRAGMENT_LOGIN.getFragment(), FRAGMENT_LOGIN.getTag())
                 .commit();
 
     }
