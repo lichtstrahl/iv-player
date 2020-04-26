@@ -33,7 +33,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        InputStream file = getResources().openRawResource(R.raw.iv_player);
+        InputStream file = getResources().openRawResource(R.raw.server);
         Certificate certificate = certificateFactory.generateCertificate(file);
         file.close();
 
