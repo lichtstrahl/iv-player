@@ -6,6 +6,7 @@ public abstract class WSUtil {
     private static final String WS = "ws";
     private static final String WSS = "wss";
     private static final String HTTP = "http";
+    private static final String HTTPS = "https";
 
     // Составление URL по шаблону
     // wss://connect.websocket.in/v2/YOUR_CHANNEL_ID?token=YOUR_ACCESS_TOKEN
@@ -20,12 +21,12 @@ public abstract class WSUtil {
     }
 
     public static String springWSURL() {
-        String url = url(WS, BuildConfig.URL_WS_SPRING, "9010");
+        String url = url(WS, BuildConfig.URL_SPRING, BuildConfig.PORT_SPRING);
         return String.format("%s/ws-handler", url);
     }
 
-    public static String baseSpringURL() {
-        return url(HTTP, BuildConfig.URL_WS_SPRING, "9010");
+    public static String baseSpringURL(boolean security) {
+        return url((security) ? HTTPS : HTTP, BuildConfig.URL_SPRING, BuildConfig.PORT_SPRING);
     }
 
     private static String url(String protocol, String baseURL, String port) {

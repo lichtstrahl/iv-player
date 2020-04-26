@@ -19,7 +19,14 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.app.App;
+import timber.log.Timber;
 
 public class LoginFragment extends Fragment {
     private static final String SHARED_LOGIN_KEY = "shared:login";
@@ -28,6 +35,8 @@ public class LoginFragment extends Fragment {
     protected TextInputEditText inputLogin;
     @BindView(R.id.buttonEnter)
     protected MaterialButton buttonEnter;
+
+    private CompositeDisposable compositeDisposable;
 
     public static LoginFragment getInstance() {
         return new LoginFragment();
@@ -44,6 +53,25 @@ public class LoginFragment extends Fragment {
         SharedPreferences sharedPreferences = parentActivity.getPreferences(Context.MODE_PRIVATE);
         String currentLogin = sharedPreferences.getString(SHARED_LOGIN_KEY, "");
 
+        compositeDisposable = new CompositeDisposable();
+
         return view;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        compositeDisposable.dispose();
+    }
+
+    @OnClick(R.id.buttonEnter)
+    protected void clickEnter(View button) {
+        Disposable disposable = App.getPlayerAPI().test()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(response -> {
+                    Timber.i(response.toString());
+                }, Timber::e);
+        compositeDisposable.add(disposable);
     }
 }
