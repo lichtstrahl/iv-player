@@ -1,7 +1,5 @@
 package root.iv.ivplayer.network.ws;
 
-import android.util.Log;
-
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.subjects.PublishSubject;
@@ -18,7 +16,7 @@ public class EchoWSListener extends WebSocketListener {
     private PublishSubject<String> publish = PublishSubject.create();
 
     public Disposable subscribe(Consumer<String> consumer) {
-        return publish.subscribe(consumer);
+        return publish.subscribe(consumer, Timber::e);
     }
 
     @Override
@@ -29,7 +27,7 @@ public class EchoWSListener extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         Timber.tag(App.getTag()).i("WS: Recv: %s", text);
-//        publish.onNext(text);
+        publish.onNext(text);
     }
 
     @Override
