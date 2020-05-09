@@ -25,7 +25,7 @@ import java.util.Objects;
 
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.network.http.dto.UserEntityDTO;
+import root.iv.ivplayer.network.http.dto.server.UserEntityDTO;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;

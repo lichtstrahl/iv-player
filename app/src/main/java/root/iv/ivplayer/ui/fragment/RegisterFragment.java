@@ -1,7 +1,6 @@
 package root.iv.ivplayer.ui.fragment;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -16,15 +15,9 @@ import androidx.fragment.app.Fragment;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.network.http.dto.UserCreateDTO;
-import root.iv.ivplayer.network.http.dto.UserEntityDTO;
-import timber.log.Timber;
+import root.iv.ivplayer.network.http.dto.server.UserEntityDTO;
 
 public class RegisterFragment extends Fragment {
     @BindView(R.id.inputFirstName)
@@ -75,21 +68,21 @@ public class RegisterFragment extends Fragment {
         String encodePassword = Base64.encodeToString(password.getBytes(), Base64.DEFAULT);
 
 
-        UserCreateDTO createDTO = UserCreateDTO.builder()
-                .firstName(inputFirstName.getText().toString())
-                .lastName(inputLastName.getText().toString())
-                .login(inputLogin.getText().toString())
-                .password(encodePassword)
-                .build();
+//        UserCreateDTO createDTO = UserCreateDTO.builder()
+//                .firstName(inputFirstName.getText().toString())
+//                .lastName(inputLastName.getText().toString())
+//                .login(inputLogin.getText().toString())
+//                .password(encodePassword)
+//                .build();
 
-        Disposable d = App.getPlayerAPI().register(createDTO)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        listener::registerSuccessful,
-                        App::logE
-                );
-        disposable.add(d);
+//        Disposable d = App.getPlayerAPI().register(createDTO)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(
+//                        listener::registerSuccessful,
+//                        App::logE
+//                );
+//        disposable.add(d);
     }
 
     public interface Listener {

@@ -1,8 +1,5 @@
 package root.iv.ivplayer.ui.fragment;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +23,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.network.http.dto.server.AuthResponse;
+import root.iv.ivplayer.network.http.dto.server.BaseResponse;
 import timber.log.Timber;
 
 public class LoginFragment extends Fragment {
@@ -33,6 +32,8 @@ public class LoginFragment extends Fragment {
 
     @BindView(R.id.inputLogin)
     protected TextInputEditText inputLogin;
+    @BindView(R.id.inputPassword)
+    protected TextInputEditText inputPassword;
     @BindView(R.id.buttonEnter)
     protected MaterialButton buttonEnter;
 
@@ -48,11 +49,6 @@ public class LoginFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
         ButterKnife.bind(this, view);
 
-        Activity parentActivity = Objects.requireNonNull(this.getActivity());
-        // Проверяем сохранился ли логин в преференсах. Если это первый вход, то необходимо зарегестрироваться
-        SharedPreferences sharedPreferences = parentActivity.getPreferences(Context.MODE_PRIVATE);
-        String currentLogin = sharedPreferences.getString(SHARED_LOGIN_KEY, "");
-
         compositeDisposable = new CompositeDisposable();
 
         return view;
@@ -66,12 +62,26 @@ public class LoginFragment extends Fragment {
 
     @OnClick(R.id.buttonEnter)
     protected void clickEnter(View button) {
-        Disposable disposable = App.getPlayerAPI().test()
+        String login = (inputLogin.getText() != null)
+                ? inputLogin.getText().toString()
+                : "";
+
+        String password = (inputPassword.getText() != null)
+                ? inputPassword.getText().toString()
+                : "";
+        Disposable disposable = App.getUserAPI().auth(login, password)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(response -> {
-                    Timber.i(response.toString());
-                }, Timber::e);
+                .subscribe(this::processAuth, Timber::e);
         compositeDisposable.add(disposable);
+    }
+
+    private void processAuth(BaseResponse<AuthResponse> response) {
+        if (response.getErrorCode() == 0) {
+            Objects.requireNonNull(response.getData());
+            Timber.i(String.valueOf(response.getData().isAuth()));
+        } else {
+            Timber.e(response.getErrorMsg());
+        }
     }
 }

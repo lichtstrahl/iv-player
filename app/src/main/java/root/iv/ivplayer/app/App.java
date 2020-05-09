@@ -7,9 +7,7 @@ import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
 
 import lombok.SneakyThrows;
@@ -20,13 +18,19 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.network.http.IvPlayerAPI;
+import root.iv.ivplayer.network.http.UserAPI;
 import root.iv.ivplayer.network.ws.WSUtil;
 import timber.log.Timber;
 
 public class App extends Application {
     private static final String TAG = "tag:ws";
-    private static IvPlayerAPI playerAPI;
+    private static final String API = "/api";
+    private static final String API_USERS = "/api/users";
+    private static UserAPI userAPI;
+
+    public static UserAPI getUserAPI() {
+        return userAPI;
+    }
 
     @SneakyThrows
     @Override
@@ -68,16 +72,12 @@ public class App extends Application {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(WSUtil.baseSpringURL(true))
+                .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_USERS))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        playerAPI = retrofit.create(IvPlayerAPI.class);
-    }
-
-    public static IvPlayerAPI getPlayerAPI() {
-        return playerAPI;
+        userAPI = retrofit.create(UserAPI.class);
     }
 
     public static void logE(Throwable t) {

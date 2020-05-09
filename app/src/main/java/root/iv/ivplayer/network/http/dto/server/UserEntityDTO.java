@@ -1,4 +1,4 @@
-package root.iv.ivplayer.network.http.dto;
+package root.iv.ivplayer.network.http.dto.server;
 
 import java.util.Calendar;
 
