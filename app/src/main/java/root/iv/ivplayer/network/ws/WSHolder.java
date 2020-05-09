@@ -38,6 +38,7 @@ public class WSHolder {
 
     public void send(String msg) {
         webSocket.send(msg);
+        Timber.i("WS send");
     }
 
     public void send(ByteString msg) {

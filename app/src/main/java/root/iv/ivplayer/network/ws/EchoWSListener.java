@@ -29,7 +29,7 @@ public class EchoWSListener extends WebSocketListener {
     @Override
     public void onMessage(WebSocket webSocket, String text) {
         Timber.tag(App.getTag()).i("WS: Recv: %s", text);
-        publish.onNext(text);
+//        publish.onNext(text);
     }
 
     @Override

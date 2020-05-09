@@ -182,11 +182,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void authSuccessful(UserEntityDTO user) {
         Timber.i("Игрок успешно вошёл");
-        WSHolder wsHolder = WSHolder.fromURL(WSUtil.springWSURL("/ws/tic-tac", true));
-
-        wsHolder.open(string -> Timber.i("From ws: %s", string));
-        wsHolder.send(user.getLogin() + " auth successful");
-        wsHolder.close();
     }
 
     // Прекращение любого взаимодействия с сервисом. Отписка и отключение
