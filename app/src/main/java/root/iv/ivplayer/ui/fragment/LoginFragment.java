@@ -1,5 +1,6 @@
 package root.iv.ivplayer.ui.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +26,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.server.AuthResponse;
 import root.iv.ivplayer.network.http.dto.server.BaseResponse;
+import root.iv.ivplayer.network.http.dto.server.UserEntityDTO;
 import timber.log.Timber;
 
 public class LoginFragment extends Fragment {
@@ -38,6 +40,7 @@ public class LoginFragment extends Fragment {
     protected MaterialButton buttonEnter;
 
     private CompositeDisposable compositeDisposable;
+    private Listener listener;
 
     public static LoginFragment getInstance() {
         return new LoginFragment();
@@ -55,9 +58,18 @@ public class LoginFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Listener) {
+            listener = (Listener) context;
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         compositeDisposable.dispose();
+        listener = null;
     }
 
     @OnClick(R.id.buttonEnter)
@@ -79,9 +91,13 @@ public class LoginFragment extends Fragment {
     private void processAuth(BaseResponse<AuthResponse> response) {
         if (response.getErrorCode() == 0) {
             Objects.requireNonNull(response.getData());
-            Timber.i(String.valueOf(response.getData().isAuth()));
+            listener.authSuccessful(response.getData().getUser());
         } else {
             Timber.e(response.getErrorMsg());
         }
+    }
+
+    public interface Listener {
+        void authSuccessful(UserEntityDTO user);
     }
 }

@@ -25,6 +25,11 @@ public abstract class WSUtil {
         return String.format("%s/ws-handler", url);
     }
 
+    public static String springWSURL(String wsPath, boolean security) {
+        String baseUrl = url(security ? WSS : WS, BuildConfig.URL_SPRING, BuildConfig.PORT_SPRING);
+        return String.format("%s%s", baseUrl, wsPath);
+    }
+
     public static String baseSpringURL(boolean security) {
         return url((security) ? HTTPS : HTTP, BuildConfig.URL_SPRING, BuildConfig.PORT_SPRING);
     }

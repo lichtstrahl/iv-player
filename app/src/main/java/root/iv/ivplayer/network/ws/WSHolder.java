@@ -6,12 +6,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.WebSocket;
 import okio.ByteString;
+import root.iv.ivplayer.app.App;
+import timber.log.Timber;
 
 public class WSHolder {
     private static final int CODE_OK = 1000;
 
     private WebSocket webSocket;
-    private OkHttpClient httpClient;
     private Request initRequest;
     private EchoWSListener listener;
     private Disposable disposable;
@@ -19,16 +20,20 @@ public class WSHolder {
 
     public WSHolder(String url, EchoWSListener listener) {
         this.initRequest = new Request.Builder().url(url).build();
-        this.httpClient = new OkHttpClient();
         this.listener = listener;
         this.webSocket = null;
         this.opened = false;
     }
 
+    public static WSHolder fromURL(String url) {
+        return new WSHolder(url, new EchoWSListener());
+    }
+
     public void open(Consumer<String> consumer) {
-        webSocket = httpClient.newWebSocket(initRequest, listener);
+        webSocket = App.httpClient().newWebSocket(initRequest, listener);
         disposable = listener.subscribe(consumer);
         opened = true;
+        Timber.i("WS open");
     }
 
     public void send(String msg) {
@@ -43,6 +48,7 @@ public class WSHolder {
         webSocket.close(CODE_OK, null);
         disposable.dispose();
         opened = false;
+        Timber.i("WS close");
     }
 
     public boolean isOpened() {

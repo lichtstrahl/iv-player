@@ -1,7 +1,5 @@
 package root.iv.ivplayer.network.http.dto.server;
 
-import java.util.Calendar;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +15,7 @@ public class UserEntityDTO {
     private String password;
     private String firstName;
     private String lastName;
-    private Calendar lastAccessTime;
+    private long lastAccessTime; // milliseconds
     private String uuid;
 }
 /**

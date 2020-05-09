@@ -26,6 +26,8 @@ import java.util.Objects;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.server.UserEntityDTO;
+import root.iv.ivplayer.network.ws.WSHolder;
+import root.iv.ivplayer.network.ws.WSUtil;
 import root.iv.ivplayer.network.ws.pubnub.PNUtil;
 import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
 import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
@@ -42,7 +44,8 @@ public class MainActivity extends AppCompatActivity
     implements
         RegisterFragment.Listener,
         GameFragment.Listener,
-        ChatFragment.Listener
+        ChatFragment.Listener,
+        LoginFragment.Listener
 {
     public static final String CHANNEL_NAME = "ch:global";
     private static final String SHARED_LOGIN_KEY = "shared:login";
@@ -174,6 +177,16 @@ public class MainActivity extends AppCompatActivity
         // Посылать в ChatFragment уже не нужно ничего. Переключатель перешел в положение false
         // Просто остановить сервис
         finishChatService();
+    }
+
+    @Override
+    public void authSuccessful(UserEntityDTO user) {
+        Timber.i("Игрок успешно вошёл");
+        WSHolder wsHolder = WSHolder.fromURL(WSUtil.springWSURL("/ws/tic-tac", true));
+
+        wsHolder.open(string -> Timber.i("From ws: %s", string));
+        wsHolder.send(user.getLogin() + " auth successful");
+        wsHolder.close();
     }
 
     // Прекращение любого взаимодействия с сервисом. Отписка и отключение

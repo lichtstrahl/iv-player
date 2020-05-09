@@ -27,6 +27,11 @@ public class App extends Application {
     private static final String API = "/api";
     private static final String API_USERS = "/api/users";
     private static UserAPI userAPI;
+    private static OkHttpClient httpClient;
+
+    public static OkHttpClient httpClient() {
+        return httpClient;
+    }
 
     public static UserAPI getUserAPI() {
         return userAPI;
@@ -62,7 +67,7 @@ public class App extends Application {
 
         Timber.plant(new Timber.DebugTree());
 
-        OkHttpClient client = new OkHttpClient.Builder()
+        httpClient = new OkHttpClient.Builder()
                 .addInterceptor(loggingInterceptor)
                 .sslSocketFactory(sslContext.getSocketFactory())
                 .hostnameVerifier((hostname, session) -> {
@@ -71,7 +76,7 @@ public class App extends Application {
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
+                .client(httpClient)
                 .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_USERS))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
@@ -79,6 +84,7 @@ public class App extends Application {
 
         userAPI = retrofit.create(UserAPI.class);
     }
+
 
     public static void logE(Throwable t) {
         Timber.tag(TAG).e(t);
