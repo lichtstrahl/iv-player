@@ -5,33 +5,23 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 
 import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
-import java.util.Objects;
-
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
-import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
-import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
+import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
-import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
-import root.iv.ivplayer.network.ws.pubnub.PNUtil;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
-import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.ui.activity.MainActivity;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
 public class DuelRoom extends Room implements PlayerRoom {
     private Scene scene;
-    private ChatServiceConnection serviceConnection;
     private TicTacEngine engine;
     private TicTacJsonProcessor jsonProcessor;
     @Nullable
@@ -39,51 +29,12 @@ public class DuelRoom extends Room implements PlayerRoom {
     private DrawableBlockState icons;
 
 
-    public DuelRoom(ChatServiceConnection serviceConnection, TicTacTextures textures) {
+    public DuelRoom(TicTacTextures textures) {
         super(2);
-        this.serviceConnection = serviceConnection;
-
-        this.engine = new TicTacEngine();
-        serviceConnection.hereNow(new PNHereNowCallback(this::hereNowProcess, Timber::e), MainActivity.CHANNEL_NAME);
-
-        this.scene = new TicTacToeScene(textures, engine);
-        scene.getMainController().setTouchHandler(this::touchHandler);
-
-        this.jsonProcessor = new TicTacJsonProcessor();
-        this.icons = DrawableBlockState.create(textures.getCross(), textures.getCircle());
-        Timber.i("Новая комната создана");
-        this.roomListener = null;
-        changeState(RoomState.WAIT_PLAYERS);
     }
 
     @Override
     public void joinPlayer(String uuid) {
-        Timber.i("Вход %s", PNUtil.parseLogin(uuid));
-
-        String selfID = serviceConnection.getSelfUUID();
-
-        if (state == RoomState.CLOSE) {
-            Timber.i("Отправка сообщения о том, что комната закрыта");
-            String roomStatus = jsonProcessor.buildRoomStatusDTO(selfID, RoomState.CLOSE);
-            serviceConnection.publishMessageToChannel(roomStatus, MainActivity.CHANNEL_NAME, null);
-        }
-
-        if (currentPlayers < maxPlayers) {
-            currentPlayers++;
-
-            // Если игроков достаточно, пробуем перейти в состояние "GAME"
-            // Определяем свою роль: Если мы 0, то переходим в ожидание хода соперника
-            if (currentPlayers >= minPlauers && currentPlayers <= maxPlayers) {
-                changeState(RoomState.GAME);
-                if (engine.getCurrentState() == BlockState.CIRCLE) changeState(RoomState.WAIT_PROGRESS);
-            }
-
-
-            // Последний вошедший ставится 0
-            if (!selfID.equals(uuid) && roomListener != null) {
-                roomListener.updatePlayers(PNUtil.parseLogin(selfID), PNUtil.parseLogin(uuid));
-            }
-        }
     }
 
     @Override
@@ -100,40 +51,10 @@ public class DuelRoom extends Room implements PlayerRoom {
     // Если игрок вошел не первым в комнату, то отыгрываем событие "второй игрок" подключился
     // Ведь он уже здесь
     private void hereNowProcess(PNHereNowResult result, PNStatus status) {
-        PNHereNowChannelData channelData = Objects.requireNonNull(
-                result.getChannels().get(MainActivity.CHANNEL_NAME)
-        );
-        String selfUUID = serviceConnection.getSelfUUID();
-
-        if (channelData.getOccupants().isEmpty()) {
-            engine.setCurrentState(BlockState.CROSS);
-            Timber.i("Вход в пустую комнату");
-            if (roomListener != null)
-                roomListener.updatePlayers(PNUtil.parseLogin(selfUUID), null
-                );
-        } else {
-            String uuid = channelData.getOccupants().get(0).getUuid();
-            engine.setCurrentState(BlockState.CIRCLE);
-            joinPlayer(uuid);
-            Timber.i("В комнате уже %s", uuid);
-            changeState(RoomState.WAIT_PROGRESS);
-            if (roomListener != null) {
-                roomListener.updatePlayers(PNUtil.parseLogin(uuid), PNUtil.parseLogin(selfUUID));
-            }
-        }
     }
 
     @Override
     public void leavePlayer(String uuid) {
-        Timber.i("Выход %s", PNUtil.parseLogin(uuid));
-        if (currentPlayers > 0) {
-            currentPlayers--;
-
-            // Если вышел важный для игры игрок, то пробуем перейти в состояние"закрыта"
-            if (currentPlayers < minPlauers && (state == RoomState.GAME || state == RoomState.WAIT_PROGRESS)) {
-                changeState(RoomState.CLOSE);
-            }
-        }
     }
 
     @Override
@@ -193,40 +114,6 @@ public class DuelRoom extends Room implements PlayerRoom {
     }
 
     private void touchHandler(MotionEvent event) {
-        // Взаимодействие с игрой возможно только при статусе GAME
-        if (state != RoomState.GAME) return;
-
-        String selfUUID = serviceConnection.getSelfUUID();
-
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_UP:
-                int oldHistorySize = engine.getHistorySize();
-                engine.touchUp(event.getX(), event.getY());
-                if (engine.getHistorySize() > oldHistorySize) {
-                    TicTacProgressDTO progress = engine.getLastState();
-                    progress.setUuid(selfUUID);
-                    String jsonState = jsonProcessor.buildProgressDTO(progress);
-                    serviceConnection
-                            .publishMessageToChannel(jsonState, MainActivity.CHANNEL_NAME, null);
-                    log("send:", progress);
-                    changeState(RoomState.WAIT_PROGRESS);
-
-                    if (engine.win()) {
-                        Timber.i("Победа");
-                        String winMsg = jsonProcessor.buildWinDTO(selfUUID);
-                        serviceConnection.publishMessageToChannel(winMsg, MainActivity.CHANNEL_NAME, null);
-                        changeState(RoomState.CLOSE);
-                        win(selfUUID);
-                    } else if (!engine.hasFreeBlocks()) {
-                        Timber.i("Ничья");
-                        String endMsg = jsonProcessor.buildEndDTO(selfUUID);
-                        serviceConnection.publishMessageToChannel(endMsg, MainActivity.CHANNEL_NAME, null);
-                        changeState(RoomState.CLOSE);
-                        end();
-                    }
-                }
-                break;
-        }
     }
 
     private void win(String uuid) {

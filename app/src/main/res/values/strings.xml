@@ -11,4 +11,5 @@
     <string name="label_room_status">Кмоната активна (нет/да)</string>
     <string name="label_enter">Вход</string>
     <string name="label_password">Пароль</string>
+    <string name="label_refresh">Обновить</string>
 </resources>

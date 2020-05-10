@@ -1,60 +1,27 @@
 package root.iv.ivplayer.ui.activity;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.pubnub.api.PubNub;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
-import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
-import com.pubnub.api.models.consumer.presence.PNHereNowResult;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-
-import java.util.Objects;
-
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.server.UserEntityDTO;
-import root.iv.ivplayer.network.ws.WSHolder;
-import root.iv.ivplayer.network.ws.WSUtil;
-import root.iv.ivplayer.network.ws.pubnub.PNUtil;
-import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNHereNowCallback;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
-import root.iv.ivplayer.service.ChatService;
-import root.iv.ivplayer.service.ChatServiceConnection;
-import root.iv.ivplayer.ui.fragment.ChatFragment;
 import root.iv.ivplayer.ui.fragment.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
-import root.iv.ivplayer.ui.fragment.RegisterFragment;
+import root.iv.ivplayer.ui.fragment.RoomsFragment;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity
-    implements
-        RegisterFragment.Listener,
+public class MainActivity extends AppCompatActivity implements
         GameFragment.Listener,
-        ChatFragment.Listener,
         LoginFragment.Listener
 {
     public static final String CHANNEL_NAME = "ch:global";
     private static final String SHARED_LOGIN_KEY = "shared:login";
-
-    private static final FragmentTag FRAGMENT_CHAT = FragmentTag
-            .builder()
-            .fragment(ChatFragment.getInstance())
-            .tag("fragment:chat")
-            .build();
 
     private static final FragmentTag FRAGMENT_GAME = FragmentTag
             .builder()
@@ -68,7 +35,11 @@ public class MainActivity extends AppCompatActivity
             .tag("fragment:login")
             .build();
 
-    private ChatServiceConnection serviceConnection;
+    private static final FragmentTag FRAGMENT_ROOMS = FragmentTag
+            .builder()
+            .fragment(RoomsFragment.getInstance())
+            .tag("fragment:rooms")
+            .build();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,8 +47,6 @@ public class MainActivity extends AppCompatActivity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         setFragment();
-
-        serviceConnection = new ChatServiceConnection();
     }
 
     private void setFragment() {
@@ -86,16 +55,6 @@ public class MainActivity extends AppCompatActivity
                 .replace(R.id.mainFrame, FRAGMENT_LOGIN.getFragment(), FRAGMENT_LOGIN.getTag())
                 .commit();
 
-    }
-
-    @Override
-    public void registerSuccessful(UserEntityDTO dto) {
-        SharedPreferences sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(SHARED_LOGIN_KEY, dto.getLogin());
-        editor.apply();
-
-        setFragment();
     }
 
     @Override
@@ -112,136 +71,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void exitFromGameFragment() {
-        // При выходе из игрового фрагмента отправляем в ChatFragment событие "как будто закрылась нотификация"
-        // Чтобы переключить в нормально положение switch
-        ChatFragment fragment = (ChatFragment) getSupportFragmentManager()
-                .findFragmentByTag(FRAGMENT_CHAT.getTag());
-        Intent stopServiceIntent = new Intent(ChatService.ACTION_END);
-        Objects.requireNonNull(fragment).receive(stopServiceIntent);
-        // И останавливаем сервис
-        finishChatService();
-    }
 
-    @Override
-    public void chatServiceStarted() {
-        // Показываем игровой фрагмент
-        Timber.tag(App.getTag()).i("Добавление нового фрагмента");
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(R.id.mainFrame, FRAGMENT_GAME.getFragment(), FRAGMENT_GAME.getTag())
-                .addToBackStack(null)
-                .commit();
-    }
-
-    @Override
-    public void serviceBind() {
-        Timber.i("bind");
-        ChatService.bind(this.getClass(), this, serviceConnection);
-
-
-
-    }
-
-    @Override
-    public void executeChatService(String login) {
-        Timber.i("start");
-        ChatService.start(this, login);
-        serviceBind();
-
-        // PubNub: Подписываемся на канал. Добавляем callback
-        PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
-                this::processPNmsg,
-                this::processPNstatus,
-                this::processPNpresence,
-                App::logE,
-                true
-        );
-        serviceConnection.addListener(callback);
-
-
-        PNHereNowCallback hereNowCallback = new PNHereNowCallback(
-                this::processPNHereNow,
-                App::logE
-        );
-
-        serviceConnection.hereNow(hereNowCallback, CHANNEL_NAME);
-    }
-
-    @Override
-    public void publishMessage(String msg) {
-        serviceConnection.publishMessageToChannel(msg, CHANNEL_NAME, null);
-    }
-
-    @Override
-    public void switchToFalse() {
-        // Посылать в ChatFragment уже не нужно ничего. Переключатель перешел в положение false
-        // Просто остановить сервис
-        finishChatService();
     }
 
     @Override
     public void authSuccessful(UserEntityDTO user) {
         Timber.i("Игрок успешно вошёл");
-    }
-
-    // Прекращение любого взаимодействия с сервисом. Отписка и отключение
-    private void finishChatService() {
-        serviceConnection.unsubscribe();
-
-        if (serviceConnection.isBind()) {
-            Timber.i("unbind");
-            serviceConnection.unbound();
-            ChatService.unbind(this.getClass(), this, serviceConnection);
-        }
-        Timber.i("stop");
-        ChatService.stop(this);
-    }
-
-    private Void processPNmsg(PubNub pn, PNMessageResult pnMsg) {
-        runOnUiThread(() -> {
-                    String msg = pnMsg.getMessage().toString();
-                    Timber.tag(App.getTag()).i(pnMsg.toString());
-                });
-        return null;
-    }
-
-    private void processPNHereNow(PNHereNowResult hereNowResult, PNStatus status) {
-        PNHereNowChannelData channelData = hereNowResult.getChannels().get(CHANNEL_NAME);
-
-        if (channelData != null) {
-            String login = PNUtil.parseLogin(serviceConnection.getSelfUUID());
-
-            boolean loginFree = channelData.getOccupants()
-                    .stream()
-                    .map(PNHereNowOccupantData::getUuid)
-                    .noneMatch(uuid -> PNUtil.parseLogin(uuid).equals(login));
-
-            if (!loginFree) {
-                this.onBackPressed();
-                Toast.makeText(this, "Логин занят", Toast.LENGTH_SHORT).show();
-            } else {
-                serviceConnection.subscribeToChannel(CHANNEL_NAME);
-            }
-        }
-    }
-
-    private Void processPNstatus(PubNub pn, PNStatus status) {
-        return null;
-    }
-
-    private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
-        String event = presenceEvent.getEvent();
-        Timber.tag(App.getTag()).i("Event: %s", event);
-
-        if (event.equals(PresenceEvent.JOIN)) {
-            String uuid = presenceEvent.getUuid();
-            Timber.tag(App.getTag()).i("Join user %s", PNUtil.parseLogin(uuid));
-        }
-
-        if (event.equals(PresenceEvent.LEAVE)) {
-            String login = PNUtil.parseLogin(presenceEvent.getUuid());
-            Timber.tag(App.getTag()).i("Leave user %s", login);
-        }
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFrame, FRAGMENT_ROOMS.getFragment(), FRAGMENT_ROOMS.getTag())
+                .commit();
     }
 
     // Удаление последнего отображенного фрагмента. Используется для ручного удаление игрового фрагмента

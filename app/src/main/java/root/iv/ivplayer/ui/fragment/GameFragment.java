@@ -35,11 +35,6 @@ import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.view.GameView;
-import root.iv.ivplayer.network.ws.pubnub.PNUtil;
-import root.iv.ivplayer.network.ws.pubnub.PresenceEvent;
-import root.iv.ivplayer.network.ws.pubnub.callback.PNSubscribePrecenseCallback;
-import root.iv.ivplayer.service.ChatService;
-import root.iv.ivplayer.service.ChatServiceConnection;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment implements DuelRoom.Listener {
@@ -66,7 +61,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     protected RelativeLayout panelPlayer2;
 
     private Listener listener;
-    private ChatServiceConnection serviceConnection;
     private PlayerRoom room;
     private Drawable square;
     private Drawable circle;
@@ -99,7 +93,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        DuelRoom duelRoom = new DuelRoom(serviceConnection, textures);
+        DuelRoom duelRoom = new DuelRoom(textures);
         duelRoom.addListener(this);
         this.room = duelRoom;
 
@@ -118,8 +112,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         Timber.i("attach");
         if (context instanceof Listener) {
             listener = (Listener) context;
-            serviceConnection = new ChatServiceConnection();
-            ChatService.bind(this.getClass(), this.getContext(), serviceConnection);
         } else
             Timber.tag(App.getTag()).w("Не раализован нужный интерфейс слушателя");
     }
@@ -127,17 +119,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     @Override
     public void onStart() {
         super.onStart();
-
-        // PubNub: Подписываемся на канал. Добавляем callback
-        PNSubscribePrecenseCallback callback = new PNSubscribePrecenseCallback(
-                this::processPNmsg,
-                this::processPNstatus,
-                this::processPNpresence,
-                App::logE,
-                true
-        );
-        serviceConnection.addListener(callback);
-
     }
 
     @Override
@@ -151,36 +132,8 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         super.onDetach();
         Timber.i("detach");
         Context context = Objects.requireNonNull(this.getContext());
-        ChatService.unbind(this.getClass(), context, serviceConnection);
         listener.exitFromGameFragment();
         listener = null;
-    }
-
-    private Void processPNmsg(PubNub pn, PNMessageResult msg) {
-        room.receiveMsg(msg);
-        return null;
-    }
-
-    private Void processPNstatus(PubNub pn, PNStatus status) {
-        Timber.tag(App.getTag()).i("GAME: status");
-        return null;
-    }
-
-    private void processPNpresence(PubNub pn, PNPresenceEventResult presenceEvent) {
-        String uuid = presenceEvent.getUuid();
-        String login = PNUtil.parseLogin(uuid);
-        String event = presenceEvent.getEvent();
-        Timber.tag(App.getTag()).i("GAME: event: %s user %s", event, login);
-
-        // Сообщаем об изменении количества игроков сцене
-        switch (event) {
-            case PresenceEvent.JOIN:
-                room.joinPlayer(presenceEvent.getUuid());
-                break;
-            case PresenceEvent.LEAVE:
-                room.leavePlayer(presenceEvent.getUuid());
-                break;
-        }
     }
 
     @Override
@@ -216,19 +169,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
 
     @Override
     public void win(String uuid) {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> {
-                    String winMsg = String.format(Locale.ENGLISH, "Игрок %s победил!", PNUtil.parseLogin(uuid));
-                    labelRoomStatus.setText(winMsg);
-
-                    if (serviceConnection.getSelfUUID().equals(uuid)) {
-                        panelPlayer1.setBackgroundColor(Color.GREEN);
-                        panelPlayer2.setBackgroundColor(Color.RED);
-                    } else {
-                        panelPlayer1.setBackgroundColor(Color.RED);
-                        panelPlayer2.setBackgroundColor(Color.GREEN);
-                    }
-                });
     }
 
     @Override
