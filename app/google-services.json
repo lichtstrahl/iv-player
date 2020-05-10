@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "21093329564",
+    "firebase_url": "https://gameproject-c7382.firebaseio.com",
+    "project_id": "gameproject-c7382",
+    "storage_bucket": "gameproject-c7382.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:21093329564:android:0156b654013782a9071b59",
+        "android_client_info": {
+          "package_name": "root.iv.ivplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "21093329564-pu7id8o1b3ibebi0qqjcf6fm84r9518o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "root.iv.ivplayer",
+            "certificate_hash": "1ce78147f34e7368badb4916711524c109ceec50"
+          }
+        },
+        {
+          "client_id": "21093329564-f31ko0im02v83f3lnoc3g4nh08h7h3cg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhAzMhxARpiBg3lYxW5rw1Lbk2xjx8bg0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "21093329564-f31ko0im02v83f3lnoc3g4nh08h7h3cg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
