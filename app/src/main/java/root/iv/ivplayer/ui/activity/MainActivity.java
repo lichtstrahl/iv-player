@@ -30,12 +30,6 @@ public class MainActivity extends AppCompatActivity implements
             .tag("fragment:login")
             .build();
 
-    private static final FragmentTag FRAGMENT_ROOMS = FragmentTag
-            .builder()
-            .fragment(RoomsFragment.getInstance())
-            .tag("fragment:rooms")
-            .build();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,11 +64,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void clickRoom(String roomName) {
+    public void clickRoom(String roomName, String login) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .add(R.id.mainFrame, GameFragment.getInstance(roomName), GameFragment.TAG)
+                .add(R.id.mainFrame, GameFragment.getInstance(roomName, login), GameFragment.TAG)
                 .commit();
     }
 
@@ -83,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements
         Timber.i("Игрок успешно вошёл");
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFrame, FRAGMENT_ROOMS.getFragment(), FRAGMENT_ROOMS.getTag())
+                .replace(R.id.mainFrame, RoomsFragment.getInstance(user.getLogin()), RoomsFragment.TAG)
                 .commit();
     }
 

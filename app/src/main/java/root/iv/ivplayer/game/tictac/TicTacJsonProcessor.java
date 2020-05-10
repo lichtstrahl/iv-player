@@ -11,6 +11,8 @@ import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
+import root.iv.ivplayer.network.ws.dto.BaseMessageWS;
+import root.iv.ivplayer.network.ws.dto.PlayerLifecycleMSG;
 
 
 public class TicTacJsonProcessor {
@@ -42,6 +44,15 @@ public class TicTacJsonProcessor {
         Type type = new TypeToken<TicTacDTO<TicTacRoomStatusDTO>>(){}.getType();
         TicTacDTO<TicTacRoomStatusDTO> roomStatus = gsonBuilder.create().fromJson(json, type);
         return roomStatus.getData();
+    }
+
+
+    public BaseMessageWS receiveBase(String json) {
+        return gsonBuilder.create().fromJson(json, BaseMessageWS.class);
+    }
+
+    public <T> T receive(String json, Class<T> cls) {
+        return gsonBuilder.create().fromJson(json, cls);
     }
 
     public String buildWinDTO(String uuid) {

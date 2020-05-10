@@ -35,6 +35,7 @@ import timber.log.Timber;
 public class GameFragment extends Fragment implements DuelRoom.Listener {
     public static final String TAG = "fragment:game";
     private static final String ARG_ROOM_NAME = "arg:room-name";
+    private static final String ARG_LOGIN = "arg:login";
 
     @BindView(R.id.gameView)
     protected GameView gameView;
@@ -62,11 +63,12 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     private Listener listener;
     private WSRoom room;
 
-    public static GameFragment getInstance(String roomName) {
+    public static GameFragment getInstance(String roomName, String login) {
         GameFragment fragment = new GameFragment();
 
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ROOM_NAME, roomName);
+        bundle.putString(ARG_LOGIN, login);
         fragment.setArguments(bundle);
 
         return fragment;
@@ -79,13 +81,15 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         ButterKnife.bind(this, view);
         listener.createGameFragment();
 
-        room = buildRoom();
+        Bundle args = Objects.requireNonNull(getArguments());
+        String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
+        String login = args.getString(ARG_LOGIN, "");
+
+        room = buildRoom(roomName, login);
         room.openWS();
         configGameView(room);
         labelRoomStatus.setText(room.getRoomState().getDescription());
 
-        Bundle args = Objects.requireNonNull(getArguments());
-        String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
         viewRoomName.setText(roomName);
         return view;
     }
@@ -109,7 +113,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     @Override
     public void onStart() {
         super.onStart();
-        room.openWS();
     }
 
     @Override
@@ -179,7 +182,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         gameView.setOnTouchListener(room.getScene().getMainController());
     }
 
-    private WSRoom buildRoom() {
+    private WSRoom buildRoom(String name, String login) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -195,7 +198,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        DuelRoom duelRoom = new DuelRoom(textures);
+        DuelRoom duelRoom = new DuelRoom(textures, name, login);
         duelRoom.addListener(this);
 
         return duelRoom;

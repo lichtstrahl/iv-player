@@ -8,8 +8,8 @@ import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
+import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.game.TicTacTextures;
-import root.iv.ivplayer.game.scene.MPScene;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
@@ -19,12 +19,17 @@ import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
+import root.iv.ivplayer.network.http.dto.server.BaseResponse;
 import root.iv.ivplayer.network.ws.WSHolder;
 import root.iv.ivplayer.network.ws.WSUtil;
+import root.iv.ivplayer.network.ws.dto.BaseMessageWS;
+import root.iv.ivplayer.network.ws.dto.PlayerLifecycleMSG;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
 public class DuelRoom extends Room implements WSRoom {
+    private String name;
+    private String login;
     private Scene scene;
     private TicTacEngine engine;
     private TicTacJsonProcessor jsonProcessor;
@@ -32,17 +37,24 @@ public class DuelRoom extends Room implements WSRoom {
     private Listener roomListener;
     private DrawableBlockState icons;
     private WSHolder wsHolder;
+    private CompositeDisposable compositeDisposable;
 
 
 
-    public DuelRoom(TicTacTextures textures) {
+    public DuelRoom(TicTacTextures textures, String name, String login) {
         super(2);
+        this.name = name;
+        this.login = login;
         wsHolder = WSHolder.fromURL(WSUtil.springWSURL("/ws/tic-tac", true));
 
         engine = new TicTacEngine();
         scene = new TicTacToeScene(textures, engine);
         scene.getMainController().setTouchHandler(this::touchHandler);
+
+        jsonProcessor = new TicTacJsonProcessor();
+        compositeDisposable = new CompositeDisposable();
     }
+
 
     @Override
     public void joinPlayer(String uuid) {
@@ -143,17 +155,52 @@ public class DuelRoom extends Room implements WSRoom {
 
     @Override
     public void openWS() {
-        if (!wsHolder.isOpened())
+        if (!wsHolder.isOpened()) {
             wsHolder.open(this::receiveWSMsg);
+            PlayerLifecycleMSG joinMsg = PlayerLifecycleMSG.join(this.login, this.name);
+            wsHolder.send(jsonProcessor.toJson(joinMsg));
+        }
     }
 
     @Override
     public void closeWS() {
+        PlayerLifecycleMSG leaveMsg = PlayerLifecycleMSG.leave(this.login, this.name);
+        wsHolder.send(jsonProcessor.toJson(leaveMsg));
         wsHolder.close();
     }
 
-    private void receiveWSMsg(String msg) {
+    // Обработка сообщений из канала (только если сообщение для нашей комнаты)
+    private void receiveWSMsg(String json) {
+        BaseMessageWS baseMessage = jsonProcessor.receiveBase(json);
 
+        if (baseMessage.getToRoom() != null && !baseMessage.getToRoom().equals(name)) {
+            Timber.w("Пришло сообщение не для нашей комнаты");
+            return;
+        }
+
+        switch (baseMessage.getType()) {
+            case LIFECYCLE:
+                PlayerLifecycleMSG playerLifecycleMSG = jsonProcessor.receive(json, PlayerLifecycleMSG.class);
+                String login = playerLifecycleMSG.getLogin();
+                String room = playerLifecycleMSG.getRoomName();
+                switch (playerLifecycleMSG.getLifecycle()) {
+                    case JOIN:
+                        Timber.i("Игрок %s вошел в комнату %s", login, room);
+                        break;
+                    case LEAVE:
+                        Timber.i("Игрок %s вышел из комнаты %s", login, room);
+                        break;
+                }
+                break;
+        }
+
+
+    }
+
+    private void processLifecycleResponse(BaseResponse response) {
+        if (response.getErrorCode() == BaseResponse.OK) {
+            Timber.w(response.getErrorMsg());
+        }
     }
 
     public interface Listener extends RoomListener {

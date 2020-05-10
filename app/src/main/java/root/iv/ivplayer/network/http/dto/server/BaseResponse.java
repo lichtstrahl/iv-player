@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseResponse<T> {
+    public static final int OK = 0;
+
     private Integer errorCode;
     private String errorMsg;
     @Nullable

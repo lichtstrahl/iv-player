@@ -1,16 +1,21 @@
 package root.iv.ivplayer.network.ws.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class PlayerLifecycleMSG {
+@EqualsAndHashCode(callSuper = true)
+public class PlayerLifecycleMSG extends BaseMessageWS {
     private String login;
     private String roomName;
     private PlayerLifecycle lifecycle;
+
+    private PlayerLifecycleMSG(String login, String roomName, PlayerLifecycle lifecycle) {
+        super(login, null, roomName, TypeMSG.LIFECYCLE);
+        this.login = login;
+        this.roomName = roomName;
+        this.lifecycle = lifecycle;
+    }
 
     public static PlayerLifecycleMSG join(String login, String room) {
         return new PlayerLifecycleMSG(login, room, PlayerLifecycle.JOIN);

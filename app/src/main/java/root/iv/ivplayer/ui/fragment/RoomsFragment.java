@@ -1,7 +1,6 @@
 package root.iv.ivplayer.ui.fragment;
 
 import android.content.Context;
-import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,8 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textview.MaterialTextView;
+
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +30,8 @@ import root.iv.ivplayer.util.DateTimeUtil;
 import timber.log.Timber;
 
 public class RoomsFragment extends Fragment {
+    public static final String TAG = "fragment:rooms";
+    private static final String ARG_LOGIN = "arg:login";
 
     @BindView(R.id.cardRoom)
     protected MaterialCardView cardRoom;
@@ -42,8 +45,14 @@ public class RoomsFragment extends Fragment {
     private CompositeDisposable compositeDisposable;
     private Listener listener;
 
-    public static RoomsFragment getInstance() {
-        return new RoomsFragment();
+    public static RoomsFragment getInstance(String login) {
+        RoomsFragment fragment = new RoomsFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putString(ARG_LOGIN, login);
+        fragment.setArguments(bundle);
+
+        return fragment;
     }
 
     @Nullable
@@ -80,7 +89,8 @@ public class RoomsFragment extends Fragment {
 
     @OnClick(R.id.cardRoom)
     protected void clickRoom() {
-        listener.clickRoom(viewRoomName.getText().toString());
+        Bundle args = Objects.requireNonNull(getArguments());
+        listener.clickRoom(viewRoomName.getText().toString(), args.getString(ARG_LOGIN));
     }
 
     private void refreshRooms() {
@@ -98,6 +108,6 @@ public class RoomsFragment extends Fragment {
     }
 
     public interface Listener {
-        void clickRoom(String roomName);
+        void clickRoom(String roomName, String login);
     }
 }
