@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
@@ -30,6 +31,7 @@ import root.iv.ivplayer.game.room.PlayerRoom;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.WSRoom;
 import root.iv.ivplayer.game.view.GameView;
+import root.iv.ivplayer.network.ws.dto.UserRole;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment implements DuelRoom.Listener {
@@ -129,6 +131,11 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         listener.exitFromGameFragment();
         listener = null;
         room.closeWS();
+    }
+
+    @OnClick(R.id.viewRolePlayer1)
+    protected void clickRole1() {
+        room.changeRole(UserRole.CROSS);
     }
 
     @Override

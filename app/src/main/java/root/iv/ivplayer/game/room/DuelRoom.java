@@ -23,7 +23,9 @@ import root.iv.ivplayer.network.http.dto.server.BaseResponse;
 import root.iv.ivplayer.network.ws.WSHolder;
 import root.iv.ivplayer.network.ws.WSUtil;
 import root.iv.ivplayer.network.ws.dto.BaseMessageWS;
+import root.iv.ivplayer.network.ws.dto.PlayerChangeRoleMSG;
 import root.iv.ivplayer.network.ws.dto.PlayerLifecycleMSG;
+import root.iv.ivplayer.network.ws.dto.UserRole;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
@@ -169,6 +171,12 @@ public class DuelRoom extends Room implements WSRoom {
         wsHolder.close();
     }
 
+    @Override
+    public void changeRole(UserRole role) {
+        PlayerChangeRoleMSG changeRoleMSG = new PlayerChangeRoleMSG(this.login, this.name, role);
+        wsHolder.send(jsonProcessor.toJson(changeRoleMSG));
+    }
+
     // Обработка сообщений из канала (только если сообщение для нашей комнаты)
     private void receiveWSMsg(String json) {
         BaseMessageWS baseMessage = jsonProcessor.receiveBase(json);
@@ -178,6 +186,7 @@ public class DuelRoom extends Room implements WSRoom {
             return;
         }
 
+        Timber.i("msg: " + baseMessage.getType().name());
         switch (baseMessage.getType()) {
             case LIFECYCLE:
                 PlayerLifecycleMSG playerLifecycleMSG = jsonProcessor.receive(json, PlayerLifecycleMSG.class);
