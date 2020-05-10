@@ -18,6 +18,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import root.iv.ivplayer.BuildConfig;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.network.http.RoomAPI;
 import root.iv.ivplayer.network.http.UserAPI;
 import root.iv.ivplayer.network.ws.WSUtil;
 import timber.log.Timber;
@@ -26,7 +27,9 @@ public class App extends Application {
     private static final String TAG = "tag:ws";
     private static final String API = "/api";
     private static final String API_USERS = "/api/users";
+    private static final String API_ROOMS = "/api/rooms";
     private static UserAPI userAPI;
+    private static RoomAPI roomAPI;
     private static OkHttpClient httpClient;
 
     public static OkHttpClient httpClient() {
@@ -35,6 +38,10 @@ public class App extends Application {
 
     public static UserAPI getUserAPI() {
         return userAPI;
+    }
+
+    public static RoomAPI getRoomAPI() {
+        return roomAPI;
     }
 
     @SneakyThrows
@@ -75,14 +82,20 @@ public class App extends Application {
                 })
                 .build();
 
-        Retrofit retrofit = new Retrofit.Builder()
+        Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .client(httpClient)
-                .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_USERS))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+                .addConverterFactory(GsonConverterFactory.create());
 
-        userAPI = retrofit.create(UserAPI.class);
+        userAPI = retrofitBuilder
+                .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_USERS))
+                .build()
+                .create(UserAPI.class);
+
+        roomAPI = retrofitBuilder
+                .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_ROOMS))
+                .build()
+                .create(RoomAPI.class);
     }
 
 
