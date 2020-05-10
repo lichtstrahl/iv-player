@@ -18,12 +18,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
-import com.pubnub.api.PubNub;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-
-import java.util.Locale;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -34,10 +28,13 @@ import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
 import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.game.room.WSRoom;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment implements DuelRoom.Listener {
+    public static final String TAG = "fragment:game";
+    private static final String ARG_ROOM_NAME = "arg:room-name";
 
     @BindView(R.id.gameView)
     protected GameView gameView;
@@ -59,15 +56,20 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     protected RelativeLayout panelPlayer1;
     @BindView(R.id.panelPlayer2)
     protected RelativeLayout panelPlayer2;
+    @BindView(R.id.viewRoomName)
+    protected TextView viewRoomName;
 
     private Listener listener;
-    private PlayerRoom room;
-    private Drawable square;
-    private Drawable circle;
-    private Drawable cross;
+    private WSRoom room;
 
-    public static GameFragment getInstance() {
-        return new GameFragment();
+    public static GameFragment getInstance(String roomName) {
+        GameFragment fragment = new GameFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putString(ARG_ROOM_NAME, roomName);
+        fragment.setArguments(bundle);
+
+        return fragment;
     }
 
     @Nullable
@@ -77,33 +79,21 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         ButterKnife.bind(this, view);
         listener.createGameFragment();
 
-
-        Resources resources = getResources();
-        Context context = Objects.requireNonNull(getContext());
-
-        square = resources.getDrawable(R.drawable.ic_square, context.getTheme());
-        cross = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
-        circle = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
-
-        TicTacTextures textures = TicTacTextures
-                .builder()
-                .circle(circle)
-                .cross(cross)
-                .square(square)
-                .background(Color.WHITE)
-                .build();
-
-        DuelRoom duelRoom = new DuelRoom(textures);
-        duelRoom.addListener(this);
-        this.room = duelRoom;
-
-        gameView.loadScene(room.getScene());
-        gameView.setOnClickListener(room.getScene().getMainController());
-        gameView.setOnTouchListener(room.getScene().getMainController());
-
+        room = buildRoom();
+        room.openWS();
+        configGameView(room);
         labelRoomStatus.setText(room.getRoomState().getDescription());
 
+        Bundle args = Objects.requireNonNull(getArguments());
+        String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
+        viewRoomName.setText(roomName);
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        room.closeWS();
     }
 
     @Override
@@ -119,6 +109,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     @Override
     public void onStart() {
         super.onStart();
+        room.openWS();
     }
 
     @Override
@@ -134,6 +125,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         Context context = Objects.requireNonNull(this.getContext());
         listener.exitFromGameFragment();
         listener = null;
+        room.closeWS();
     }
 
     @Override
@@ -179,6 +171,34 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                     panelPlayer1.setBackgroundColor(Color.LTGRAY);
                     panelPlayer2.setBackgroundColor(Color.LTGRAY);
                 });
+    }
+
+    private void configGameView(PlayerRoom room) {
+        gameView.loadScene(room.getScene());
+        gameView.setOnClickListener(room.getScene().getMainController());
+        gameView.setOnTouchListener(room.getScene().getMainController());
+    }
+
+    private WSRoom buildRoom() {
+        Resources resources = getResources();
+        Context context = Objects.requireNonNull(getContext());
+
+        Drawable square = resources.getDrawable(R.drawable.ic_square, context.getTheme());
+        Drawable cross = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
+        Drawable circle = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
+
+        TicTacTextures textures = TicTacTextures
+                .builder()
+                .circle(circle)
+                .cross(cross)
+                .square(square)
+                .background(Color.WHITE)
+                .build();
+
+        DuelRoom duelRoom = new DuelRoom(textures);
+        duelRoom.addListener(this);
+
+        return duelRoom;
     }
 
     public interface Listener {

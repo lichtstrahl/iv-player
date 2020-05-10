@@ -9,28 +9,39 @@ import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
 import root.iv.ivplayer.game.TicTacTextures;
+import root.iv.ivplayer.game.scene.MPScene;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
+import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
+import root.iv.ivplayer.network.ws.WSHolder;
+import root.iv.ivplayer.network.ws.WSUtil;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
-public class DuelRoom extends Room implements PlayerRoom {
+public class DuelRoom extends Room implements WSRoom {
     private Scene scene;
     private TicTacEngine engine;
     private TicTacJsonProcessor jsonProcessor;
     @Nullable
     private Listener roomListener;
     private DrawableBlockState icons;
+    private WSHolder wsHolder;
+
 
 
     public DuelRoom(TicTacTextures textures) {
         super(2);
+        wsHolder = WSHolder.fromURL(WSUtil.springWSURL("/ws/tic-tac", true));
+
+        engine = new TicTacEngine();
+        scene = new TicTacToeScene(textures, engine);
+        scene.getMainController().setTouchHandler(this::touchHandler);
     }
 
     @Override
@@ -128,6 +139,21 @@ public class DuelRoom extends Room implements PlayerRoom {
 
     private void log(String prefix, TicTacProgressDTO progress) {
         Timber.i("%s Ход %s: %d %s", prefix, progress.getUuid(), progress.getBlockIndex(), progress.getState().name());
+    }
+
+    @Override
+    public void openWS() {
+        if (!wsHolder.isOpened())
+            wsHolder.open(this::receiveWSMsg);
+    }
+
+    @Override
+    public void closeWS() {
+        wsHolder.close();
+    }
+
+    private void receiveWSMsg(String msg) {
+
     }
 
     public interface Listener extends RoomListener {

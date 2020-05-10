@@ -18,7 +18,7 @@ public class WSHolder {
     private Disposable disposable;
     private boolean opened;
 
-    public WSHolder(String url, EchoWSListener listener) {
+    private WSHolder(String url, EchoWSListener listener) {
         this.initRequest = new Request.Builder().url(url).build();
         this.listener = listener;
         this.webSocket = null;

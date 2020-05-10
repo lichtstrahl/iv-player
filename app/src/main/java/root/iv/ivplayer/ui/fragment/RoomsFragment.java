@@ -1,5 +1,6 @@
 package root.iv.ivplayer.ui.fragment;
 
+import android.content.Context;
 import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import io.reactivex.schedulers.Schedulers;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.http.dto.server.RoomEntityDTO;
+import root.iv.ivplayer.util.DateTimeUtil;
 import timber.log.Timber;
 
 public class RoomsFragment extends Fragment {
@@ -38,6 +40,7 @@ public class RoomsFragment extends Fragment {
     protected MaterialCheckBox viewRoomLive;
 
     private CompositeDisposable compositeDisposable;
+    private Listener listener;
 
     public static RoomsFragment getInstance() {
         return new RoomsFragment();
@@ -59,11 +62,25 @@ public class RoomsFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         compositeDisposable.dispose();
+        listener = null;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+
+        if (context instanceof Listener)
+            listener = (Listener) context;
     }
 
     @OnClick(R.id.buttonRefresh)
     protected void clickRefresh() {
         refreshRooms();
+    }
+
+    @OnClick(R.id.cardRoom)
+    protected void clickRoom() {
+        listener.clickRoom(viewRoomName.getText().toString());
     }
 
     private void refreshRooms() {
@@ -73,26 +90,14 @@ public class RoomsFragment extends Fragment {
                 .subscribe(rooms -> {
                     RoomEntityDTO room = rooms.get(0);
                     viewRoomLive.setChecked(room.isLive());
-                    viewRoomCreateDate.setText(stringDateTime(room.getCreateDate()));
+                    viewRoomCreateDate.setText(DateTimeUtil.stringDateTime(room.getCreateDate()));
                     viewRoomName.setText(room.getName());
                 }, Timber::e);
 
         compositeDisposable.add(d);
     }
 
-    private String stringDateTime(long milliseconds) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(milliseconds);
-        return stringDateTime(calendar);
-    }
-
-    private String stringDateTime(Calendar calendar) {
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-        int h = calendar.get(Calendar.HOUR_OF_DAY);
-        int m = calendar.get(Calendar.MINUTE);
-        int s = calendar.get(Calendar.SECOND);
-        return String.format("%s-%s-%s %s:%s:%s", year, month, day, h, m, s);
+    public interface Listener {
+        void clickRoom(String roomName);
     }
 }

@@ -50,7 +50,6 @@ public class LoginFragment extends Fragment {
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
-    private WSHolder wsHolder;
 
     public static LoginFragment getInstance() {
         return new LoginFragment();
@@ -63,8 +62,6 @@ public class LoginFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         compositeDisposable = new CompositeDisposable();
-        wsHolder = WSHolder.fromURL(WSUtil.springWSURL("/ws/tic-tac", true));
-        switchWS.setOnCheckedChangeListener(this::switchWS);
 
         return view;
     }
@@ -105,20 +102,6 @@ public class LoginFragment extends Fragment {
         String msg = (inputLogin.getText() != null)
                 ? inputLogin.getText().toString()
                 : "";
-        wsHolder.send(msg);
-    }
-
-    private void switchWS(View view, boolean isChecked) {
-
-        if (isChecked) {
-            wsHolder.open(string -> {
-                String msg = String.format("From ws: %s", string);
-                Timber.i(msg);
-                Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
-            });
-        } else {
-            wsHolder.close();
-        }
     }
 
     private void processAuth(BaseResponse<AuthResponse> response) {

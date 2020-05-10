@@ -18,16 +18,11 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements
         GameFragment.Listener,
-        LoginFragment.Listener
+        LoginFragment.Listener,
+        RoomsFragment.Listener
 {
     public static final String CHANNEL_NAME = "ch:global";
     private static final String SHARED_LOGIN_KEY = "shared:login";
-
-    private static final FragmentTag FRAGMENT_GAME = FragmentTag
-            .builder()
-            .fragment(GameFragment.getInstance())
-            .tag("fragment:game")
-            .build();
 
     private static final FragmentTag FRAGMENT_LOGIN = FragmentTag
             .builder()
@@ -72,6 +67,15 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void exitFromGameFragment() {
 
+    }
+
+    @Override
+    public void clickRoom(String roomName) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(null)
+                .add(R.id.mainFrame, GameFragment.getInstance(roomName), GameFragment.TAG)
+                .commit();
     }
 
     @Override
