@@ -91,7 +91,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
 
         room = buildRoom(roomName);
         configGameView(room);
-        labelRoomStatus.setText(room.getRoomState().getDescription());
 
         viewRoomName.setText(roomName);
         return view;

@@ -37,6 +37,8 @@ public class RoomsFragment extends Fragment {
     protected MaterialCardView cardRoom;
     @BindView(R.id.viewRoomName)
     protected MaterialTextView viewRoomName;
+    @BindView(R.id.viewRoomState)
+    protected MaterialTextView viewRoomState;
     @BindView(R.id.viewEmailPlayer1)
     protected MaterialTextView viewEmailPlayer1;
     @BindView(R.id.viewEmailPlayer2)
@@ -88,16 +90,13 @@ public class RoomsFragment extends Fragment {
     @OnClick(R.id.cardRoom)
     protected void clickRoom() {
         // При нажатии на кнопку необходимо обновить
-        App.getFbDatabase()
-                .getReference("rooms")
-                .child(viewRoomName.getText().toString())
+        App.getRoom(viewRoomName.getText().toString())
                 .addListenerForSingleValueEvent(new EnterRoomListener());
     }
 
     private void refreshRooms() {
         // Получаем список комнат: child-узлы поля rooms
-        App.getFbDatabase()
-                .getReference("rooms")
+        App.getRooms()
                 .addValueEventListener(new RoomsFBListener());
 
     }
@@ -117,6 +116,7 @@ public class RoomsFragment extends Fragment {
                 viewRoomName.setText(roomName);
                 viewEmailPlayer1.setText(fbRoom.getEmailPlayer1());
                 viewEmailPlayer2.setText(fbRoom.getEmailPlayer2());
+                viewRoomState.setText(fbRoom.getState().name());
             }
         }
 
@@ -148,9 +148,7 @@ public class RoomsFragment extends Fragment {
                 room.setEmailPlayer2(fbCurrentUser.getEmail());
             }
 
-            App.getFbDatabase()
-                    .getReference("rooms")
-                    .child(viewRoomName.getText().toString())
+            App.getRoom(viewRoomName.getText().toString())
                     .setValue(room);
 
 

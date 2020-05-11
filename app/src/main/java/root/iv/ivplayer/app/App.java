@@ -2,6 +2,7 @@ package root.iv.ivplayer.app;
 
 import android.app.Application;
 
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.InputStream;
@@ -49,6 +50,14 @@ public class App extends Application {
 
     public static FirebaseDatabase getFbDatabase() {
         return fbDatabase;
+    }
+
+    public static DatabaseReference getRooms() {
+        return fbDatabase.getReference("rooms");
+    }
+
+    public static DatabaseReference getRoom(String roomName) {
+        return getRooms().child(roomName);
     }
 
     @SneakyThrows
