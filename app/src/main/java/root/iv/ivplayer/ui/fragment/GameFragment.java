@@ -138,28 +138,19 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
 
     @Override
     public void updatePlayers(@Nullable String login1, @Nullable String login2) {
-        if (this.getActivity() != null)
-            this.getActivity().runOnUiThread(() -> {
-            viewLogin1.setText((login1 != null) ? login1 : "");
-
-            viewLogin2.setText((login2 != null) ? login2 : "");
-        });
+        viewLogin1.setText((login1 != null) ? login1 : "");
+        viewLogin2.setText((login2 != null) ? login2 : "");
     }
 
     @Override
     public void exit() {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> this.getActivity().onBackPressed());
+        this.getActivity().onBackPressed();
     }
 
     @Override
     public void changeStatus(RoomState roomState) {
-        if (this.getActivity() != null)
-            this.getActivity()
-                .runOnUiThread(() -> {
-                    switchRoomState.setChecked(roomState == RoomState.GAME);
-                    labelRoomStatus.setText(roomState.getDescription());
-                });
+        switchRoomState.setChecked(roomState == RoomState.GAME);
+        labelRoomStatus.setText(roomState.getDescription());
     }
 
     @Override
@@ -169,30 +160,24 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
 
     @Override
     public void win(String email) {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> {
-                    labelRoomStatus.setText("Игрок " + email + "выиграл");
-                    int color1 = viewLogin1.getText().toString().equals(email)
-                            ? Color.GREEN
-                            : Color.RED;
+        labelRoomStatus.setText("Игрок " + email + "выиграл");
+        int color1 = viewLogin1.getText().toString().equals(email)
+                ? Color.GREEN
+                : Color.RED;
 
-                    int color2 = viewLogin2.getText().toString().equals(email)
-                            ? Color.GREEN
-                            : Color.RED;
+        int color2 = viewLogin2.getText().toString().equals(email)
+                ? Color.GREEN
+                : Color.RED;
 
-                    panelPlayer1.setBackgroundColor(color1);
-                    panelPlayer2.setBackgroundColor(color2);
-                });
+        panelPlayer1.setBackgroundColor(color1);
+        panelPlayer2.setBackgroundColor(color2);
     }
 
     @Override
     public void end() {
-        Objects.requireNonNull(this.getActivity())
-                .runOnUiThread(() -> {
-                    labelRoomStatus.setText("Игра окончена");
-                    panelPlayer1.setBackgroundColor(Color.LTGRAY);
-                    panelPlayer2.setBackgroundColor(Color.LTGRAY);
-                });
+        labelRoomStatus.setText("Игра окончена");
+        panelPlayer1.setBackgroundColor(Color.LTGRAY);
+        panelPlayer2.setBackgroundColor(Color.LTGRAY);
     }
 
     private void configGameView(PlayerRoom room) {
