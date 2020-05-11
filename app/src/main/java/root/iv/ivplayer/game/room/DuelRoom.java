@@ -153,8 +153,8 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         updateLocalStatus(RoomState.GAME);
         newRoom.setState(RoomState.GAME);
         engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
-        App.getRoom(name)
-                .setValue(newRoom);
+        App.getRoomStatus(name).setValue(RoomState.GAME);
+
 
         String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getEmail());
         App.getProgressInRoom(name, enemyProgressPath)
@@ -212,18 +212,12 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
     @Override
     public void exitFromRoom() {
-        if (fbRoom.getEmailPlayer1().equals(fbUser.getEmail())) {
-            fbRoom.setEmailPlayer1("");
-        }
-
-        if (fbRoom.getEmailPlayer2().equals(fbUser.getEmail())) {
-            fbRoom.setEmailPlayer2("");
-        }
+        // Ищем путь до email для очистки его
+        String currentEmailPath = fbRoom.getCurrentEmailPath(fbUser.getEmail());
 
         updateLocalStatus(RoomState.CLOSE);
-        App.getRoom(name)
-                .setValue(fbRoom);
-
+        App.getPlayerEmail(name, currentEmailPath)
+                .setValue("");
     }
 
     public interface Listener extends RoomListener {

@@ -60,6 +60,14 @@ public class App extends Application {
         return getRooms().child(roomName);
     }
 
+    public static DatabaseReference getRoomStatus(String roomName) {
+        return getRooms().child(roomName).child("state");
+    }
+
+    public static DatabaseReference getPlayerEmail(String roomName, String pathEmail) {
+        return getRoom(roomName).child(pathEmail);
+    }
+
     public static DatabaseReference getProgressInRoom(String roomName, String progress) {
         return getRoom(roomName).child(progress);
     }

@@ -53,6 +53,12 @@ public class FBRoom {
                 : PROGRESS_PATH_CIRCLE;
     }
 
+    public String getCurrentEmailPath(String email) {
+        return (emailPlayer1.equals(email))
+                ? "emailPlayer1"
+                : "emailPlayer2";
+    }
+
     public String getEnemyProgressPath(String email) {
         BlockState currentState = getCurrentRole(email);
         return currentState == BlockState.CROSS
