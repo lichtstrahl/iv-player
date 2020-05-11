@@ -111,7 +111,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
                 if (engine.getHistorySize() > oldHistorySize) {
                     TicTacProgressDTO lastProgress = engine.getLastState();
-                    publishProgress(lastProgress);
+                    publishProgress(lastProgress, engine.win(), !engine.hasFreeBlocks());
                 }
 
                 break;
@@ -119,14 +119,21 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     }
 
     // Публикуем в соответствующем поле (progressCROSS, progressCIRCLE)
-    private void publishProgress(TicTacProgressDTO lastProgress) {
+    private void publishProgress(TicTacProgressDTO lastProgress, boolean win, boolean end) {
         String progressPath = fbRoom.getCurrentProgressPath(fbUser.getEmail());
-        FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), engine.win(), !engine.hasFreeBlocks(), engine.getCurrentState());
+        FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), win,
+                end, engine.getCurrentState(), fbUser.getEmail());
         App.getProgressInRoom(name, progressPath)
                 .setValue(progress);
+
+        if (win)
+            win(fbUser.getEmail());
+        else if (end)
+            end();
     }
 
     private void win(String uuid) {
+        end();
         Timber.i("Игрок %s выиграл", uuid);
         if (roomListener != null) roomListener.win(uuid);
     }
@@ -219,26 +226,31 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
     }
 
+    public interface Listener extends RoomListener {
+        void updatePlayers(@Nullable String login1, @Nullable String login2);
+        void win(String email);
+        void end();
+        void changeStatus(RoomState roomState);
+        void exit();
+    }
+
     class ProgressObserver implements ValueEventListener {
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBProgress enemyProgress = dataSnapshot.getValue(FBProgress.class);
-            if (enemyProgress != null)
+            if (enemyProgress != null) {
                 engine.markBlock(enemyProgress.getIndex(), enemyProgress.getState());
+                if (engine.win())
+                    win(enemyProgress.getEmail());
+                else if (!engine.hasFreeBlocks())
+                    end();
+            }
         }
 
         @Override
         public void onCancelled(@NonNull DatabaseError databaseError) {
             Timber.w(databaseError.getMessage());
         }
-    }
-
-    public interface Listener extends RoomListener {
-        void updatePlayers(@Nullable String login1, @Nullable String login2);
-        void win(String uuid);
-        void end();
-        void changeStatus(RoomState roomState);
-        void exit();
     }
 }

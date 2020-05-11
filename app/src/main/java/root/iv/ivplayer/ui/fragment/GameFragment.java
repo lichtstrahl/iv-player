@@ -168,7 +168,21 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     }
 
     @Override
-    public void win(String uuid) {
+    public void win(String email) {
+        Objects.requireNonNull(this.getActivity())
+                .runOnUiThread(() -> {
+                    labelRoomStatus.setText("Игрок " + email + "выиграл");
+                    int color1 = viewLogin1.getText().toString().equals(email)
+                            ? Color.GREEN
+                            : Color.RED;
+
+                    int color2 = viewLogin2.getText().toString().equals(email)
+                            ? Color.GREEN
+                            : Color.RED;
+
+                    panelPlayer1.setBackgroundColor(color1);
+                    panelPlayer2.setBackgroundColor(color2);
+                });
     }
 
     @Override
