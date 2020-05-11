@@ -16,6 +16,7 @@ import java.util.Objects;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
@@ -43,6 +44,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         super(2);
         this.name = name;
         this.fbUser = user;
+        this.state = RoomState.WAIT_PLAYERS;
 
         engine = new TicTacEngine();
         scene = new TicTacToeScene(textures, engine);
@@ -87,7 +89,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         return fbRoom.getState();
     }
 
-    private void updateLocalStatus(RoomState newState) {
+    private void updateLocalRoom(RoomState newState) {
             boolean transit = RoomStateJump.of(fbRoom.getState()).possibleTransit(newState);
             if (transit) {
                 Timber.i("%s -> %s", fbRoom.getState().name(), newState.name());
@@ -100,8 +102,21 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
                 Timber.w("Переход %s -> %s невозможен", fbRoom.getState().name(), newState.name());
     }
 
+    private void updateLocalStatus(RoomState newState) {
+        boolean transit = RoomStateJump.of(state).possibleTransit(newState);
+        if (transit) {
+            Timber.i("%s -> %s", state.name(), newState.name());
+            state = newState;
+            if (roomListener != null) {
+                roomListener.changeStatus(state);
+            }
+        }
+        else
+            Timber.w("Переход %s -> %s невозможен", state.name(), newState.name());
+    }
+
     private void touchHandler(MotionEvent event) {
-        if (fbRoom.getState() != RoomState.GAME)
+        if (this.state != RoomState.GAME)
             return;
 
         switch (event.getAction()) {
@@ -119,12 +134,15 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     }
 
     // Публикуем в соответствующем поле (progressCROSS, progressCIRCLE)
+    // А также устанавлиаем поле wait на себя
     private void publishProgress(TicTacProgressDTO lastProgress, boolean win, boolean end) {
         String progressPath = fbRoom.getCurrentProgressPath(fbUser.getEmail());
         FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), win,
                 end, engine.getCurrentState(), fbUser.getEmail());
         App.getProgressInRoom(name, progressPath)
                 .setValue(progress);
+        App.getWaitField(name)
+                .setValue(fbUser.getEmail());
 
         if (win)
             win(fbUser.getEmail());
@@ -149,12 +167,19 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
     // Начало игры (передаём состояние комнаты, которое к этому привело)
     // При запуске необходимо подписаться на обновления прогресса противоположного игрока
+    // Если начал игру ноликами, то установка флага ожидания на себя
     private void startGame(FBRoom newRoom) {
+        updateLocalRoom(RoomState.GAME);
         updateLocalStatus(RoomState.GAME);
         newRoom.setState(RoomState.GAME);
         engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
         App.getRoomStatus(name).setValue(RoomState.GAME);
 
+
+        // Подписка на обновления и обновление
+        App.getWaitField(name).addValueEventListener(new WaitProgressObserver());
+        if (engine.getCurrentState() == BlockState.CIRCLE)
+            App.getWaitField(name).setValue(fbUser.getEmail());
 
         String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getEmail());
         App.getProgressInRoom(name, enemyProgressPath)
@@ -182,7 +207,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
             // Выход игрока
             if (newRoom.isLeavePlayer(fbRoom)) {
-                updateLocalStatus(RoomState.CLOSE);
+                updateLocalRoom(RoomState.CLOSE);
                 newRoom.setState(RoomState.CLOSE);
                 App.getRoom(name)
                         .setValue(newRoom);
@@ -190,7 +215,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
             // Смена статуса
             if (newRoom.isChangeState(fbRoom)) {
-                updateLocalStatus(newRoom.getState());
+                updateLocalRoom(newRoom.getState());
             }
 
             // Обновляем локальные данные о комнате
@@ -215,7 +240,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         // Ищем путь до email для очистки его
         String currentEmailPath = fbRoom.getCurrentEmailPath(fbUser.getEmail());
 
-        updateLocalStatus(RoomState.CLOSE);
+        updateLocalRoom(RoomState.CLOSE);
         App.getPlayerEmail(name, currentEmailPath)
                 .setValue("");
     }
@@ -228,6 +253,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         void exit();
     }
 
+    // Следим за обновлением хода противника
     class ProgressObserver implements ValueEventListener {
 
         @Override
@@ -239,6 +265,25 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
                     win(enemyProgress.getEmail());
                 else if (!engine.hasFreeBlocks())
                     end();
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Timber.w(databaseError.getMessage());
+        }
+    }
+
+    // Следим за обновлением поля WAIT (кто ждёт ход)
+    class WaitProgressObserver implements ValueEventListener {
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            String waitEmail = dataSnapshot.getValue(String.class);
+            if (waitEmail != null && waitEmail.equals(fbUser.getEmail())) {
+                updateLocalStatus(RoomState.WAIT_PROGRESS);
+            } else {
+                updateLocalStatus(RoomState.GAME);
             }
         }
 

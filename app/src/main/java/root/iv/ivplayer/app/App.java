@@ -72,6 +72,10 @@ public class App extends Application {
         return getRoom(roomName).child(progress);
     }
 
+    public static DatabaseReference getWaitField(String roomName) {
+        return getRoom(roomName).child("wait");
+    }
+
     @SneakyThrows
     @Override
     public void onCreate() {
