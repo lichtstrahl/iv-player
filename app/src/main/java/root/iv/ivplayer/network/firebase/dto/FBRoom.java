@@ -7,12 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.tictac.BlockState;
-import root.iv.ivplayer.game.tictac.TicTacEngine;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class FBRoom {
+    public static final String PROGRESS_PATH_CIRCLE = "progressCIRCLE";
+    public static final String PROGRESS_PATH_CROSS = "progressCROSS";
+
     private String emailPlayer1;
     private String emailPlayer2;
     private RoomState state;
@@ -44,11 +46,17 @@ public class FBRoom {
                 : BlockState.CIRCLE;
     }
 
-    public String getProgressPath(String email) {
+    public String getCurrentProgressPath(String email) {
         BlockState currentState = getCurrentRole(email);
         return currentState == BlockState.CROSS
-                ? "progressCROSS"
-                : "progressCIRCLE";
+                ? PROGRESS_PATH_CROSS
+                : PROGRESS_PATH_CIRCLE;
+    }
 
+    public String getEnemyProgressPath(String email) {
+        BlockState currentState = getCurrentRole(email);
+        return currentState == BlockState.CROSS
+                ? PROGRESS_PATH_CIRCLE
+                : PROGRESS_PATH_CROSS;
     }
 }
