@@ -11,7 +11,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
-import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
@@ -85,11 +84,11 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         return fbRoom.getState();
     }
 
-    private void changeState(RoomState newState) {
+    private void updateLocalStatus(RoomState newState) {
             boolean transit = RoomStateJump.of(fbRoom.getState()).possibleTransit(newState);
             if (transit) {
-                fbRoom.setState(newState);
                 Timber.i("%s -> %s", fbRoom.getState().name(), newState.name());
+                fbRoom.setState(newState);
                 if (roomListener != null) {
                     roomListener.changeStatus(fbRoom.getState());
                 }
@@ -120,7 +119,6 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         FBRoom newRoom = dataSnapshot.getValue(FBRoom.class);
 
         if (fbRoom != null) {
-
             int oldCount = fbRoom.countPlayer();
             int newCount = newRoom.countPlayer();
             // Вход игрока
@@ -132,17 +130,38 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
                 // Вторым игроком
                 if (oldCount == 1) {
-                    changeState(RoomState.GAME);
+                    updateLocalStatus(RoomState.GAME);
+                    newRoom.setState(RoomState.GAME);
+                    App.getRoom(name)
+                            .setValue(newRoom);
                 }
             }
 
             // Выход игрока
             if (newCount < oldCount) {
-                changeState(RoomState.CLOSE);
+                updateLocalStatus(RoomState.CLOSE);
+                newRoom.setState(RoomState.CLOSE);
+                App.getRoom(name)
+                        .setValue(newRoom);
+            }
+
+            // Смена статуса
+            if (newRoom.getState() != fbRoom.getState()) {
+                updateLocalStatus(newRoom.getState());
+            }
+
+            // Обновляем локальные данные о комнате
+            this.fbRoom = newRoom;
+        } else { // То есть комната только только открылась. Реагируем если вошли вторым
+            this.fbRoom = newRoom;
+            int newCount = newRoom.countPlayer();
+            if (newCount == 2) {
+                updateLocalStatus(RoomState.GAME);
+                newRoom.setState(RoomState.GAME);
+                App.getRoom(name)
+                        .setValue(newRoom);
             }
         }
-        // Другие изменения
-        this.fbRoom = newRoom;
         roomListener.updatePlayers(fbRoom.getEmailPlayer1(), fbRoom.getEmailPlayer2());
     }
 
@@ -161,10 +180,10 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
             fbRoom.setEmailPlayer2("");
         }
 
-        changeState(RoomState.CLOSE);
-
+        updateLocalStatus(RoomState.CLOSE);
         App.getRoom(name)
                 .setValue(fbRoom);
+
     }
 
     public interface Listener extends RoomListener {

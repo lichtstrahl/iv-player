@@ -25,8 +25,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
+import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
@@ -89,9 +91,10 @@ public class RoomsFragment extends Fragment {
 
     @OnClick(R.id.cardRoom)
     protected void clickRoom() {
+        String roomName = viewRoomName.getText().toString();
         // При нажатии на кнопку необходимо обновить
-        App.getRoom(viewRoomName.getText().toString())
-                .addListenerForSingleValueEvent(new EnterRoomListener());
+        App.getRoom(roomName)
+                .addListenerForSingleValueEvent(new EnterRoomListener(roomName, fbCurrentUser.getEmail()));
     }
 
     private void refreshRooms() {
@@ -130,29 +133,32 @@ public class RoomsFragment extends Fragment {
         void clickRoom(String roomName);
     }
 
+    @AllArgsConstructor
     private class EnterRoomListener implements ValueEventListener {
+        private String roomName;
+        private String email;
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBRoom room = dataSnapshot.getValue(FBRoom.class);
-            // Если оба заняты, то ничего не делаем
-            if (!room.getEmailPlayer1().isEmpty() && !room.getEmailPlayer2().isEmpty()) {
-                Toast.makeText(RoomsFragment.this.getActivity(), "Места заняты", Toast.LENGTH_SHORT).show();
+
+            if (room.getState() != RoomState.WAIT_PLAYERS) {
+                Toast.makeText(RoomsFragment.this.getActivity(), "Комната не ждёт игроков", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Заполняем email-ы (если 1 занят, пишем себя во второй)
             if (room.getEmailPlayer1().isEmpty()) {
-                room.setEmailPlayer1(fbCurrentUser.getEmail());
+                room.setEmailPlayer1(email);
             } else if (room.getEmailPlayer2().isEmpty()) {
-                room.setEmailPlayer2(fbCurrentUser.getEmail());
+                room.setEmailPlayer2(email);
             }
 
-            App.getRoom(viewRoomName.getText().toString())
+            App.getRoom(roomName)
                     .setValue(room);
 
 
-            listener.clickRoom(viewRoomName.getText().toString());
+            listener.clickRoom(roomName);
         }
 
         @Override
