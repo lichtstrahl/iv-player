@@ -2,6 +2,7 @@ package root.iv.ivplayer.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,6 +31,7 @@ import timber.log.Timber;
 
 public class LoginFragment extends Fragment {
     private static final String SHARED_LOGIN_KEY = "shared:login";
+    private static final String SHARED_PASS_KEY = "shared:key";
 
     @BindView(R.id.inputLogin)
     protected TextInputEditText inputLogin;
@@ -38,6 +41,8 @@ public class LoginFragment extends Fragment {
     protected MaterialButton buttonEnter;
     @BindView(R.id.switchWS)
     protected SwitchMaterial switchWS;
+    @BindView(R.id.checkStorage)
+    protected MaterialCheckBox checkStorage;
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
@@ -56,9 +61,13 @@ public class LoginFragment extends Fragment {
         compositeDisposable = new CompositeDisposable();
         fbAuth = FirebaseAuth.getInstance();
 
-        inputLogin.setText("cool.rainbow2012@yandex.ru");
-        inputPassword.setText("i1g9o9r7");
 
+        SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        String login = preferences.getString(SHARED_LOGIN_KEY, null);
+        String password = preferences.getString(SHARED_PASS_KEY, null);
+
+        if (login != null && password != null)
+            enter(login, password);
 
         return view;
     }
@@ -96,16 +105,15 @@ public class LoginFragment extends Fragment {
                 ? inputPassword.getText().toString()
                 : "";
 
-        fbAuth.signInWithEmailAndPassword(login, password)
-                .addOnCompleteListener(this.getActivity(), (taskSignIn) -> {
-                    if (taskSignIn.isSuccessful()) {
-                        FirebaseUser user = fbAuth.getCurrentUser();
-                        listener.authSuccessful(user);
-                    } else {
-                        Toast.makeText(this.getContext(), "Неудачный вход", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        if (checkStorage.isChecked()) {
+            SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+            preferences.edit()
+                    .putString(SHARED_LOGIN_KEY, login)
+                    .putString(SHARED_PASS_KEY, password)
+                    .apply();
+        }
 
+        enter(login, password);
     }
 
     @OnClick(R.id.buttonRegister)
@@ -120,6 +128,18 @@ public class LoginFragment extends Fragment {
                         Toast.makeText(this.getContext(), "Пользователь создан", Toast.LENGTH_SHORT).show();
                     } else {
                         Timber.w("Не удалось создать польщователя");
+                    }
+                });
+    }
+
+    private void enter(String login, String password) {
+        fbAuth.signInWithEmailAndPassword(login, password)
+                .addOnCompleteListener(this.getActivity(), (taskSignIn) -> {
+                    if (taskSignIn.isSuccessful()) {
+                        FirebaseUser user = fbAuth.getCurrentUser();
+                        listener.authSuccessful(user);
+                    } else {
+                        Toast.makeText(this.getContext(), "Неудачный вход", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
