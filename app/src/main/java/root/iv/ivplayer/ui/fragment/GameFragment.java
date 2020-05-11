@@ -18,6 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -27,11 +29,10 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
+import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.PlayerRoom;
 import root.iv.ivplayer.game.room.RoomState;
-import root.iv.ivplayer.game.room.WSRoom;
 import root.iv.ivplayer.game.view.GameView;
-import root.iv.ivplayer.network.ws.dto.UserRole;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment implements DuelRoom.Listener {
@@ -63,14 +64,14 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     protected TextView viewRoomName;
 
     private Listener listener;
-    private WSRoom room;
+    private FirebaseRoom room;
+    private FirebaseAuth fbAuth;
 
-    public static GameFragment getInstance(String roomName, String login) {
+    public static GameFragment getInstance(String roomName) {
         GameFragment fragment = new GameFragment();
 
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ROOM_NAME, roomName);
-        bundle.putString(ARG_LOGIN, login);
         fragment.setArguments(bundle);
 
         return fragment;
@@ -83,12 +84,12 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         ButterKnife.bind(this, view);
         listener.createGameFragment();
 
+        fbAuth = FirebaseAuth.getInstance();
+
         Bundle args = Objects.requireNonNull(getArguments());
         String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
-        String login = args.getString(ARG_LOGIN, "");
 
-        room = buildRoom(roomName, login);
-        room.openWS();
+        room = buildRoom(roomName);
         configGameView(room);
         labelRoomStatus.setText(room.getRoomState().getDescription());
 
@@ -99,7 +100,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        room.closeWS();
     }
 
     @Override
@@ -127,15 +127,14 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     public void onDetach() {
         super.onDetach();
         Timber.i("detach");
+        room.exitFromRoom();
         Context context = Objects.requireNonNull(this.getContext());
         listener.exitFromGameFragment();
         listener = null;
-        room.closeWS();
     }
 
     @OnClick(R.id.viewRolePlayer1)
     protected void clickRole1() {
-        room.changeRole(UserRole.CROSS);
     }
 
     @Override
@@ -189,7 +188,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         gameView.setOnTouchListener(room.getScene().getMainController());
     }
 
-    private WSRoom buildRoom(String name, String login) {
+    private FirebaseRoom buildRoom(String name) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -205,7 +204,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        DuelRoom duelRoom = new DuelRoom(textures, name, login);
+        DuelRoom duelRoom = new DuelRoom(textures, name, fbAuth.getCurrentUser());
         duelRoom.addListener(this);
 
         return duelRoom;

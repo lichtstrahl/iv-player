@@ -5,5 +5,5 @@
     <dimen name="notification_height_expand">256dp</dimen>
     <dimen name="smallMargin">2dp</dimen>
     <dimen name="notification_close_icon_size">50dp</dimen>
-    <dimen name="login_text_size">25sp</dimen>
+    <dimen name="login_text_size">15sp</dimen>
 </resources>

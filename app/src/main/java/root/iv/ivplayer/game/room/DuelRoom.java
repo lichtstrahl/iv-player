@@ -2,13 +2,17 @@ package root.iv.ivplayer.game.room;
 
 import android.view.MotionEvent;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.presence.PNHereNowResult;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
 import io.reactivex.disposables.CompositeDisposable;
+import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
@@ -19,19 +23,14 @@ import root.iv.ivplayer.game.tictac.dto.TicTacDTOType;
 import root.iv.ivplayer.game.tictac.dto.TicTacEndDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.tictac.dto.TicTacRoomStatusDTO;
-import root.iv.ivplayer.network.http.dto.server.BaseResponse;
+import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.ws.WSHolder;
 import root.iv.ivplayer.network.ws.WSUtil;
-import root.iv.ivplayer.network.ws.dto.BaseMessageWS;
-import root.iv.ivplayer.network.ws.dto.PlayerChangeRoleMSG;
-import root.iv.ivplayer.network.ws.dto.PlayerLifecycleMSG;
-import root.iv.ivplayer.network.ws.dto.UserRole;
 import timber.log.Timber;
 
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
-public class DuelRoom extends Room implements WSRoom {
+public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     private String name;
-    private String login;
     private Scene scene;
     private TicTacEngine engine;
     private TicTacJsonProcessor jsonProcessor;
@@ -40,13 +39,15 @@ public class DuelRoom extends Room implements WSRoom {
     private DrawableBlockState icons;
     private WSHolder wsHolder;
     private CompositeDisposable compositeDisposable;
+    private FBRoom fbRoom;
+    private FirebaseUser fbUser;
 
 
 
-    public DuelRoom(TicTacTextures textures, String name, String login) {
+    public DuelRoom(TicTacTextures textures, String name, FirebaseUser user) {
         super(2);
         this.name = name;
-        this.login = login;
+        this.fbUser = user;
         wsHolder = WSHolder.fromURL(WSUtil.springWSURL("/ws/tic-tac", true));
 
         engine = new TicTacEngine();
@@ -55,6 +56,11 @@ public class DuelRoom extends Room implements WSRoom {
 
         jsonProcessor = new TicTacJsonProcessor();
         compositeDisposable = new CompositeDisposable();
+
+        App.getFbDatabase()
+                .getReference("rooms")
+                .child(name)
+                .addValueEventListener(this);
     }
 
 
@@ -72,47 +78,12 @@ public class DuelRoom extends Room implements WSRoom {
         this.roomListener = null;
     }
 
-    // Первый вошедший играет крестиками
-    // Если игрок вошел не первым в комнату, то отыгрываем событие "второй игрок" подключился
-    // Ведь он уже здесь
-    private void hereNowProcess(PNHereNowResult result, PNStatus status) {
-    }
-
     @Override
     public void leavePlayer(String uuid) {
     }
 
     @Override
     public void receiveMsg(PNMessageResult msg) {
-        String body = msg.getMessage().getAsString();
-        TicTacDTOType dtoType = jsonProcessor.dtoType(body);
-
-        switch (dtoType) {
-            case PROGRESS:
-                TicTacProgressDTO progress = jsonProcessor.receiveProgressDTO(body);
-                log("receive:", progress);
-                engine.markBlock(progress.getBlockIndex(), progress.getState());
-                changeState(RoomState.GAME);
-                break;
-
-            case END:
-                TicTacEndDTO end = jsonProcessor.receiveWinDTO(body);
-                changeState(RoomState.CLOSE);
-                if (end.isWin())
-                    win(end.getUuid());
-                else
-                    end();
-                break;
-
-            case ROOM_STATE:
-                TicTacRoomStatusDTO roomStatusDTO = jsonProcessor.reciveStatusRoomDTO(body);
-                Timber.i("Вход в закрытую комнату");
-                if (roomStatusDTO.getRoomState() == RoomState.CLOSE && roomListener != null) {
-                    roomListener.exit();
-                    removeListener();
-                }
-                break;
-        }
     }
 
     @Override
@@ -156,60 +127,38 @@ public class DuelRoom extends Room implements WSRoom {
     }
 
     @Override
-    public void openWS() {
-        if (!wsHolder.isOpened()) {
-            wsHolder.open(this::receiveWSMsg);
-            PlayerLifecycleMSG joinMsg = PlayerLifecycleMSG.join(this.login, this.name);
-            wsHolder.send(jsonProcessor.toJson(joinMsg));
+    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        this.fbRoom = dataSnapshot.getValue(FBRoom.class);
+        roomListener.updatePlayers(fbRoom.getEmailPlayer1(), fbRoom.getEmailPlayer2());
+
+        if (fbRoom.getEmailPlayer1().isEmpty() || fbRoom.getEmailPlayer2().isEmpty()) {
+            changeState(RoomState.PAUSE);
+        }
+
+        if (!fbRoom.getEmailPlayer1().isEmpty() && !fbRoom.getEmailPlayer2().isEmpty()) {
+            changeState(RoomState.GAME);
         }
     }
 
     @Override
-    public void closeWS() {
-        PlayerLifecycleMSG leaveMsg = PlayerLifecycleMSG.leave(this.login, this.name);
-        wsHolder.send(jsonProcessor.toJson(leaveMsg));
-        wsHolder.close();
+    public void onCancelled(@NonNull DatabaseError databaseError) {
+        Timber.w(databaseError.getMessage());
     }
 
     @Override
-    public void changeRole(UserRole role) {
-        PlayerChangeRoleMSG changeRoleMSG = new PlayerChangeRoleMSG(this.login, this.name, role);
-        wsHolder.send(jsonProcessor.toJson(changeRoleMSG));
-    }
-
-    // Обработка сообщений из канала (только если сообщение для нашей комнаты)
-    private void receiveWSMsg(String json) {
-        BaseMessageWS baseMessage = jsonProcessor.receiveBase(json);
-
-        if (baseMessage.getToRoom() != null && !baseMessage.getToRoom().equals(name)) {
-            Timber.w("Пришло сообщение не для нашей комнаты");
-            return;
+    public void exitFromRoom() {
+        if (fbRoom.getEmailPlayer1().equals(fbUser.getEmail())) {
+            fbRoom.setEmailPlayer1("");
         }
 
-        Timber.i("msg: " + baseMessage.getType().name());
-        switch (baseMessage.getType()) {
-            case LIFECYCLE:
-                PlayerLifecycleMSG playerLifecycleMSG = jsonProcessor.receive(json, PlayerLifecycleMSG.class);
-                String login = playerLifecycleMSG.getLogin();
-                String room = playerLifecycleMSG.getRoomName();
-                switch (playerLifecycleMSG.getLifecycle()) {
-                    case JOIN:
-                        Timber.i("Игрок %s вошел в комнату %s", login, room);
-                        break;
-                    case LEAVE:
-                        Timber.i("Игрок %s вышел из комнаты %s", login, room);
-                        break;
-                }
-                break;
+        if (fbRoom.getEmailPlayer2().equals(fbUser.getEmail())) {
+            fbRoom.setEmailPlayer2("");
         }
 
-
-    }
-
-    private void processLifecycleResponse(BaseResponse response) {
-        if (response.getErrorCode() == BaseResponse.OK) {
-            Timber.w(response.getErrorMsg());
-        }
+        App.getFbDatabase()
+                .getReference("rooms")
+                .child(name)
+                .setValue(fbRoom);
     }
 
     public interface Listener extends RoomListener {

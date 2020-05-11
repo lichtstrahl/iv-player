@@ -12,30 +12,22 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
-import root.iv.ivplayer.network.http.dto.server.RoomEntityDTO;
-import root.iv.ivplayer.util.DateTimeUtil;
 import timber.log.Timber;
 
 public class RoomsFragment extends Fragment {
@@ -52,6 +44,7 @@ public class RoomsFragment extends Fragment {
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
+    private FirebaseUser fbCurrentUser;
 
     public static RoomsFragment getInstance(String login) {
         RoomsFragment fragment = new RoomsFragment();
@@ -67,6 +60,7 @@ public class RoomsFragment extends Fragment {
 
         compositeDisposable = new CompositeDisposable();
         refreshRooms();
+        fbCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         return view;
     }
@@ -93,6 +87,11 @@ public class RoomsFragment extends Fragment {
 
     @OnClick(R.id.cardRoom)
     protected void clickRoom() {
+        // При нажатии на кнопку необходимо обновить
+        App.getFbDatabase()
+                .getReference("rooms")
+                .child(viewRoomName.getText().toString())
+                .addListenerForSingleValueEvent(new EnterRoomListener());
     }
 
     private void refreshRooms() {
@@ -128,6 +127,39 @@ public class RoomsFragment extends Fragment {
     }
 
     public interface Listener {
-        void clickRoom(String roomName, String login);
+        void clickRoom(String roomName);
+    }
+
+    private class EnterRoomListener implements ValueEventListener {
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            FBRoom room = dataSnapshot.getValue(FBRoom.class);
+            // Если оба заняты, то ничего не делаем
+            if (!room.getEmailPlayer1().isEmpty() && !room.getEmailPlayer2().isEmpty()) {
+                Toast.makeText(RoomsFragment.this.getActivity(), "Места заняты", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Заполняем email-ы (если 1 занят, пишем себя во второй)
+            if (room.getEmailPlayer1().isEmpty()) {
+                room.setEmailPlayer1(fbCurrentUser.getEmail());
+            } else if (room.getEmailPlayer2().isEmpty()) {
+                room.setEmailPlayer2(fbCurrentUser.getEmail());
+            }
+
+            App.getFbDatabase()
+                    .getReference("rooms")
+                    .child(viewRoomName.getText().toString())
+                    .setValue(room);
+
+
+            listener.clickRoom(viewRoomName.getText().toString());
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Timber.w(databaseError.getMessage());
+        }
     }
 }

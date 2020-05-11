@@ -65,11 +65,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void clickRoom(String roomName, String login) {
+    public void clickRoom(String roomName) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .add(R.id.mainFrame, GameFragment.getInstance(roomName, login), GameFragment.TAG)
+                .add(R.id.mainFrame, GameFragment.getInstance(roomName), GameFragment.TAG)
                 .commit();
     }
 
