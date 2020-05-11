@@ -25,8 +25,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.network.http.dto.server.AuthResponse;
-import root.iv.ivplayer.network.http.dto.server.BaseResponse;
 import timber.log.Timber;
 
 public class LoginFragment extends Fragment {
@@ -57,6 +55,9 @@ public class LoginFragment extends Fragment {
 
         compositeDisposable = new CompositeDisposable();
         fbAuth = FirebaseAuth.getInstance();
+
+        inputLogin.setText("cool.rainbow2012@yandex.ru");
+        inputPassword.setText("i1g9o9r7");
 
 
         return view;

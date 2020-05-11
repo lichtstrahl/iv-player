@@ -21,26 +21,26 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/stdMargin"
                 android:textColor="@android:color/white"
+                android:layout_centerVertical="true"
                 android:textSize="20sp"
                 tools:text="@tools:sample/cities"/>
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/viewRoomCreateDate"
+                android:id="@+id/viewEmailPlayer1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_margin="@dimen/stdMargin"
-                android:layout_toStartOf="@id/viewRoomLive"
-                tools:text="@tools:sample/date/hhmmss"/>
-
-            <com.google.android.material.checkbox.MaterialCheckBox
-                android:id="@+id/viewRoomLive"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
                 android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
                 android:layout_margin="@dimen/stdMargin"
-                android:enabled="false"/>
+                tools:text="@tools:sample/full_names" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/viewEmailPlayer2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/viewEmailPlayer1"
+                android:layout_margin="@dimen/stdMargin"
+                tools:text="@tools:sample/full_names" />
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
 

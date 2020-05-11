@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +14,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -25,32 +33,28 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.http.dto.server.RoomEntityDTO;
 import root.iv.ivplayer.util.DateTimeUtil;
 import timber.log.Timber;
 
 public class RoomsFragment extends Fragment {
     public static final String TAG = "fragment:rooms";
-    private static final String ARG_LOGIN = "arg:login";
 
     @BindView(R.id.cardRoom)
     protected MaterialCardView cardRoom;
     @BindView(R.id.viewRoomName)
     protected MaterialTextView viewRoomName;
-    @BindView(R.id.viewRoomCreateDate)
-    protected MaterialTextView viewRoomCreateDate;
-    @BindView(R.id.viewRoomLive)
-    protected MaterialCheckBox viewRoomLive;
+    @BindView(R.id.viewEmailPlayer1)
+    protected MaterialTextView viewEmailPlayer1;
+    @BindView(R.id.viewEmailPlayer2)
+    protected MaterialTextView viewEmailPlayer2;
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
 
     public static RoomsFragment getInstance(String login) {
         RoomsFragment fragment = new RoomsFragment();
-
-        Bundle bundle = new Bundle();
-        bundle.putString(ARG_LOGIN, login);
-        fragment.setArguments(bundle);
 
         return fragment;
     }
@@ -89,22 +93,38 @@ public class RoomsFragment extends Fragment {
 
     @OnClick(R.id.cardRoom)
     protected void clickRoom() {
-        Bundle args = Objects.requireNonNull(getArguments());
-        listener.clickRoom(viewRoomName.getText().toString(), args.getString(ARG_LOGIN));
     }
 
     private void refreshRooms() {
-        Disposable d = App.getRoomAPI().getAllRooms()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(rooms -> {
-                    RoomEntityDTO room = rooms.get(0);
-                    viewRoomLive.setChecked(room.isLive());
-                    viewRoomCreateDate.setText(DateTimeUtil.stringDateTime(room.getCreateDate()));
-                    viewRoomName.setText(room.getName());
-                }, Timber::e);
+        // Получаем список комнат: child-узлы поля rooms
+        App.getFbDatabase()
+                .getReference("rooms")
+                .addValueEventListener(new RoomsFBListener());
 
-        compositeDisposable.add(d);
+    }
+
+
+    private class RoomsFBListener implements ValueEventListener {
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            long count = dataSnapshot.getChildrenCount();
+            if (count == 0)
+                Toast.makeText(RoomsFragment.this.getActivity(), "Комнат нет", Toast.LENGTH_SHORT).show();
+
+            for (DataSnapshot room : dataSnapshot.getChildren()) {
+                String roomName = room.getKey();
+                FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
+                viewRoomName.setText(roomName);
+                viewEmailPlayer1.setText(fbRoom.getEmailPlayer1());
+                viewEmailPlayer2.setText(fbRoom.getEmailPlayer2());
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Timber.e(databaseError.getMessage());
+        }
     }
 
     public interface Listener {

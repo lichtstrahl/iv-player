@@ -47,18 +47,23 @@
         android:layout_margin="@dimen/stdMargin"
         android:text="@string/label_enter"/>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inputAuthLayout"
+        android:layout_alignParentStart="true"
+        android:layout_margin="@dimen/stdMargin"
+        android:text="@string/label_register"/>
+
+
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/switchWS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/buttonEnter"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonRegister"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/switchWS"
-        android:text="@string/label_register"/>
 
 </RelativeLayout>
