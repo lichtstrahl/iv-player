@@ -55,10 +55,10 @@
         android:layout_centerHorizontal="true"/>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonSend"
+        android:id="@+id/buttonRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/switchWS"
-        android:text="@string/send"/>
+        android:text="@string/label_register"/>
 
 </RelativeLayout>

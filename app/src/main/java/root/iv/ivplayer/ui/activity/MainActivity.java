@@ -9,8 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.firebase.auth.FirebaseUser;
+
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.network.http.dto.server.UserEntityDTO;
 import root.iv.ivplayer.ui.fragment.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
 import root.iv.ivplayer.ui.fragment.RoomsFragment;
@@ -73,11 +74,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void authSuccessful(UserEntityDTO user) {
+    public void authSuccessful(FirebaseUser user) {
         Timber.i("Игрок успешно вошёл");
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFrame, RoomsFragment.getInstance(user.getLogin()), RoomsFragment.TAG)
+                .replace(R.id.mainFrame, RoomsFragment.getInstance(user.getEmail()), RoomsFragment.TAG)
                 .commit();
     }
 

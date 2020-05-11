@@ -2,6 +2,8 @@ package root.iv.ivplayer.app;
 
 import android.app.Application;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -31,6 +33,7 @@ public class App extends Application {
     private static UserAPI userAPI;
     private static RoomAPI roomAPI;
     private static OkHttpClient httpClient;
+    private static FirebaseDatabase fbDatabase;
 
     public static OkHttpClient httpClient() {
         return httpClient;
@@ -42,6 +45,10 @@ public class App extends Application {
 
     public static RoomAPI getRoomAPI() {
         return roomAPI;
+    }
+
+    public static FirebaseDatabase getFbDatabase() {
+        return fbDatabase;
     }
 
     @SneakyThrows
@@ -96,6 +103,8 @@ public class App extends Application {
                 .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_ROOMS))
                 .build()
                 .create(RoomAPI.class);
+
+        fbDatabase = FirebaseDatabase.getInstance();
     }
 
 
