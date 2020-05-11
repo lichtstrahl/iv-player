@@ -60,6 +60,10 @@ public class App extends Application {
         return getRooms().child(roomName);
     }
 
+    public static DatabaseReference getProgressInRoom(String roomName, String progress) {
+        return getRoom(roomName).child(progress);
+    }
+
     @SneakyThrows
     @Override
     public void onCreate() {

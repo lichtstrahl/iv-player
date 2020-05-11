@@ -11,6 +11,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
+import java.util.Objects;
+
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.scene.Scene;
@@ -19,6 +21,7 @@ import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
@@ -98,6 +101,29 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     }
 
     private void touchHandler(MotionEvent event) {
+        if (fbRoom.getState() != RoomState.GAME)
+            return;
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_UP:
+                int oldHistorySize = engine.getHistorySize();
+                engine.touchUp(event.getX(), event.getY());
+
+                if (engine.getHistorySize() > oldHistorySize) {
+                    TicTacProgressDTO lastProgress = engine.getLastState();
+                    publishProgress(lastProgress);
+                }
+
+                break;
+        }
+    }
+
+    // Публикуем в соответствующем поле (progressCROSS, progressCIRCLE)
+    private void publishProgress(TicTacProgressDTO lastProgress) {
+        String progressPath = fbRoom.getProgressPath(fbUser.getEmail());
+        FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), engine.win(), !engine.hasFreeBlocks());
+        App.getProgressInRoom(name, progressPath)
+                .setValue(progress);
     }
 
     private void win(String uuid) {
@@ -116,13 +142,12 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
     @Override
     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-        FBRoom newRoom = dataSnapshot.getValue(FBRoom.class);
-
+        FBRoom newRoom = Objects.requireNonNull(dataSnapshot.getValue(FBRoom.class));
+        Timber.i("Изменения данных");
         if (fbRoom != null) {
             int oldCount = fbRoom.countPlayer();
-            int newCount = newRoom.countPlayer();
             // Вход игрока
-            if (newCount > oldCount) {
+            if (newRoom.isJoinPlayer(fbRoom)) {
                 // В пустую комнату
                 if (oldCount == 0) {
                     Timber.i("Вход в пустую комнату");
@@ -132,13 +157,14 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
                 if (oldCount == 1) {
                     updateLocalStatus(RoomState.GAME);
                     newRoom.setState(RoomState.GAME);
+                    engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
                     App.getRoom(name)
                             .setValue(newRoom);
                 }
             }
 
             // Выход игрока
-            if (newCount < oldCount) {
+            if (newRoom.isLeavePlayer(fbRoom)) {
                 updateLocalStatus(RoomState.CLOSE);
                 newRoom.setState(RoomState.CLOSE);
                 App.getRoom(name)
@@ -146,7 +172,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
             }
 
             // Смена статуса
-            if (newRoom.getState() != fbRoom.getState()) {
+            if (newRoom.isChangeState(fbRoom)) {
                 updateLocalStatus(newRoom.getState());
             }
 
@@ -158,6 +184,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
             if (newCount == 2) {
                 updateLocalStatus(RoomState.GAME);
                 newRoom.setState(RoomState.GAME);
+                engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
                 App.getRoom(name)
                         .setValue(newRoom);
             }
