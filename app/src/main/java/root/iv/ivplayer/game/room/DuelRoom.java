@@ -16,9 +16,7 @@ import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.api.FirebaseRoom;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
-import root.iv.ivplayer.game.tictac.DrawableBlockState;
 import root.iv.ivplayer.game.tictac.TicTacEngine;
-import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
@@ -34,6 +32,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     private Listener roomListener;
     private FBRoom fbRoom;
     private FirebaseUser fbUser;
+    private boolean wait;
 
     public DuelRoom(TicTacTextures textures, String name, FirebaseUser user) {
         super(new TicTacToeScene(textures));
@@ -45,7 +44,9 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
         FBDatabaseAdapter.getRoom(name)
                 .addValueEventListener(this);
-        this.state = RoomState.WAIT_PLAYERS;
+        FBDatabaseAdapter.getRoomStatus(name)
+                .addValueEventListener(new RoomStatusObserver());
+        this.wait = true;
     }
 
     @Override
@@ -71,21 +72,8 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
                 Timber.w("Переход %s -> %s невозможен", fbRoom.getState().name(), newState.name());
     }
 
-    private void updateLocalStatus(RoomState newState) {
-        boolean transit = RoomStateJump.of(state).possibleTransit(newState);
-        if (transit) {
-            Timber.i("%s -> %s", state.name(), newState.name());
-            state = newState;
-            if (roomListener != null) {
-                roomListener.changeStatus(state);
-            }
-        }
-        else
-            Timber.w("Переход %s -> %s невозможен", state.name(), newState.name());
-    }
-
     private void touchHandler(MotionEvent event) {
-        if (this.state != RoomState.GAME)
+        if (this.wait)
             return;
 
         switch (event.getAction()) {
@@ -139,7 +127,6 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     // Если начал игру ноликами, то установка флага ожидания на себя
     private void startGame(FBRoom newRoom) {
         updateLocalRoom(RoomState.GAME);
-        updateLocalStatus(RoomState.GAME);
         newRoom.setState(RoomState.GAME);
         engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
         FBDatabaseAdapter.getRoomStatus(name).setValue(RoomState.GAME);
@@ -147,8 +134,12 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
         // Подписка на обновления и обновление
         FBDatabaseAdapter.getWaitField(name).addValueEventListener(new WaitProgressObserver());
-        if (engine.getCurrentState() == BlockState.CIRCLE)
+        if (engine.getCurrentState() == BlockState.CIRCLE) {
             FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getEmail());
+            this.wait = true;
+        } else {
+            this.wait = false;
+        }
 
         String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getEmail());
         FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
@@ -184,16 +175,12 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
                         .setValue(newRoom);
             }
 
-            // Смена статуса
-            if (newRoom.isChangeState(fbRoom)) {
-                updateLocalRoom(newRoom.getState());
-            }
-
             // Обновляем локальные данные о комнате
             this.fbRoom = newRoom;
         } else { // То есть комната только только открылась. Реагируем если вошли вторым
             this.fbRoom = newRoom;
             int newCount = newRoom.countPlayer();
+            Timber.i("Локальная комната создана, вошли %d-ым", newCount);
             if (newCount == 2) {
                 startGame(newRoom);
             }
@@ -249,11 +236,22 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             String waitEmail = dataSnapshot.getValue(String.class);
-            if (waitEmail != null && waitEmail.equals(fbUser.getEmail())) {
-                updateLocalStatus(RoomState.WAIT_PROGRESS);
-            } else {
-                updateLocalStatus(RoomState.GAME);
-            }
+            wait = waitEmail != null && waitEmail.equals(fbUser.getEmail());
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Timber.w(databaseError.getMessage());
+        }
+    }
+
+    // Следим за изменением статуса комнаты
+    class RoomStatusObserver implements  ValueEventListener {
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            RoomState newState = dataSnapshot.getValue(RoomState.class);
+            updateLocalRoom(newState);
         }
 
         @Override

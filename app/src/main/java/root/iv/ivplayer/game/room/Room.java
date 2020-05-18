@@ -7,11 +7,9 @@ import root.iv.ivplayer.game.scene.Scene;
 public abstract class Room {
     @Getter
     protected Scene scene;
-    protected RoomState state;
 
     public Room(Scene scene) {
         this.scene = scene;
-        this.state = RoomState.NEW;
     }
 
     abstract public void addListener(RoomListener listener);

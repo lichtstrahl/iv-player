@@ -25,8 +25,8 @@ public class FBRoom {
     public int countPlayer() {
         int count = 0;
 
-        count += (player1InRoom()) ? 0 : 1;
-        count += (player2InRoom()) ? 0 : 1;
+        count += (player1InRoom()) ? 1 : 0;
+        count += (player2InRoom()) ? 1 : 0;
 
         return count;
     }
