@@ -1,58 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardRoom"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerListRooms"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/notification_background"
-        app:cardCornerRadius="20dp">
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/viewRoomName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/stdMargin"
-                android:textColor="@android:color/white"
-                android:layout_centerVertical="true"
-                android:textSize="20sp"
-                tools:text="@tools:sample/cities"/>
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomPanel"
+        android:layout_marginStart="@dimen/stdMargin"
+        android:layout_marginEnd="@dimen/stdMargin"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_room"/>
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/viewRoomState"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/viewRoomName"/>
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/viewEmailPlayer1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_margin="@dimen/stdMargin"
-                tools:text="@tools:sample/full_names" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/viewEmailPlayer2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_below="@id/viewEmailPlayer1"
-                android:layout_margin="@dimen/stdMargin"
-                tools:text="@tools:sample/full_names" />
-        </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
+        android:id="@+id/bottomPanel"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonRefresh"
             android:layout_width="wrap_content"
@@ -60,4 +30,4 @@
             android:layout_margin="@dimen/stdMargin"
             android:text="@string/label_refresh"/>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

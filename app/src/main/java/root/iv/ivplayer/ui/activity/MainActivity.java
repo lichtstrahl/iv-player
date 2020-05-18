@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseUser;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.ui.fragment.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
-import root.iv.ivplayer.ui.fragment.RoomsFragment;
+import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements

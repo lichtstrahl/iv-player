@@ -15,9 +15,9 @@ public class FBRoom {
     public static final String PROGRESS_PATH_CIRCLE = "progressCIRCLE";
     public static final String PROGRESS_PATH_CROSS = "progressCROSS";
 
-    private String emailPlayer1;
-    private String emailPlayer2;
-    private RoomState state;
+    protected String emailPlayer1;
+    protected String emailPlayer2;
+    protected RoomState state;
 
     public int countPlayer() {
         int count = 0;

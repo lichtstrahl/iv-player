@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ui.fragment;
+package root.iv.ivplayer.ui.fragment.rooms;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textview.MaterialTextView;
@@ -30,24 +32,19 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
+import root.iv.ivplayer.network.firebase.dto.RoomUI;
 import timber.log.Timber;
 
 public class RoomsFragment extends Fragment {
     public static final String TAG = "fragment:rooms";
 
-    @BindView(R.id.cardRoom)
-    protected MaterialCardView cardRoom;
-    @BindView(R.id.viewRoomName)
-    protected MaterialTextView viewRoomName;
-    @BindView(R.id.viewRoomState)
-    protected MaterialTextView viewRoomState;
-    @BindView(R.id.viewEmailPlayer1)
-    protected MaterialTextView viewEmailPlayer1;
-    @BindView(R.id.viewEmailPlayer2)
-    protected MaterialTextView viewEmailPlayer2;
+    @BindView(R.id.recyclerListRooms)
+    protected RecyclerView recyclerListRooms;
+
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
+    private RoomsAdapter roomsAdapter;
     private FirebaseUser fbCurrentUser;
 
     public static RoomsFragment getInstance(String login) {
@@ -64,8 +61,10 @@ public class RoomsFragment extends Fragment {
 
         compositeDisposable = new CompositeDisposable();
         refreshRooms();
+        roomsAdapter = RoomsAdapter.empty(inflater, this::clickRoom);
         fbCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
-
+        recyclerListRooms.setAdapter(roomsAdapter);
+        recyclerListRooms.setLayoutManager(new LinearLayoutManager(this.getContext(),RecyclerView.VERTICAL, false));
         return view;
     }
 
@@ -89,19 +88,18 @@ public class RoomsFragment extends Fragment {
         refreshRooms();
     }
 
-    @OnClick(R.id.cardRoom)
-    protected void clickRoom() {
-        String roomName = viewRoomName.getText().toString();
+    protected void clickRoom(View roomItemView) {
+        int position = recyclerListRooms.getChildAdapterPosition(roomItemView);
+        RoomUI room = roomsAdapter.getRoom(position);
         // При нажатии на кнопку необходимо обновить
-        App.getRoom(roomName)
-                .addListenerForSingleValueEvent(new EnterRoomListener(roomName, fbCurrentUser.getEmail()));
+        App.getRoom(room.getName())
+                .addListenerForSingleValueEvent(new EnterRoomListener(room.getName(), fbCurrentUser.getEmail()));
     }
 
     private void refreshRooms() {
         // Получаем список комнат: child-узлы поля rooms
         App.getRooms()
                 .addValueEventListener(new RoomsFBListener());
-
     }
 
 
@@ -116,10 +114,7 @@ public class RoomsFragment extends Fragment {
             for (DataSnapshot room : dataSnapshot.getChildren()) {
                 String roomName = room.getKey();
                 FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
-                viewRoomName.setText(roomName);
-                viewEmailPlayer1.setText(fbRoom.getEmailPlayer1());
-                viewEmailPlayer2.setText(fbRoom.getEmailPlayer2());
-                viewRoomState.setText(fbRoom.getState().name());
+                roomsAdapter.roomNotify(roomName, fbRoom);
             }
         }
 
