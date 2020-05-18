@@ -28,14 +28,14 @@ import butterknife.OnClick;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
-import root.iv.ivplayer.game.room.DuelRoom;
+import root.iv.ivplayer.game.tictac.TicTacRoom;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
-public class GameFragment extends Fragment implements DuelRoom.Listener {
+public class GameFragment extends Fragment implements TicTacRoom.Listener {
     public static final String TAG = "fragment:game";
     private static final String ARG_ROOM_NAME = "arg:room-name";
     private static final String ARG_LOGIN = "arg:login";
@@ -191,7 +191,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        return new DuelRoom(textures, name, fbAuth.getCurrentUser());
+        return new TicTacRoom(textures, name, fbAuth.getCurrentUser());
     }
 
     public interface Listener {

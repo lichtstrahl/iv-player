@@ -1,4 +1,4 @@
-package root.iv.ivplayer.game.room;
+package root.iv.ivplayer.game.tictac;
 
 import android.view.MotionEvent;
 
@@ -13,6 +13,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Objects;
 
 import root.iv.ivplayer.game.TicTacTextures;
+import root.iv.ivplayer.game.room.Room;
+import root.iv.ivplayer.game.room.RoomListener;
+import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.room.api.FirebaseRoom;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
@@ -24,8 +28,7 @@ import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
-// Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
-public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
+public class TicTacRoom extends Room implements FirebaseRoom, ValueEventListener {
     private String name;
     private TicTacEngine engine;
     @Nullable
@@ -34,7 +37,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     private FirebaseUser fbUser;
     private boolean wait;
 
-    public DuelRoom(TicTacTextures textures, String name, FirebaseUser user) {
+    public TicTacRoom(TicTacTextures textures, String name, FirebaseUser user) {
         super(new TicTacToeScene(textures));
         this.name = name;
         this.fbUser = user;
