@@ -1,6 +1,7 @@
 package root.iv.ivplayer.network.firebase.dto;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,15 +16,17 @@ public class FBRoom {
     public static final String PROGRESS_PATH_CIRCLE = "progressCIRCLE";
     public static final String PROGRESS_PATH_CROSS = "progressCROSS";
 
+    @Nullable
     protected String emailPlayer1;
+    @Nullable
     protected String emailPlayer2;
     protected RoomState state;
 
     public int countPlayer() {
         int count = 0;
 
-        count += (emailPlayer1.isEmpty()) ? 0 : 1;
-        count += (emailPlayer2.isEmpty()) ? 0 : 1;
+        count += (player1InRoom()) ? 0 : 1;
+        count += (player2InRoom()) ? 0 : 1;
 
         return count;
     }
@@ -54,7 +57,7 @@ public class FBRoom {
     }
 
     public String getCurrentEmailPath(String email) {
-        return (emailPlayer1.equals(email))
+        return (email.equals(emailPlayer1))
                 ? "emailPlayer1"
                 : "emailPlayer2";
     }
@@ -64,5 +67,13 @@ public class FBRoom {
         return currentState == BlockState.CROSS
                 ? PROGRESS_PATH_CIRCLE
                 : PROGRESS_PATH_CROSS;
+    }
+
+    public boolean player1InRoom() {
+        return emailPlayer1 != null && !emailPlayer1.isEmpty();
+    }
+
+    public boolean player2InRoom() {
+        return emailPlayer2 != null && !emailPlayer2.isEmpty();
     }
 }

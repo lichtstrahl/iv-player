@@ -21,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -93,12 +94,9 @@ public class RoomsFragment extends Fragment {
                 ? inputNewRoomName.getText().toString()
                 : "";
         if (!newRoomName.isEmpty()) {
-            FBDatabaseAdapter.getRooms()
-                    .child(newRoomName)
-                    .child("state")
-                    .setValue(RoomState.WAIT_PLAYERS);
+            FBDatabaseAdapter.getRooms().addListenerForSingleValueEvent(new CreateRoomListener(newRoomName));
         } else {
-            Toast.makeText(this.getContext(), "Имя не задано", Toast.LENGTH_SHORT);
+            Toast.makeText(this.getContext(), "Имя не задано", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -120,6 +118,7 @@ public class RoomsFragment extends Fragment {
         void clickRoom(String roomName);
     }
 
+    // Реагируем на изменение списка комнат и данных в них
     private class RoomsFBListener extends FBDataListener {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -131,6 +130,30 @@ public class RoomsFragment extends Fragment {
                 String roomName = room.getKey();
                 FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
                 roomsAdapter.roomNotify(roomName, fbRoom);
+            }
+        }
+    }
+
+    // Смотрим какие сейчас комнаты есть и если нужное нам имя не занято, создаём
+    @AllArgsConstructor
+    private class CreateRoomListener extends FBDataListener {
+        private String roomName;
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+            boolean busy = false;
+            for (DataSnapshot room : dataSnapshot.getChildren())
+                if (room.getKey() != null && room.getKey().equals(roomName))
+                    busy = true;
+
+            if (!busy) {
+                FBDatabaseAdapter.getRooms()
+                        .child(roomName)
+                        .child("state")
+                        .setValue(RoomState.WAIT_PLAYERS);
+            } else {
+                Toast.makeText(RoomsFragment.this.getContext(), "Название занято", Toast.LENGTH_SHORT).show();
             }
         }
     }
