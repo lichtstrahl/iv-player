@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,7 +42,8 @@ public class RoomsFragment extends Fragment {
 
     @BindView(R.id.recyclerListRooms)
     protected RecyclerView recyclerListRooms;
-
+    @BindView(R.id.inputNewRoomName)
+    protected TextInputEditText inputNewRoomName;
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
@@ -84,9 +87,19 @@ public class RoomsFragment extends Fragment {
             listener = (Listener) context;
     }
 
-    @OnClick(R.id.buttonRefresh)
-    protected void clickRefresh() {
-        refreshRooms();
+    @OnClick(R.id.buttonCreateRoom)
+    protected void clickButtonCreateRoom() {
+        String newRoomName = (inputNewRoomName.getText() != null)
+                ? inputNewRoomName.getText().toString()
+                : "";
+        if (!newRoomName.isEmpty()) {
+            FBDatabaseAdapter.getRooms()
+                    .child(newRoomName)
+                    .child("state")
+                    .setValue(RoomState.WAIT_PLAYERS);
+        } else {
+            Toast.makeText(this.getContext(), "Имя не задано", Toast.LENGTH_SHORT);
+        }
     }
 
     protected void clickRoom(View roomItemView) {

@@ -12,4 +12,5 @@
     <string name="label_enter">Вход</string>
     <string name="label_password">Пароль</string>
     <string name="label_refresh">Обновить</string>
+    <string name="label_new_room_name">Имя новой комнаты</string>
 </resources>

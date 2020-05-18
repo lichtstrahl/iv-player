@@ -7,6 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerListRooms"
         android:layout_width="match_parent"
@@ -14,20 +15,41 @@
         android:layout_above="@id/bottomPanel"
         android:layout_marginStart="@dimen/stdMargin"
         android:layout_marginEnd="@dimen/stdMargin"
+        android:layout_marginBottom="6dp"
         tools:itemCount="3"
-        tools:listitem="@layout/item_room"/>
-
+        tools:listitem="@layout/item_room" />
 
     <LinearLayout
         android:id="@+id/bottomPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonRefresh"
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputNewRoomNameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="9">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputNewRoomName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/label_new_room_name"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/buttonCreateRoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:layout_margin="@dimen/stdMargin"
-            android:text="@string/label_refresh"/>
+            app:backgroundTint="@color/colorAccent"
+            app:fabSize="mini"
+            app:srcCompat="@drawable/ic_add"
+            app:tint="@android:color/white"/>
     </LinearLayout>
+
+
+
 </RelativeLayout>
