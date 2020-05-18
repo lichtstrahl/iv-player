@@ -39,7 +39,8 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         this.name = name;
         this.fbUser = user;
 
-        engine = new TicTacEngine();
+        TicTacToeScene ticTacToeScene = (TicTacToeScene) scene;
+        engine = new TicTacEngine(ticTacToeScene.getAllBlocks());
         scene.getMainController().setTouchHandler(this::touchHandler);
 
         FBDatabaseAdapter.getRoom(name)

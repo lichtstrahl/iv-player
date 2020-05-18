@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.controller.Controller;
@@ -80,6 +81,13 @@ public class TicTacToeScene implements Scene {
         this.drawableObjects = new ArrayList<>();
         // Контроллер для управления касаниями
         this.controller = new TicTacController();
+    }
+
+    public List<Block> getAllBlocks() {
+        return this.grid.getObjects()
+                .stream()
+                .map(obj -> (Block)obj)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -22,10 +22,13 @@ public class TicTacEngine {
     private BlockState currentState;
     private List<TicTacProgressDTO> history;
 
-    public TicTacEngine() {
+    public TicTacEngine(List<Block> blocks) {
         this.blocks = new Block[9];
         this.currentState = BlockState.FREE;
         this.history = new ArrayList<>();
+
+        for (int i = 0; i < 9; i++)
+            loadBlock(i, blocks.get(i));
     }
 
     public void loadBlock(int index, Block block) {
