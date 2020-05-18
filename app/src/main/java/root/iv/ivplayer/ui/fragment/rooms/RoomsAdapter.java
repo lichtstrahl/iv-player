@@ -1,6 +1,7 @@
 package root.iv.ivplayer.ui.fragment.rooms;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.firebase.dto.RoomUI;
@@ -22,12 +25,14 @@ import root.iv.ivplayer.network.firebase.dto.RoomUI;
 @AllArgsConstructor
 public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHolder> {
     private List<RoomUI> rooms;
-
     private LayoutInflater inflater;
     private View.OnClickListener roomClickListener;
+    private View.OnCreateContextMenuListener createContextMenuListener;
+    @Getter
+    private int position;
 
-    public static RoomsAdapter empty(LayoutInflater inflater, View.OnClickListener clickListener) {
-        return new RoomsAdapter(new LinkedList<>(), inflater, clickListener);
+    public static RoomsAdapter empty(LayoutInflater inflater, View.OnClickListener clickListener, View.OnCreateContextMenuListener contextMenuListener) {
+        return new RoomsAdapter(new LinkedList<>(), inflater, clickListener, contextMenuListener, Menu.NONE);
     }
 
     @NonNull
@@ -39,6 +44,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
 
     @Override
     public void onBindViewHolder(@NonNull RoomViewHolder holder, int position) {
+        holder.itemView.setOnLongClickListener(v -> {
+            this.position = position;
+            return false;
+        });
+
         holder.bind(rooms.get(position));
     }
 
@@ -55,6 +65,12 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
             updateRoom(name, room);
         else
             addRoom(name, room);
+    }
+
+    public void removeRoom(String name) {
+        int index = roomNames().indexOf(name);
+        rooms.remove(index);
+        notifyItemRemoved(index);
     }
 
     public RoomUI getRoom(int index) {
@@ -101,6 +117,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
             viewEmail1 = itemView.findViewById(R.id.viewEmailPlayer1);
             viewEmail2 = itemView.findViewById(R.id.viewEmailPlayer2);
             itemView.setOnClickListener(roomClickListener);
+            itemView.setOnCreateContextMenuListener(createContextMenuListener);
         }
 
         private void bind(RoomUI room) {
