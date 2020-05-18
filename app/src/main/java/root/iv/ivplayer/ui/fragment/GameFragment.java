@@ -115,6 +115,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     @Override
     public void onStart() {
         super.onStart();
+        room.init();
     }
 
     @Override

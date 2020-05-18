@@ -14,4 +14,5 @@ public abstract class Room {
 
     abstract public void addListener(RoomListener listener);
     abstract public void exitFromRoom();
+    abstract public void init();
 }
