@@ -60,16 +60,11 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void exitFromGameFragment() {
-
-    }
-
-    @Override
     public void clickRoom(String roomName) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .add(R.id.mainFrame, GameFragment.getInstance(roomName), GameFragment.TAG)
+                .replace(R.id.mainFrame, GameFragment.getInstance(roomName), GameFragment.TAG)
                 .commit();
     }
 

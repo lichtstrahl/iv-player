@@ -45,6 +45,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
         FBDatabaseAdapter.getRoom(name)
                 .addValueEventListener(this);
+        this.state = RoomState.WAIT_PLAYERS;
     }
 
     @Override
@@ -162,6 +163,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
             int oldCount = fbRoom.countPlayer();
             // Вход игрока
             if (newRoom.isJoinPlayer(fbRoom)) {
+                Timber.i("В комнату кто-то вошёл");
                 // В пустую комнату
                 if (oldCount == 0) {
                     Timber.i("Вход в пустую комнату");
@@ -175,6 +177,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
 
             // Выход игрока
             if (newRoom.isLeavePlayer(fbRoom)) {
+                Timber.i("Из комнаты кто-то вышел");
                 updateLocalRoom(RoomState.CLOSE);
                 newRoom.setState(RoomState.CLOSE);
                 FBDatabaseAdapter.getRoom(name)

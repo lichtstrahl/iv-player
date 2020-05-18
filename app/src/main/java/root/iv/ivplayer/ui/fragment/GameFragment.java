@@ -128,7 +128,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         super.onDetach();
         Timber.i("detach");
         room.exitFromRoom();
-        listener.exitFromGameFragment();
         listener = null;
     }
 
@@ -198,6 +197,5 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     public interface Listener {
         void createGameFragment();
         void stopGameFragment();
-        void exitFromGameFragment();
     }
 }
