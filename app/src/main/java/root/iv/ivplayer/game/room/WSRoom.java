@@ -1,5 +1,6 @@
 package root.iv.ivplayer.game.room;
 
+import root.iv.ivplayer.game.room.api.PubNubRoom;
 import root.iv.ivplayer.network.ws.dto.UserRole;
 
 /**
@@ -8,7 +9,7 @@ import root.iv.ivplayer.network.ws.dto.UserRole;
  * 2. Закрывает WS
   */
 
-public interface WSRoom extends PlayerRoom {
+public interface WSRoom extends PubNubRoom {
     void openWS(); // Обработчик должен передаваться на этапе создания комнаты
     void closeWS();
     void changeRole(UserRole role);

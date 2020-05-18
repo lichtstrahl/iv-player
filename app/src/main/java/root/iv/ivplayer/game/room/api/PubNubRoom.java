@@ -1,7 +1,9 @@
-package root.iv.ivplayer.game.room;
+package root.iv.ivplayer.game.room.api;
 
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
+import root.iv.ivplayer.game.room.RoomListener;
+import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.scene.Scene;
 
 /**
@@ -11,7 +13,7 @@ import root.iv.ivplayer.game.scene.Scene;
  * + Запущена ли комната?
  * + Постановка на паузу
  */
-public interface PlayerRoom {
+public interface PubNubRoom {
     void joinPlayer(String uuid);
     void leavePlayer(String uuid);
     void receiveMsg(PNMessageResult msg);

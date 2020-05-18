@@ -13,8 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +29,8 @@ import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
+import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.firebase.dto.RoomUI;
 import timber.log.Timber;
@@ -63,6 +63,7 @@ public class RoomsFragment extends Fragment {
         refreshRooms();
         roomsAdapter = RoomsAdapter.empty(inflater, this::clickRoom);
         fbCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
+
         recyclerListRooms.setAdapter(roomsAdapter);
         recyclerListRooms.setLayoutManager(new LinearLayoutManager(this.getContext(),RecyclerView.VERTICAL, false));
         return view;
@@ -92,19 +93,21 @@ public class RoomsFragment extends Fragment {
         int position = recyclerListRooms.getChildAdapterPosition(roomItemView);
         RoomUI room = roomsAdapter.getRoom(position);
         // При нажатии на кнопку необходимо обновить
-        App.getRoom(room.getName())
+        FBDatabaseAdapter.getRoom(room.getName())
                 .addListenerForSingleValueEvent(new EnterRoomListener(room.getName(), fbCurrentUser.getEmail()));
     }
 
     private void refreshRooms() {
         // Получаем список комнат: child-узлы поля rooms
-        App.getRooms()
+        FBDatabaseAdapter.getRooms()
                 .addValueEventListener(new RoomsFBListener());
     }
 
+    public interface Listener {
+        void clickRoom(String roomName);
+    }
 
-    private class RoomsFBListener implements ValueEventListener {
-
+    private class RoomsFBListener extends FBDataListener {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             long count = dataSnapshot.getChildrenCount();
@@ -117,19 +120,10 @@ public class RoomsFragment extends Fragment {
                 roomsAdapter.roomNotify(roomName, fbRoom);
             }
         }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            Timber.e(databaseError.getMessage());
-        }
-    }
-
-    public interface Listener {
-        void clickRoom(String roomName);
     }
 
     @AllArgsConstructor
-    private class EnterRoomListener implements ValueEventListener {
+    private class EnterRoomListener extends FBDataListener {
         private String roomName;
         private String email;
 
@@ -143,22 +137,17 @@ public class RoomsFragment extends Fragment {
             }
 
             // Заполняем email-ы (если 1 занят, пишем себя во второй)
-            if (room.getEmailPlayer1().isEmpty()) {
+            if (room.getEmailPlayer1() == null || room.getEmailPlayer1().isEmpty()) {
                 room.setEmailPlayer1(email);
-            } else if (room.getEmailPlayer2().isEmpty()) {
+            } else if (room.getEmailPlayer2() == null || room.getEmailPlayer2().isEmpty()) {
                 room.setEmailPlayer2(email);
             }
 
-            App.getRoom(roomName)
+            FBDatabaseAdapter.getRoom(roomName)
                     .setValue(room);
 
 
             listener.clickRoom(roomName);
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            Timber.w(databaseError.getMessage());
         }
     }
 }

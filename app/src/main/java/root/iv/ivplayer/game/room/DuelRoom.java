@@ -9,12 +9,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
 import java.util.Objects;
 
-import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
+import root.iv.ivplayer.game.room.api.FirebaseRoom;
 import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.DrawableBlockState;
@@ -22,6 +21,7 @@ import root.iv.ivplayer.game.tictac.TicTacEngine;
 import root.iv.ivplayer.game.tictac.TicTacJsonProcessor;
 import root.iv.ivplayer.game.tictac.TicTacToeScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
@@ -29,36 +29,22 @@ import timber.log.Timber;
 // Комната для дуэли. Является комнатой и реализует действия для слежения за количеством
 public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     private String name;
-    private Scene scene;
     private TicTacEngine engine;
-    private TicTacJsonProcessor jsonProcessor;
     @Nullable
     private Listener roomListener;
-    private DrawableBlockState icons;
     private FBRoom fbRoom;
     private FirebaseUser fbUser;
 
-
-
     public DuelRoom(TicTacTextures textures, String name, FirebaseUser user) {
-        super(2);
+        super(new TicTacToeScene(textures));
         this.name = name;
         this.fbUser = user;
-        this.state = RoomState.WAIT_PLAYERS;
 
         engine = new TicTacEngine();
-        scene = new TicTacToeScene(textures, engine);
         scene.getMainController().setTouchHandler(this::touchHandler);
 
-        jsonProcessor = new TicTacJsonProcessor();
-
-        App.getRoom(name)
+        FBDatabaseAdapter.getRoom(name)
                 .addValueEventListener(this);
-    }
-
-
-    @Override
-    public void joinPlayer(String uuid) {
     }
 
     @Override
@@ -67,26 +53,8 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
     }
 
     @Override
-    public void removeListener() {
-        this.roomListener = null;
-    }
-
-    @Override
-    public void leavePlayer(String uuid) {
-    }
-
-    @Override
-    public void receiveMsg(PNMessageResult msg) {
-    }
-
-    @Override
     public Scene getScene() {
         return scene;
-    }
-
-    @Override
-    public RoomState getRoomState() {
-        return fbRoom.getState();
     }
 
     private void updateLocalRoom(RoomState newState) {
@@ -139,9 +107,9 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         String progressPath = fbRoom.getCurrentProgressPath(fbUser.getEmail());
         FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), win,
                 end, engine.getCurrentState(), fbUser.getEmail());
-        App.getProgressInRoom(name, progressPath)
+        FBDatabaseAdapter.getProgressInRoom(name, progressPath)
                 .setValue(progress);
-        App.getWaitField(name)
+        FBDatabaseAdapter.getWaitField(name)
                 .setValue(fbUser.getEmail());
 
         if (win)
@@ -173,16 +141,16 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         updateLocalStatus(RoomState.GAME);
         newRoom.setState(RoomState.GAME);
         engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
-        App.getRoomStatus(name).setValue(RoomState.GAME);
+        FBDatabaseAdapter.getRoomStatus(name).setValue(RoomState.GAME);
 
 
         // Подписка на обновления и обновление
-        App.getWaitField(name).addValueEventListener(new WaitProgressObserver());
+        FBDatabaseAdapter.getWaitField(name).addValueEventListener(new WaitProgressObserver());
         if (engine.getCurrentState() == BlockState.CIRCLE)
-            App.getWaitField(name).setValue(fbUser.getEmail());
+            FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getEmail());
 
         String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getEmail());
-        App.getProgressInRoom(name, enemyProgressPath)
+        FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
                 .addValueEventListener(new ProgressObserver());
     }
 
@@ -209,7 +177,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
             if (newRoom.isLeavePlayer(fbRoom)) {
                 updateLocalRoom(RoomState.CLOSE);
                 newRoom.setState(RoomState.CLOSE);
-                App.getRoom(name)
+                FBDatabaseAdapter.getRoom(name)
                         .setValue(newRoom);
             }
 
@@ -241,8 +209,7 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         String currentEmailPath = fbRoom.getCurrentEmailPath(fbUser.getEmail());
 
         updateLocalRoom(RoomState.CLOSE);
-        App.getPlayerEmail(name, currentEmailPath)
-                .setValue("");
+        FBDatabaseAdapter.getPlayerEmail(name, currentEmailPath).removeValue();
     }
 
     public interface Listener extends RoomListener {
@@ -250,7 +217,6 @@ public class DuelRoom extends Room implements FirebaseRoom, ValueEventListener {
         void win(String email);
         void end();
         void changeStatus(RoomState roomState);
-        void exit();
     }
 
     // Следим за обновлением хода противника

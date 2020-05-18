@@ -1,26 +1,19 @@
 package root.iv.ivplayer.game.room;
 
-/**
-    Класс комната: содержит информацию о максимальном и минимальном количестве игроков
-    А также основную сцену
- */
+import lombok.Getter;
+import root.iv.ivplayer.game.scene.Scene;
+
+// Базовая комната. Имеет состояние и отрисовываемую сцену, больше ничего
 public abstract class Room {
-    protected int maxPlayers;
-    protected int minPlauers;
-    protected int currentPlayers;
+    @Getter
+    protected Scene scene;
     protected RoomState state;
 
-    public Room(int fixPlayer) {
-        this.maxPlayers = fixPlayer;
-        this.minPlauers = fixPlayer;
-        this.currentPlayers = 0;
+    public Room(Scene scene) {
+        this.scene = scene;
         this.state = RoomState.NEW;
     }
 
-    public Room(int maxPlayers, int minPlauers) {
-        this.maxPlayers = maxPlayers;
-        this.minPlauers = minPlauers;
-        this.currentPlayers = 0;
-        this.state = RoomState.NEW;
-    }
+    abstract public void addListener(RoomListener listener);
+    abstract public void exitFromRoom();
 }

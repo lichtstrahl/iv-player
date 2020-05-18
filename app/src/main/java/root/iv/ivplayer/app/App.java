@@ -34,7 +34,6 @@ public class App extends Application {
     private static UserAPI userAPI;
     private static RoomAPI roomAPI;
     private static OkHttpClient httpClient;
-    private static FirebaseDatabase fbDatabase;
 
     public static OkHttpClient httpClient() {
         return httpClient;
@@ -46,34 +45,6 @@ public class App extends Application {
 
     public static RoomAPI getRoomAPI() {
         return roomAPI;
-    }
-
-    public static FirebaseDatabase getFbDatabase() {
-        return fbDatabase;
-    }
-
-    public static DatabaseReference getRooms() {
-        return fbDatabase.getReference("rooms");
-    }
-
-    public static DatabaseReference getRoom(String roomName) {
-        return getRooms().child(roomName);
-    }
-
-    public static DatabaseReference getRoomStatus(String roomName) {
-        return getRooms().child(roomName).child("state");
-    }
-
-    public static DatabaseReference getPlayerEmail(String roomName, String pathEmail) {
-        return getRoom(roomName).child(pathEmail);
-    }
-
-    public static DatabaseReference getProgressInRoom(String roomName, String progress) {
-        return getRoom(roomName).child(progress);
-    }
-
-    public static DatabaseReference getWaitField(String roomName) {
-        return getRoom(roomName).child("wait");
     }
 
     @SneakyThrows
@@ -128,8 +99,6 @@ public class App extends Application {
                 .baseUrl(String.format("%s%s/", WSUtil.baseSpringURL(true), API_ROOMS))
                 .build()
                 .create(RoomAPI.class);
-
-        fbDatabase = FirebaseDatabase.getInstance();
     }
 
 

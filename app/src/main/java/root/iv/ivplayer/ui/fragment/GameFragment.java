@@ -29,9 +29,9 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.DuelRoom;
-import root.iv.ivplayer.game.room.FirebaseRoom;
-import root.iv.ivplayer.game.room.PlayerRoom;
+import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
@@ -64,7 +64,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     protected TextView viewRoomName;
 
     private Listener listener;
-    private FirebaseRoom room;
+    private Room room;
     private FirebaseAuth fbAuth;
 
     public static GameFragment getInstance(String roomName) {
@@ -90,7 +90,8 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
 
         room = buildRoom(roomName);
-        configGameView(room);
+        configGameView(room.getScene());
+        room.addListener(this);
 
         viewRoomName.setText(roomName);
         return view;
@@ -127,7 +128,6 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         super.onDetach();
         Timber.i("detach");
         room.exitFromRoom();
-        Context context = Objects.requireNonNull(this.getContext());
         listener.exitFromGameFragment();
         listener = null;
     }
@@ -143,19 +143,9 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
     }
 
     @Override
-    public void exit() {
-        this.getActivity().onBackPressed();
-    }
-
-    @Override
     public void changeStatus(RoomState roomState) {
         switchRoomState.setChecked(roomState == RoomState.GAME);
         labelRoomStatus.setText(roomState.getDescription());
-    }
-
-    @Override
-    public void roomClosed() {
-
     }
 
     @Override
@@ -180,13 +170,13 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
         panelPlayer2.setBackgroundColor(Color.LTGRAY);
     }
 
-    private void configGameView(PlayerRoom room) {
-        gameView.loadScene(room.getScene());
-        gameView.setOnClickListener(room.getScene().getMainController());
-        gameView.setOnTouchListener(room.getScene().getMainController());
+    private void configGameView(Scene scene) {
+        gameView.loadScene(scene);
+        gameView.setOnClickListener(scene.getMainController());
+        gameView.setOnTouchListener(scene.getMainController());
     }
 
-    private FirebaseRoom buildRoom(String name) {
+    private Room buildRoom(String name) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -202,10 +192,7 @@ public class GameFragment extends Fragment implements DuelRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        DuelRoom duelRoom = new DuelRoom(textures, name, fbAuth.getCurrentUser());
-        duelRoom.addListener(this);
-
-        return duelRoom;
+        return new DuelRoom(textures, name, fbAuth.getCurrentUser());
     }
 
     public interface Listener {
