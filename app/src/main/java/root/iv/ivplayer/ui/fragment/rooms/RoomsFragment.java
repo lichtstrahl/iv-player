@@ -53,6 +53,8 @@ public class RoomsFragment extends Fragment {
     private RoomsAdapter roomsAdapter;
     private FirebaseUser fbCurrentUser;
 
+    private RoomsFBListener roomsFBListener;
+
     public static RoomsFragment getInstance(String login) {
         RoomsFragment fragment = new RoomsFragment();
 
@@ -66,12 +68,13 @@ public class RoomsFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         compositeDisposable = new CompositeDisposable();
-        refreshRooms();
         roomsAdapter = RoomsAdapter.empty(inflater, this::clickRoom, this::createContextMenu);
         fbCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         recyclerListRooms.setAdapter(roomsAdapter);
         recyclerListRooms.setLayoutManager(new LinearLayoutManager(this.getContext(),RecyclerView.VERTICAL, false));
+
+        roomsFBListener = new RoomsFBListener();
 
         registerForContextMenu(recyclerListRooms);
         return view;
@@ -82,6 +85,22 @@ public class RoomsFragment extends Fragment {
         super.onDetach();
         compositeDisposable.dispose();
         listener = null;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        FBDatabaseAdapter.getRooms()
+                .removeEventListener(roomsFBListener);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // Получаем список комнат: child-узлы поля rooms
+        FBDatabaseAdapter.getRooms()
+                .addValueEventListener(roomsFBListener);
     }
 
     @Override
@@ -143,12 +162,6 @@ public class RoomsFragment extends Fragment {
                 menu.add(Menu.NONE, MENU_ITEM_REOPEN, Menu.NONE, "reopen");
             }
         }
-    }
-
-    private void refreshRooms() {
-        // Получаем список комнат: child-узлы поля rooms
-        FBDatabaseAdapter.getRooms()
-                .addValueEventListener(new RoomsFBListener());
     }
 
     public interface Listener {
