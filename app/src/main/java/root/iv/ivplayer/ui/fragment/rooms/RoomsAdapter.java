@@ -77,7 +77,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
         return rooms.get(index);
     }
 
-    private List<String> roomNames() {
+    public List<String> roomNames() {
         return rooms.stream().map(RoomUI::getName).collect(Collectors.toList());
     }
 

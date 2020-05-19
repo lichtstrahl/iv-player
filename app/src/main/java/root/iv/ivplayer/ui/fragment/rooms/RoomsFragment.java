@@ -23,6 +23,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -168,19 +170,30 @@ public class RoomsFragment extends Fragment {
         void clickRoom(String roomName);
     }
 
-    // Реагируем на изменение списка комнат и данных в них
+    /**
+     * Firebase listeners
+     */
+
+    /**
+     *  Реагируем на изменение списка комнат и данных в них
+     *
+     *  Каждая комната обновляется (если её не было, то будет создана в адаптере)
+     *  Запоминается список уже имеющихся комнат, чтобы те что не пришли от FB были удалены
+      */
     private class RoomsFBListener extends FBDataListener {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            long count = dataSnapshot.getChildrenCount();
-            if (count == 0)
-                Toast.makeText(RoomsFragment.this.getActivity(), "Комнат нет", Toast.LENGTH_SHORT).show();
+            List<String> removedRooms = roomsAdapter.roomNames();
 
             for (DataSnapshot room : dataSnapshot.getChildren()) {
                 String roomName = room.getKey();
                 FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
                 roomsAdapter.roomNotify(roomName, fbRoom);
+                removedRooms.remove(roomName);
             }
+
+            for (String removedName : removedRooms)
+                roomsAdapter.removeRoom(removedName);
         }
     }
 
