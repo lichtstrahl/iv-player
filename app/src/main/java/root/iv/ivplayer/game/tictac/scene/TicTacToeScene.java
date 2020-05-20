@@ -66,7 +66,7 @@ public class TicTacToeScene implements Scene {
         // Заливка фона
         canvas.drawColor(textures.getBackground());
         // Отрисовка поля
-        grid.getObjects().forEach(obj -> obj.render(canvas));
+        grid.render(canvas);
 
         drawableObjects.forEach(obj -> obj.render(canvas));
     }

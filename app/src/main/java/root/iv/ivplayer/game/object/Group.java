@@ -1,5 +1,7 @@
 package root.iv.ivplayer.game.object;
 
+import android.graphics.Canvas;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,5 +27,9 @@ public class Group {
 
     public void add(DrawableObject object) {
         objects.add(object);
+    }
+
+    public void render(Canvas canvas) {
+        objects.forEach(obj -> obj.render(canvas));
     }
 }
