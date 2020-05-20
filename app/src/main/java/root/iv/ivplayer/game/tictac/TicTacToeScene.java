@@ -1,6 +1,7 @@
 package root.iv.ivplayer.game.tictac;
 
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +12,12 @@ import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
-import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.scene.Scene;
 
 public class TicTacToeScene implements Scene {
-    private static final int SQUARE_SIZE = 150;
 
     // Генераторы для создания объектов
     private ObjectGenerator backgroundGenerator;
-
     private TicTacTextures textures;
 
     // Объекты для отрисовки
@@ -29,21 +27,20 @@ public class TicTacToeScene implements Scene {
     // Элменты управления
     private SensorController controller;
 
-    public TicTacToeScene(TicTacTextures textures) {
+    public TicTacToeScene(TicTacTextures textures, int squareSize, int startMargin, int topMargin) {
         this.textures = textures;
+
 
         // Генератор для фона
         backgroundGenerator = new ObjectGenerator();
         backgroundGenerator.setDrawable(textures.getSquare());
-        backgroundGenerator.setFixSize(SQUARE_SIZE, SQUARE_SIZE);
+        backgroundGenerator.setFixSize(squareSize, squareSize);
 
 
         // Формирование сетки
-        int startMargin = 100;
-        int topMargin = 100;
         grid = Group.empty();
         for (int i = 0; i < 9; i++) {
-            StaticObject2 square = backgroundGenerator.buildStatic(startMargin + (i % 3)*SQUARE_SIZE, topMargin + (i /3) * SQUARE_SIZE);
+            StaticObject2 square = backgroundGenerator.buildStatic(startMargin + (i % 3)*squareSize, topMargin + (i /3) * squareSize);
             Block block = Block.of(square, textures.getCross(), textures.getCircle());
             grid.add(block);
         }
