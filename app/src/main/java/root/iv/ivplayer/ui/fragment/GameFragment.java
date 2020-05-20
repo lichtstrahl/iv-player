@@ -90,7 +90,6 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
 
         room = buildRoom(roomName);
         configGameView(room.getScene());
-        room.addListener(this);
 
         viewRoomName.setText(roomName);
         return view;
@@ -167,7 +166,6 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
 
     private void configGameView(Scene scene) {
         gameView.loadScene(scene);
-        gameView.setOnClickListener(scene.getMainController());
         gameView.setOnTouchListener(scene.getMainController());
     }
 
@@ -187,7 +185,9 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        return new TicTacRoom(textures, name, fbAuth.getCurrentUser());
+        TicTacRoom ticTacRoom =  new TicTacRoom(textures, name, fbAuth.getCurrentUser());
+        ticTacRoom.addListener(this);
+        return ticTacRoom;
     }
 
     public interface Listener {

@@ -18,6 +18,7 @@ import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
+import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;

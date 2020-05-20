@@ -27,7 +27,7 @@ public class TicTacToeScene implements Scene {
     private Group grid;
 
     // Элменты управления
-    private TicTacController controller;
+    private SensorController controller;
 
     public TicTacToeScene(TicTacTextures textures) {
         this.textures = textures;
@@ -83,11 +83,6 @@ public class TicTacToeScene implements Scene {
 
     @Override
     public void moveOnObject(int index, float dx, float dy) {
-
-    }
-
-    @Override
-    public void grabObjectControl(Object2 object) {
 
     }
 }
