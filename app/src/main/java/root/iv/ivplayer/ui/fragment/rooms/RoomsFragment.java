@@ -232,7 +232,7 @@ public class RoomsFragment extends Fragment {
                 return;
             }
 
-            // Заполняем email-ы (если 1 занят, пишем себя во второй)
+            // Заполняем uid-ы (если 1 занят, пишем себя во второй)
             if (room.getPlayer1() == null) {
                 room.setPlayer1(FBUser.create(fbCurrentUser.getDisplayName(), fbCurrentUser.getUid()));
             } else if (room.getPlayer2() == null) {

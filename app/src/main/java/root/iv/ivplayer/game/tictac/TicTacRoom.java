@@ -169,7 +169,7 @@ public class TicTacRoom extends Room {
 
     @Override
     public void exit() {
-        // Ищем путь до email для очистки его
+        // Ищем путь до uid для очистки его
         String currentEmailPath = fbRoom.getCurrentPlayerPath(fbUser.getUid());
 
         updateLocalStatus(RoomState.CLOSE);
@@ -189,7 +189,7 @@ public class TicTacRoom extends Room {
             if (enemyProgress != null) {
                 engine.markBlock(enemyProgress.getIndex(), enemyProgress.getState());
                 if (engine.win())
-                    win(enemyProgress.getEmail());
+                    win(enemyProgress.getUid());
                 else if (engine.end())
                     end();
             }

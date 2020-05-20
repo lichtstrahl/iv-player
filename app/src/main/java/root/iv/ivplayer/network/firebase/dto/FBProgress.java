@@ -14,5 +14,5 @@ public class FBProgress {
     private boolean win;
     private boolean end;
     private BlockState state;
-    private String email;
+    private String uid;
 }
