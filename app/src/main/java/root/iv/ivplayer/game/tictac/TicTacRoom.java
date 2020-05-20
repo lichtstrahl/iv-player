@@ -26,7 +26,7 @@ import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
 public class TicTacRoom extends Room {
-    private TicTacEngine engine;
+    private TicTacEngineAPI engine;
     @Nullable
     private Listener roomListener;
     private FBRoom fbRoom;
@@ -43,6 +43,7 @@ public class TicTacRoom extends Room {
         getScene().getMainController().setTouchHandler(this::touchHandler);
     }
 
+    @Override
     public void init() {
         RoomObserver roomObserver = new RoomObserver();
         FBDatabaseAdapter.getRoom(name)
@@ -74,12 +75,12 @@ public class TicTacRoom extends Room {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
-                int oldHistorySize = engine.getHistorySize();
+                int oldHistorySize = engine.getProgressHistorySize();
                 engine.touchUp(event.getX(), event.getY());
 
-                if (engine.getHistorySize() > oldHistorySize) {
-                    TicTacProgressDTO lastProgress = engine.getLastState();
-                    publishProgress(lastProgress, engine.win(), !engine.hasFreeBlocks());
+                if (engine.getProgressHistorySize() > oldHistorySize) {
+                    TicTacProgressDTO lastProgress = engine.getLastProgress();
+                    publishProgress(lastProgress, engine.win(), engine.end());
                 }
 
                 break;
@@ -91,7 +92,7 @@ public class TicTacRoom extends Room {
     private void publishProgress(TicTacProgressDTO lastProgress, boolean win, boolean end) {
         String progressPath = fbRoom.getCurrentProgressPath(fbUser.getEmail());
         FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), win,
-                end, engine.getCurrentState(), fbUser.getEmail());
+                end, engine.getCurrentRole(), fbUser.getEmail());
         FBDatabaseAdapter.getProgressInRoom(name, progressPath)
                 .setValue(progress);
         FBDatabaseAdapter.getWaitField(name)
@@ -121,18 +122,20 @@ public class TicTacRoom extends Room {
     // Начало игры (передаём состояние комнаты, которое к этому привело)
     // При запуске необходимо подписаться на обновления прогресса противоположного игрока
     // Если начал игру ноликами, то установка флага ожидания на себя
-    private void startGame(FBRoom newRoom) {
+    private void startGame(FBRoom newRoom, BlockState currentRole) {
         newRoom.setState(RoomState.GAME);
-        engine.setCurrentState(newRoom.getCurrentRole(fbUser.getEmail()));
-        FBDatabaseAdapter.getRoomStatus(name).setValue(RoomState.GAME);
+        engine.setCurrentRole(currentRole);
+        FBDatabaseAdapter.getRoomStatus(name)
+                .setValue(RoomState.GAME);
 
 
-        // Подписка на обновления и обновление
+        // Подписка на обновления флага ожидания
         WaitProgressObserver waitProgressObserver = new WaitProgressObserver();
-        FBDatabaseAdapter.getWaitField(name).addValueEventListener(waitProgressObserver);
+        FBDatabaseAdapter.getWaitField(name)
+                .addValueEventListener(waitProgressObserver);
         fbObservers.add(waitProgressObserver);
 
-        if (engine.getCurrentState() == BlockState.CIRCLE) {
+        if (currentRole == BlockState.CIRCLE) {
             FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getEmail());
             updateLocalStatus(RoomState.GAME);
         } else {
@@ -187,7 +190,7 @@ public class TicTacRoom extends Room {
                 engine.markBlock(enemyProgress.getIndex(), enemyProgress.getState());
                 if (engine.win())
                     win(enemyProgress.getEmail());
-                else if (!engine.hasFreeBlocks())
+                else if (engine.end())
                     end();
             }
         }
@@ -223,7 +226,7 @@ public class TicTacRoom extends Room {
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBRoom newRoom = Objects.requireNonNull(dataSnapshot.getValue(FBRoom.class));
             Timber.i("Изменения в комнате");
-            if (fbRoom != null) {
+            if (fbRoom != null) { // Т.е. мы уже находимся в комнате
                 int oldCount = fbRoom.countPlayer();
                 // Вход игрока
                 if (newRoom.isJoinPlayer(fbRoom)) {
@@ -235,7 +238,7 @@ public class TicTacRoom extends Room {
 
                     // Вторым игроком
                     if (oldCount == 1) {
-                        startGame(newRoom);
+                        startGame(newRoom, BlockState.CROSS);
                     }
                 }
 
@@ -250,12 +253,12 @@ public class TicTacRoom extends Room {
 
                 // Обновляем локальные данные о комнате
                 updateRoom(newRoom);
-            } else { // То есть комната только только открылась. Реагируем если вошли вторым
+            } else { // То есть это собственный вход в комнату
                 updateRoom(newRoom);
                 int newCount = newRoom.countPlayer();
                 Timber.i("Локальная комната создана, вошли %d-ым", newCount);
                 if (newCount == 2) {
-                    startGame(newRoom);
+                    startGame(newRoom, BlockState.CIRCLE);
                 }
             }
             roomListener.updatePlayers(fbRoom.getEmailPlayer1(), fbRoom.getEmailPlayer2());

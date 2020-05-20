@@ -12,13 +12,11 @@ import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 
 // Непосредственно движок игры
 // Здесь будут храниться необходимые данные для рассчетов
-public class TicTacEngine {
+public class TicTacEngine implements TicTacEngineAPI {
     private static final int COUNT_COLUMNS = 3;
     private static final int COUNT_ROWS = 3;
 
     private Block[] blocks;
-    @Getter
-    @Setter
     private BlockState currentState;
     private List<TicTacProgressDTO> history;
 
@@ -39,7 +37,18 @@ public class TicTacEngine {
         this.blocks[index].mark(state);
     }
 
+    @Override
+    public BlockState getCurrentRole() {
+        return currentState;
+    }
+
+    @Override
+    public void setCurrentRole(BlockState state) {
+        this.currentState = state;
+    }
+
     // Отрыв пальца от экрана. Должен ли блок реагировать?
+    @Override
     public void touchUp(float x, float y) {
         for (int i = 0; i < blocks.length; i++) {
             Block b = blocks[i];
@@ -52,12 +61,9 @@ public class TicTacEngine {
         }
     }
 
-    public int getHistorySize() {
-        return history.size();
-    }
-
-    public TicTacProgressDTO getLastState() {
-        return history.get(history.size()-1);
+    @Override
+    public boolean end() {
+        return !hasFreeBlocks();
     }
 
     // Определяет является ли ситуация на площадке победной
@@ -141,5 +147,15 @@ public class TicTacEngine {
         }
 
         return true;
+    }
+
+    @Override
+    public int getProgressHistorySize() {
+        return history.size();
+    }
+
+    @Override
+    public TicTacProgressDTO getLastProgress() {
+        return history.get(history.size()-1);
     }
 }
