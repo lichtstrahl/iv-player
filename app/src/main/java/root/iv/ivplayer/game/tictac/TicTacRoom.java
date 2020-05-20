@@ -108,10 +108,12 @@ public class TicTacRoom extends Room {
             end();
     }
 
-    private void win(String uuid) {
+    private void win(String uid) {
         end();
-        Timber.i("Игрок %s выиграл", uuid);
-        if (roomListener != null) roomListener.win(uuid);
+
+
+        Timber.i("Игрок %s выиграл", uid);
+        if (roomListener != null) roomListener.win(fbRoom.numberPlayer(uid));
     }
 
     private void end() {
@@ -213,7 +215,7 @@ public class TicTacRoom extends Room {
 
     public interface Listener extends RoomListener {
         void updatePlayers(@Nullable String displayName1, @Nullable String displayName2);
-        void win(String email);
+        void win(int numberPlayer);
         void end();
         void changeStatus(RoomState roomState);
     }

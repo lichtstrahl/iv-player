@@ -86,4 +86,11 @@ public class FBRoom {
                 ? player2.getName()
                 : player2.getUid();
     }
+
+    // Номер игрока по id
+    public int numberPlayer(String uid) {
+        return (player1 != null && player1.getUid().equals(uid))
+                ? 1
+                : 2;
+    }
 }

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -144,13 +143,17 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     }
 
     @Override
-    public void win(String email) {
-        labelRoomStatus.setText("Игрок " + email + "выиграл");
-        int color1 = viewLogin1.getText().toString().equals(email)
+    public void win(int numberPlayer) {
+        String name = (numberPlayer == 1)
+                ? viewLogin1.getText().toString()
+                : viewLogin2.getText().toString();
+
+        labelRoomStatus.setText("Игрок " + name + "выиграл");
+        int color1 = numberPlayer == 1
                 ? Color.GREEN
                 : Color.RED;
 
-        int color2 = viewLogin2.getText().toString().equals(email)
+        int color2 = numberPlayer == 2
                 ? Color.GREEN
                 : Color.RED;
 
