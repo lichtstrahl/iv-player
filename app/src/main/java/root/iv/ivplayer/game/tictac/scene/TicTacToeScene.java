@@ -1,4 +1,4 @@
-package root.iv.ivplayer.game.tictac;
+package root.iv.ivplayer.game.tictac.scene;
 
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -13,6 +13,9 @@ import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.tictac.Block;
+import root.iv.ivplayer.game.tictac.TicTacController;
+import root.iv.ivplayer.game.tictac.TicTacTextures;
 
 public class TicTacToeScene implements Scene {
 
