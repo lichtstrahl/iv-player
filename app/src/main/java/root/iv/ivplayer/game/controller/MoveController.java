@@ -1,6 +1,5 @@
 package root.iv.ivplayer.game.controller;
 
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -11,7 +10,7 @@ import timber.log.Timber;
 
 // Контроллер, служит для управления каким-либо объектом
 // Для этого он как минимум должен быть движимым
-public abstract class MoveController implements View.OnClickListener,Controller {
+public abstract class MoveController implements CaptureController, View.OnClickListener {
     @Nullable
     private MovableObject object;
 
@@ -39,10 +38,5 @@ public abstract class MoveController implements View.OnClickListener,Controller 
     @Override
     public boolean isReleased() {
         return object == null;
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        return false;
     }
 }

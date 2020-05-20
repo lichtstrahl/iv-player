@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import root.iv.ivplayer.game.controller.Controller;
+import root.iv.ivplayer.game.controller.SensorController;
 import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
@@ -19,7 +19,6 @@ public class TicTacToeScene implements Scene {
 
     // Генераторы для создания объектов
     private ObjectGenerator backgroundGenerator;
-    private ObjectGenerator crossGenerator;
 
     private TicTacTextures textures;
 
@@ -29,33 +28,6 @@ public class TicTacToeScene implements Scene {
 
     // Элменты управления
     private TicTacController controller;
-
-
-
-    public TicTacToeScene(TicTacTextures textures, TicTacEngine engine) {
-        this.textures = textures;
-
-        // Генератор для фона
-        backgroundGenerator = new ObjectGenerator();
-        backgroundGenerator.setDrawable(textures.getSquare());
-        backgroundGenerator.setFixSize(SQUARE_SIZE, SQUARE_SIZE);
-
-        // Формирование сетки
-        int startMargin = 100;
-        int topMargin = 100;
-        grid = Group.empty();
-        for (int i = 0; i < 9; i++) {
-            StaticObject2 square = backgroundGenerator.buildStatic(startMargin + (i % 3)*SQUARE_SIZE, topMargin + (i /3) * SQUARE_SIZE);
-            Block block = Block.of(square, textures.getCross(), textures.getCircle());
-            engine.loadBlock(i, block);
-            grid.add(block);
-        }
-
-        // Прочие отрисовываемые объекты
-        this.drawableObjects = new ArrayList<>();
-        // Контроллер для управления касаниями
-        this.controller = new TicTacController();
-    }
 
     public TicTacToeScene(TicTacTextures textures) {
         this.textures = textures;
@@ -100,7 +72,7 @@ public class TicTacToeScene implements Scene {
     }
 
     @Override
-    public Controller getMainController() {
+    public SensorController getMainController() {
         return controller;
     }
 

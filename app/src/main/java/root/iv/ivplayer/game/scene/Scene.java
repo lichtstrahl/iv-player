@@ -2,11 +2,9 @@ package root.iv.ivplayer.game.scene;
 
 import android.graphics.Canvas;
 
-import root.iv.ivplayer.game.controller.Controller;
+import root.iv.ivplayer.game.controller.SensorController;
 import root.iv.ivplayer.game.object.DrawableObject;
-import root.iv.ivplayer.game.object.Player;
 import root.iv.ivplayer.game.object.simple.Object2;
-import root.iv.ivplayer.game.tictac.dto.PlayerPositionDTO;
 
 /**
      Что умеет сцена:
@@ -19,7 +17,7 @@ import root.iv.ivplayer.game.tictac.dto.PlayerPositionDTO;
 public interface Scene {
     void render(Canvas canvas);
 
-    Controller getMainController();
+    SensorController getMainController();
     void addDrawableObject(DrawableObject object2);
 
     void moveOnObject(int index, float dx, float dy);

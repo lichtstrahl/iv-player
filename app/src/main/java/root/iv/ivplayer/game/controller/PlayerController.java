@@ -1,6 +1,5 @@
 package root.iv.ivplayer.game.controller;
 
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -55,15 +54,5 @@ public class PlayerController extends MoveController {
     @Override
     public boolean isReleased() {
         return player == null;
-    }
-
-    @Override
-    public void setClickHandler(androidx.core.util.Consumer<View> handler) {
-
-    }
-
-    @Override
-    public void setTouchHandler(androidx.core.util.Consumer<MotionEvent> event) {
-
     }
 }

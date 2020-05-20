@@ -6,10 +6,10 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
-import root.iv.ivplayer.game.controller.Controller;
+import root.iv.ivplayer.game.controller.SensorController;
 import root.iv.ivplayer.game.object.simple.Object2;
 
-public class TicTacController implements Controller {
+public class TicTacController implements SensorController {
     @Nullable
     private Consumer<View> clickConsumer;
     @Nullable
