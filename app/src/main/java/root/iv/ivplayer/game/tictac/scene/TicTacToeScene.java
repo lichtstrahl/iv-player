@@ -38,6 +38,7 @@ public class TicTacToeScene implements Scene {
         squareGenerator = new ObjectGenerator();
         squareGenerator.setDrawable(textures.getSquare());
         squareGenerator.setFixSize(squareSize, squareSize);
+        squareGenerator.setTintColor(textures.getSquareColor());
 
         backgroundGenerator = new ObjectGenerator();
         backgroundGenerator.setDrawable(textures.getBackground());
@@ -64,7 +65,7 @@ public class TicTacToeScene implements Scene {
             StaticObject2 square = squareGenerator.buildStatic(
                     startMargin + (i % 3)*squareSize,
                     topMargin + (i /3) * squareSize);
-            Block block = Block.of(square, textures.getCross(), textures.getCircle());
+            Block block = Block.of(square, textures.getCross(), textures.getCircle(), textures.getCrossColor(), textures.getCircleColor());
             group.add(block);
         }
 

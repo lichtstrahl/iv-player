@@ -5,6 +5,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.ColorInt;
+
 import lombok.Getter;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
@@ -26,7 +28,7 @@ public class Block extends StaticObject2 {
         this.state = BlockState.FREE;
     }
 
-    public static Block of(StaticObject2 block, Drawable cross, Drawable circle) {
+    public static Block of(StaticObject2 block, Drawable cross, Drawable circle, @ColorInt int crossColor, @ColorInt int circleColor) {
         Block b =  new Block(block);
 
         int iconW = b.width-margin*2;
@@ -36,11 +38,13 @@ public class Block extends StaticObject2 {
         b.crossGenerator = new ObjectGenerator();
         b.crossGenerator.setDrawable(cross);
         b.crossGenerator.setFixSize(iconW, iconH);
+        b.crossGenerator.setTintColor(crossColor);
 
         // Генератор для ноликов
         b.circleGenerator = new ObjectGenerator();
         b.circleGenerator.setDrawable(circle);
         b.circleGenerator.setFixSize(iconW, iconH);
+        b.circleGenerator.setTintColor(circleColor);
 
         return b;
     }
