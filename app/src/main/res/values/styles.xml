@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <!-- Стиль для подписей внизу крестиков-ноликов -->
+    <style name="TicTacBottomLabel">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
 </resources>

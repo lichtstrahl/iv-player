@@ -47,7 +47,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     @BindView(R.id.labelRoomStatus)
     protected TextView labelRoomStatus;
     @BindView(R.id.bottomBlock)
-    protected LinearLayout layout;
+    protected ViewGroup layout;
     @BindView(R.id.viewLoginPlayer1)
     protected TextView viewLogin1;
     @BindView(R.id.viewRolePlayer1)
@@ -57,9 +57,9 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     @BindView(R.id.viewRolePlayer2)
     protected ImageView viewRole2;
     @BindView(R.id.panelPlayer1)
-    protected RelativeLayout panelPlayer1;
+    protected ViewGroup panelPlayer1;
     @BindView(R.id.panelPlayer2)
-    protected RelativeLayout panelPlayer2;
+    protected ViewGroup panelPlayer2;
     @BindView(R.id.viewRoomName)
     protected TextView viewRoomName;
 

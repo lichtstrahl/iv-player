@@ -9,29 +9,33 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottomBlock"
+        tools:background="@drawable/background_texture_of_dark_wood"
         />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/bottomBlock"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/stdMargin"
-        android:orientation="vertical">
+        android:background="@drawable/background_light_wood">
         <TextView
             android:id="@+id/viewRoomName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/TicTacBottomLabel"
             android:textSize="20sp"
             tools:text="@tools:sample/cities"
             />
         <LinearLayout
+            android:id="@+id/statusPanel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@id/viewRoomName">
             <TextView
                 android:id="@+id/labelRoomStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                style="@style/TicTacBottomLabel"
                 android:text="@string/label_room_status"
                 android:layout_gravity="center_vertical"/>
             <androidx.appcompat.widget.SwitchCompat
@@ -44,7 +48,9 @@
         <RelativeLayout
             android:id="@+id/panelPlayer1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/horizontalCenter"
+            android:layout_toStartOf="@id/horizontalCenter">
             <TextView
                 android:id="@+id/viewLoginPlayer1"
                 android:layout_width="match_parent"
@@ -56,6 +62,7 @@
                 android:textSize="@dimen/login_text_size"
                 android:textAlignment="gravity"
                 android:gravity="center_vertical"
+                style="@style/TicTacBottomLabel"
                 android:layout_marginStart="@dimen/stdMargin"/>
             <ImageView
                 android:id="@+id/viewRolePlayer1"
@@ -67,10 +74,19 @@
                 android:src="@drawable/ic_cross"/>
         </RelativeLayout>
 
+        <View
+            android:id="@+id/horizontalCenter"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_below="@id/statusPanel"
+            android:layout_centerHorizontal="true"/>
+
         <RelativeLayout
             android:id="@+id/panelPlayer2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/horizontalCenter"
+            android:layout_toEndOf="@id/horizontalCenter">
             <TextView
                 android:id="@+id/viewLoginPlayer2"
                 android:layout_width="match_parent"
@@ -82,6 +98,7 @@
                 android:textSize="@dimen/login_text_size"
                 android:textAlignment="gravity"
                 android:gravity="center_vertical"
+                style="@style/TicTacBottomLabel"
                 android:layout_marginStart="@dimen/stdMargin"/>
 
             <ImageView
@@ -94,6 +111,6 @@
                 android:src="@drawable/ic_circle"/>
         </RelativeLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>
