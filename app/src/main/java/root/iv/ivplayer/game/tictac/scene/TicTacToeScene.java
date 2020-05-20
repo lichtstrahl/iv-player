@@ -41,12 +41,7 @@ public class TicTacToeScene implements Scene {
 
 
         // Формирование сетки
-        grid = Group.empty();
-        for (int i = 0; i < 9; i++) {
-            StaticObject2 square = backgroundGenerator.buildStatic(startMargin + (i % 3)*squareSize, topMargin + (i /3) * squareSize);
-            Block block = Block.of(square, textures.getCross(), textures.getCircle());
-            grid.add(block);
-        }
+        grid = gridConstruct(startMargin, topMargin, squareSize);
 
         // Прочие отрисовываемые объекты
         this.drawableObjects = new ArrayList<>();
@@ -61,6 +56,19 @@ public class TicTacToeScene implements Scene {
                 .collect(Collectors.toList());
     }
 
+    public Group gridConstruct(int startMargin, int topMargin, int squareSize) {
+        Group group = Group.empty();
+        for (int i = 0; i < 9; i++) {
+            StaticObject2 square = backgroundGenerator.buildStatic(
+                    startMargin + (i % 3)*squareSize,
+                    topMargin + (i /3) * squareSize);
+            Block block = Block.of(square, textures.getCross(), textures.getCircle());
+            group.add(block);
+        }
+
+        return group;
+    }
+
     @Override
     public void render(Canvas canvas) {
         // Заливка фона
@@ -69,6 +77,32 @@ public class TicTacToeScene implements Scene {
         grid.render(canvas);
 
         drawableObjects.forEach(obj -> obj.render(canvas));
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        int min = Math.min(width, height);
+
+        int size = min / 3;
+        int startMargin = (width < height)
+                ? 0
+                : (width - height) / 2;
+        int topMargin = (width < height)
+                ? (height - width) / 2
+                : 0;
+
+        backgroundGenerator.setFixSize(size, size);
+
+        // Создаём новую группу блоков с новыми размерами
+        Group newGrid = gridConstruct(startMargin, topMargin, size);
+        // Переносим старые состояния
+        int count = grid.size();
+        for (int i = 0; i < count; i++) {
+            Block oldBlock = (Block) grid.getObjects().get(i);
+            Block newBlock = (Block) newGrid.getObjects().get(i);
+            newBlock.mark(oldBlock.getState());
+        }
+        grid = newGrid;
     }
 
     @Override

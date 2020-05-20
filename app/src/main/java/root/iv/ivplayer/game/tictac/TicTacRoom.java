@@ -72,8 +72,10 @@ public class TicTacRoom extends Room {
     }
 
     private void touchHandler(MotionEvent event) {
+        Timber.i("touch: %s, %d", fbRoom.getState().name(), event.getAction());
         if (fbRoom.getState() != RoomState.GAME)
             return;
+
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:

@@ -23,6 +23,11 @@ public class StaticObject2 extends Object2 implements DrawableObject {
     }
 
 
+    public void resize(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
+
     public void render(Canvas canvas) {
         int x0 = Math.round(position.x);
         int y0 = Math.round(position.y);

@@ -17,4 +17,5 @@ public interface Scene {
     void addDrawableObject(DrawableObject object2);
 
     void moveOnObject(int index, float dx, float dy);
+    void resize(int width, int height);
 }

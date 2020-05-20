@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -19,6 +20,7 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Objects;
 
@@ -64,7 +66,6 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
 
     private Listener listener;
     private Room room;
-    private FirebaseAuth fbAuth;
 
     public static GameFragment getInstance(String roomName) {
         GameFragment fragment = new GameFragment();
@@ -83,13 +84,17 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         ButterKnife.bind(this, view);
         listener.createGameFragment();
 
-        fbAuth = FirebaseAuth.getInstance();
+        FirebaseAuth fbAuth = FirebaseAuth.getInstance();
 
         Bundle args = Objects.requireNonNull(getArguments());
         String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
 
-        room = buildRoom(roomName);
+        room = buildRoom(roomName, fbAuth.getCurrentUser(), gameView);
         configGameView(room.getScene());
+
+//        gameView.post(() -> {
+//            room.getScene().resize(gameView.getWidth(), gameView.getHeight());
+//        });
 
         viewRoomName.setText(roomName);
         return view;
@@ -169,7 +174,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         gameView.setOnTouchListener(scene.getMainController());
     }
 
-    private Room buildRoom(String name) {
+    private Room buildRoom(String name, FirebaseUser user, GameView gameView) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -185,7 +190,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
                 .background(Color.WHITE)
                 .build();
 
-        TicTacRoom ticTacRoom =  new TicTacRoom(textures, name, fbAuth.getCurrentUser());
+        TicTacRoom ticTacRoom =  new TicTacRoom(textures, name, user);
         ticTacRoom.addListener(this);
         return ticTacRoom;
     }

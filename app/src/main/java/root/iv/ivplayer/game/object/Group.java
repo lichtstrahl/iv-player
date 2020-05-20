@@ -32,4 +32,8 @@ public class Group {
     public void render(Canvas canvas) {
         objects.forEach(obj -> obj.render(canvas));
     }
+
+    public int size() {
+        return objects.size();
+    }
 }

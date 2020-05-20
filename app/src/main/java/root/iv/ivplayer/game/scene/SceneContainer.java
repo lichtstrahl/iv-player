@@ -11,4 +11,8 @@ public abstract class SceneContainer {
     public SceneContainer(Scene scene) {
         this.scene = scene;
     }
+
+    public void autoResize(int width, int height) {
+
+    }
 }
