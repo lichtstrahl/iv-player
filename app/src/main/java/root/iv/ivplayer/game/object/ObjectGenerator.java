@@ -3,6 +3,7 @@ package root.iv.ivplayer.game.object;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -26,6 +27,10 @@ public class ObjectGenerator {
     public void setFixSize(int w, int h) {
         width = w;
         height = h;
+    }
+
+    public void setTintColor(@ColorInt int color) {
+        this.drawable.setTint(color);
     }
 
     public boolean hasTexture() {
