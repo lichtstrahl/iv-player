@@ -13,6 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -47,6 +50,7 @@ public class LoginFragment extends Fragment {
     private CompositeDisposable compositeDisposable;
     private Listener listener;
     private FirebaseAuth fbAuth;
+    private GoogleSignInClient googleSignInClient;
 
     public static LoginFragment getInstance() {
         return new LoginFragment();
@@ -60,6 +64,13 @@ public class LoginFragment extends Fragment {
 
         compositeDisposable = new CompositeDisposable();
         fbAuth = FirebaseAuth.getInstance();
+
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(this.getContext(), gso);
 
 
         SharedPreferences preferences = getActivity().getPreferences(Context.MODE_PRIVATE);

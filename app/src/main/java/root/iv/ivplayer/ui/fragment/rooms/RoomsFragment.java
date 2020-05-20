@@ -120,7 +120,7 @@ public class RoomsFragment extends Fragment {
 
         switch (item.getItemId()) {
             case MENU_ITEM_DELETE:
-                FBDatabaseAdapter.getRooms().child(room.getName()).removeValue(this::deleteRoomListener);
+                FBDatabaseAdapter.getRooms().child(room.getName()).removeValue();
                 break;
 
             case MENU_ITEM_REOPEN:
@@ -218,12 +218,6 @@ public class RoomsFragment extends Fragment {
             } else {
                 Toast.makeText(RoomsFragment.this.getContext(), "Название занято", Toast.LENGTH_SHORT).show();
             }
-        }
-    }
-
-    private void deleteRoomListener(@Nullable DatabaseError error, @NonNull DatabaseReference reference) {
-        if (error == null) {
-            roomsAdapter.removeRoom(reference.getKey());
         }
     }
 

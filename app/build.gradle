@@ -98,6 +98,7 @@ dependencies {
 
     implementation "com.google.android.material:material:$materialDesignVersion"
 
+    // Firebase
     implementation "com.google.firebase:firebase-analytics:$fbVersion"
     implementation "com.google.firebase:firebase-database:$fbDatabaseVersion"
     implementation "com.google.firebase:firebase-auth:$fbAuthVersion"
