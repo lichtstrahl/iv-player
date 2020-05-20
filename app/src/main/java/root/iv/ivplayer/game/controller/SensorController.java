@@ -26,7 +26,7 @@ public abstract class SensorController implements View.OnClickListener, View.OnT
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (touchConsumer != null) touchConsumer.accept(event);
-        return false;
+        return true;
     }
 
     public void setClickHandler(Consumer<View> handler) {
