@@ -183,14 +183,10 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         Drawable square = resources.getDrawable(R.drawable.ic_square, context.getTheme());
         Drawable cross = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
         Drawable circle = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
+        Drawable background = resources.getDrawable(R.drawable.background_texture_of_dark_wood, context.getTheme());
 
         TicTacTextures textures = TicTacTextures
-                .builder()
-                .circle(circle)
-                .cross(cross)
-                .square(square)
-                .background(Color.WHITE)
-                .build();
+                .create(square, circle, cross, Color.WHITE, background);
 
         TicTacRoom ticTacRoom =  new TicTacRoom(textures, name, user);
         ticTacRoom.addListener(this);

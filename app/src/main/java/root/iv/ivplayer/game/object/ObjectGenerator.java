@@ -28,6 +28,10 @@ public class ObjectGenerator {
         height = h;
     }
 
+    public boolean hasTexture() {
+        return drawable != null;
+    }
+
     public StaticObject2 buildStatic(int x0, int y0) {
         return new StaticObject2(Point2.point(x0, y0), drawable, width, height);
     }

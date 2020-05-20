@@ -1,7 +1,6 @@
 package root.iv.ivplayer.game.tictac.scene;
 
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +19,7 @@ import root.iv.ivplayer.game.tictac.TicTacTextures;
 public class TicTacToeScene implements Scene {
 
     // Генераторы для создания объектов
+    private ObjectGenerator squareGenerator;
     private ObjectGenerator backgroundGenerator;
     private TicTacTextures textures;
 
@@ -35,10 +35,12 @@ public class TicTacToeScene implements Scene {
 
 
         // Генератор для фона
-        backgroundGenerator = new ObjectGenerator();
-        backgroundGenerator.setDrawable(textures.getSquare());
-        backgroundGenerator.setFixSize(squareSize, squareSize);
+        squareGenerator = new ObjectGenerator();
+        squareGenerator.setDrawable(textures.getSquare());
+        squareGenerator.setFixSize(squareSize, squareSize);
 
+        backgroundGenerator = new ObjectGenerator();
+        backgroundGenerator.setDrawable(textures.getBackground());
 
         // Формирование сетки
         grid = gridConstruct(startMargin, topMargin, squareSize);
@@ -59,7 +61,7 @@ public class TicTacToeScene implements Scene {
     public Group gridConstruct(int startMargin, int topMargin, int squareSize) {
         Group group = Group.empty();
         for (int i = 0; i < 9; i++) {
-            StaticObject2 square = backgroundGenerator.buildStatic(
+            StaticObject2 square = squareGenerator.buildStatic(
                     startMargin + (i % 3)*squareSize,
                     topMargin + (i /3) * squareSize);
             Block block = Block.of(square, textures.getCross(), textures.getCircle());
@@ -72,7 +74,13 @@ public class TicTacToeScene implements Scene {
     @Override
     public void render(Canvas canvas) {
         // Заливка фона
-        canvas.drawColor(textures.getBackground());
+        if (backgroundGenerator.hasTexture()) {
+            backgroundGenerator.setFixSize(canvas.getWidth(), canvas.getHeight());
+            backgroundGenerator.buildStatic(0, 0).render(canvas);
+        } else {
+            canvas.drawColor(textures.getBackgroundColor());
+        }
+
         // Отрисовка поля
         grid.render(canvas);
 
@@ -91,7 +99,7 @@ public class TicTacToeScene implements Scene {
                 ? (height - width) / 2
                 : 0;
 
-        backgroundGenerator.setFixSize(size, size);
+        squareGenerator.setFixSize(size, size);
 
         // Создаём новую группу блоков с новыми размерами
         Group newGrid = gridConstruct(startMargin, topMargin, size);
