@@ -12,8 +12,8 @@ public class RoomUI extends FBRoom {
     @Builder
     public RoomUI(String name, FBRoom fbRoom) {
         this.name = name;
-        this.emailPlayer1 = fbRoom.getEmailPlayer1();
-        this.emailPlayer2 = fbRoom.getEmailPlayer2();
+        this.player1 = fbRoom.getPlayer1();
+        this.player2 = fbRoom.getPlayer2();
         this.state = fbRoom.getState();
     }
 }

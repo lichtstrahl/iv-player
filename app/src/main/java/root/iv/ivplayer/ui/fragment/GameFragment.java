@@ -132,9 +132,9 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     }
 
     @Override
-    public void updatePlayers(@Nullable String login1, @Nullable String login2) {
-        viewLogin1.setText((login1 != null) ? login1 : "");
-        viewLogin2.setText((login2 != null) ? login2 : "");
+    public void updatePlayers(@Nullable String displayName1, @Nullable String displayName2) {
+        viewLogin1.setText((displayName1 != null) ? displayName1 : "");
+        viewLogin2.setText((displayName2 != null) ? displayName2 : "");
     }
 
     @Override

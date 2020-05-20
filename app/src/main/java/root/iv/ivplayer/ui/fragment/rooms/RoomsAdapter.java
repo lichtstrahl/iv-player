@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.firebase.dto.RoomUI;
@@ -123,8 +122,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
         private void bind(RoomUI room) {
             viewRoomName.setText(room.getName());
             viewRoomState.setText(room.getState().name());
-            viewEmail1.setText(room.getEmailPlayer1());
-            viewEmail2.setText(room.getEmailPlayer2());
+            viewEmail1.setText(room.name1());
+            viewEmail2.setText(room.name2());
         }
     }
 }

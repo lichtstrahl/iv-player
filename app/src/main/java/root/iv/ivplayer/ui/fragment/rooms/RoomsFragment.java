@@ -20,10 +20,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,11 +30,11 @@ import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
+import root.iv.ivplayer.network.firebase.dto.FBUser;
 import root.iv.ivplayer.network.firebase.dto.RoomUI;
 
 public class RoomsFragment extends Fragment {
@@ -148,7 +145,7 @@ public class RoomsFragment extends Fragment {
         RoomUI room = roomsAdapter.getRoom(position);
         // При нажатии на кнопку необходимо обновить
         FBDatabaseAdapter.getRoom(room.getName())
-                .addListenerForSingleValueEvent(new EnterRoomListener(room.getName(), fbCurrentUser.getEmail()));
+                .addListenerForSingleValueEvent(new EnterRoomListener(room.getName()));
     }
 
     // Если в комнате нет игроков, то для неё возможен вызов контекстного меню
@@ -225,7 +222,6 @@ public class RoomsFragment extends Fragment {
     @AllArgsConstructor
     private class EnterRoomListener extends FBDataListener {
         private String roomName;
-        private String email;
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -237,10 +233,10 @@ public class RoomsFragment extends Fragment {
             }
 
             // Заполняем email-ы (если 1 занят, пишем себя во второй)
-            if (room.getEmailPlayer1() == null || room.getEmailPlayer1().isEmpty()) {
-                room.setEmailPlayer1(email);
-            } else if (room.getEmailPlayer2() == null || room.getEmailPlayer2().isEmpty()) {
-                room.setEmailPlayer2(email);
+            if (room.getPlayer1() == null) {
+                room.setPlayer1(FBUser.create(fbCurrentUser.getDisplayName(), fbCurrentUser.getUid()));
+            } else if (room.getPlayer2() == null) {
+                room.setPlayer2(FBUser.create(fbCurrentUser.getDisplayName(), fbCurrentUser.getUid()));
             }
 
             FBDatabaseAdapter.getRoom(roomName)

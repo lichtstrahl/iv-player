@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FBUser {
-    private String login;
-    private String password;
+    private String name;
+    private String uid;
+
+    public static FBUser create(String name, String uid) {
+        return new FBUser(name, uid);
+    }
 }

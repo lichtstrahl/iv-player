@@ -3,6 +3,10 @@ package root.iv.ivplayer.network.firebase.dto;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.firebase.encoders.annotations.Encodable;
+
+import java.util.Optional;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,16 +21,16 @@ public class FBRoom {
     public static final String PROGRESS_PATH_CROSS = "progressCROSS";
 
     @Nullable
-    protected String emailPlayer1;
+    protected FBUser player1;
     @Nullable
-    protected String emailPlayer2;
+    protected FBUser player2;
     protected RoomState state;
 
     public int countPlayer() {
         int count = 0;
 
-        count += (player1InRoom()) ? 1 : 0;
-        count += (player2InRoom()) ? 1 : 0;
+        count += (player1 != null) ? 1 : 0;
+        count += (player2 != null) ? 1 : 0;
 
         return count;
     }
@@ -39,41 +43,47 @@ public class FBRoom {
         return countPlayer() < oldRoom.countPlayer();
     }
 
-    public boolean isChangeState(@NonNull FBRoom oldRoom) {
-        return this.state != oldRoom.state;
-    }
-
-    public BlockState getCurrentRole(String email) {
-        return (email.equals(emailPlayer1))
+    public BlockState getCurrentRole(String uid) {
+        return (uid.equals(player1.getUid()))
                 ? BlockState.CROSS
                 : BlockState.CIRCLE;
     }
 
-    public String getCurrentProgressPath(String email) {
-        BlockState currentState = getCurrentRole(email);
+    public String getCurrentProgressPath(String uid) {
+        BlockState currentState = getCurrentRole(uid);
         return currentState == BlockState.CROSS
                 ? PROGRESS_PATH_CROSS
                 : PROGRESS_PATH_CIRCLE;
     }
 
-    public String getCurrentEmailPath(String email) {
-        return (email.equals(emailPlayer1))
-                ? "emailPlayer1"
-                : "emailPlayer2";
+    public String getCurrentPlayerPath(String uid) {
+        return (uid.equals(player1.getUid()))
+                ? "player1"
+                : "player2";
     }
 
-    public String getEnemyProgressPath(String email) {
-        BlockState currentState = getCurrentRole(email);
+    public String getEnemyProgressPath(String uid) {
+        BlockState currentState = getCurrentRole(uid);
         return currentState == BlockState.CROSS
                 ? PROGRESS_PATH_CIRCLE
                 : PROGRESS_PATH_CROSS;
     }
 
-    public boolean player1InRoom() {
-        return emailPlayer1 != null && !emailPlayer1.isEmpty();
+    public String name1() {
+        if (player1 == null)
+            return "";
+
+        return (player1.getName() != null && !player1.getName().isEmpty())
+                ? player1.getName()
+                : player1.getUid();
     }
 
-    public boolean player2InRoom() {
-        return emailPlayer2 != null && !emailPlayer2.isEmpty();
+    public String name2() {
+        if (player2 == null)
+            return "";
+
+        return (player2.getName() != null && !player2.getName().isEmpty())
+                ? player2.getName()
+                : player2.getUid();
     }
 }

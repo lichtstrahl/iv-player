@@ -90,16 +90,16 @@ public class TicTacRoom extends Room {
     // Публикуем в соответствующем поле (progressCROSS, progressCIRCLE)
     // А также устанавлиаем поле wait на себя
     private void publishProgress(TicTacProgressDTO lastProgress, boolean win, boolean end) {
-        String progressPath = fbRoom.getCurrentProgressPath(fbUser.getEmail());
+        String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
         FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), win,
-                end, engine.getCurrentRole(), fbUser.getEmail());
+                end, engine.getCurrentRole(), fbUser.getUid());
         FBDatabaseAdapter.getProgressInRoom(name, progressPath)
                 .setValue(progress);
         FBDatabaseAdapter.getWaitField(name)
-                .setValue(fbUser.getEmail());
+                .setValue(fbUser.getUid());
 
         if (win)
-            win(fbUser.getEmail());
+            win(fbUser.getUid());
         else if (end)
             end();
     }
@@ -136,13 +136,13 @@ public class TicTacRoom extends Room {
         fbObservers.add(waitProgressObserver);
 
         if (currentRole == BlockState.CIRCLE) {
-            FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getEmail());
+            FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getUid());
             updateLocalStatus(RoomState.GAME);
         } else {
             updateLocalStatus(RoomState.WAIT_PROGRESS);
         }
 
-        String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getEmail());
+        String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getUid());
         ProgressObserver progressObserver = new ProgressObserver();
         FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
                 .addValueEventListener(progressObserver);
@@ -158,10 +158,10 @@ public class TicTacRoom extends Room {
             fbRoom.setState(RoomState.WAIT_PLAYERS);
         }
 
-        fbRoom.setEmailPlayer1(newRoom.getEmailPlayer1());
-        fbRoom.setEmailPlayer2(newRoom.getEmailPlayer2());
+        fbRoom.setPlayer1(newRoom.getPlayer1());
+        fbRoom.setPlayer2(newRoom.getPlayer2());
 
-        // Если игрок ждёт хода, то обновлять менять это не следует, это делается в соответствующем наблюдателе.
+        // Если игрок ждёт хода, то обновлять статус не следует, это делается в соответствующем наблюдателе.
         if (fbRoom.getState() != RoomState.WAIT_PROGRESS) {
             updateLocalStatus(newRoom.getState());
         }
@@ -170,7 +170,7 @@ public class TicTacRoom extends Room {
     @Override
     public void exit() {
         // Ищем путь до email для очистки его
-        String currentEmailPath = fbRoom.getCurrentEmailPath(fbUser.getEmail());
+        String currentEmailPath = fbRoom.getCurrentPlayerPath(fbUser.getUid());
 
         updateLocalStatus(RoomState.CLOSE);
         FBDatabaseAdapter.getPlayerEmail(name, currentEmailPath).removeValue();
@@ -201,6 +201,13 @@ public class TicTacRoom extends Room {
         }
     }
 
+    public interface Listener extends RoomListener {
+        void updatePlayers(@Nullable String displayName1, @Nullable String displayName2);
+        void win(String email);
+        void end();
+        void changeStatus(RoomState roomState);
+    }
+
     // Следим за обновлением поля WAIT (кто ждёт ход)
     class WaitProgressObserver implements ValueEventListener {
 
@@ -208,7 +215,7 @@ public class TicTacRoom extends Room {
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             String waitEmail = dataSnapshot.getValue(String.class);
 
-            if (waitEmail != null && waitEmail.equals(fbUser.getEmail()))
+            if (waitEmail != null && waitEmail.equals(fbUser.getUid()))
                 updateLocalStatus(RoomState.WAIT_PROGRESS);
             else
                 updateLocalStatus(RoomState.GAME);
@@ -261,14 +268,7 @@ public class TicTacRoom extends Room {
                     startGame(newRoom, BlockState.CIRCLE);
                 }
             }
-            roomListener.updatePlayers(fbRoom.getEmailPlayer1(), fbRoom.getEmailPlayer2());
+            roomListener.updatePlayers(fbRoom.name1(), fbRoom.name2());
         }
-    }
-
-    public interface Listener extends RoomListener {
-        void updatePlayers(@Nullable String login1, @Nullable String login2);
-        void win(String email);
-        void end();
-        void changeStatus(RoomState roomState);
     }
 }
