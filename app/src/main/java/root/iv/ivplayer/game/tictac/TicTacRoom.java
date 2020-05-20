@@ -14,13 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
-import root.iv.ivplayer.game.room.api.FirebaseRoom;
-import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
@@ -28,8 +25,7 @@ import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
-public class TicTacRoom extends Room implements FirebaseRoom {
-    private String name;
+public class TicTacRoom extends Room {
     private TicTacEngine engine;
     @Nullable
     private Listener roomListener;
@@ -38,13 +34,13 @@ public class TicTacRoom extends Room implements FirebaseRoom {
     private List<ValueEventListener> fbObservers;
 
     public TicTacRoom(TicTacTextures textures, String name, FirebaseUser user) {
-        super(new TicTacToeScene(textures));
-        this.name = name;
+        super(name, new TicTacToeScene(textures));
+
         this.fbUser = user;
         fbObservers = new ArrayList<>();
-        TicTacToeScene ticTacToeScene = (TicTacToeScene) scene;
+        TicTacToeScene ticTacToeScene = (TicTacToeScene) getScene();
         engine = new TicTacEngine(ticTacToeScene.getAllBlocks());
-        scene.getMainController().setTouchHandler(this::touchHandler);
+        getScene().getMainController().setTouchHandler(this::touchHandler);
     }
 
     public void init() {
@@ -57,11 +53,6 @@ public class TicTacRoom extends Room implements FirebaseRoom {
     @Override
     public void addListener(RoomListener listener) {
         this.roomListener = (Listener) listener;
-    }
-
-    @Override
-    public Scene getScene() {
-        return scene;
     }
 
     private void updateLocalStatus(RoomState newState) {
@@ -174,7 +165,7 @@ public class TicTacRoom extends Room implements FirebaseRoom {
     }
 
     @Override
-    public void exitFromRoom() {
+    public void exit() {
         // Ищем путь до email для очистки его
         String currentEmailPath = fbRoom.getCurrentEmailPath(fbUser.getEmail());
 
@@ -184,13 +175,6 @@ public class TicTacRoom extends Room implements FirebaseRoom {
         for (ValueEventListener listener : fbObservers) {
             FBDatabaseAdapter.getRoom(name).removeEventListener(listener);
         }
-    }
-
-    public interface Listener extends RoomListener {
-        void updatePlayers(@Nullable String login1, @Nullable String login2);
-        void win(String email);
-        void end();
-        void changeStatus(RoomState roomState);
     }
 
     // Следим за обновлением хода противника
@@ -276,5 +260,12 @@ public class TicTacRoom extends Room implements FirebaseRoom {
             }
             roomListener.updatePlayers(fbRoom.getEmailPlayer1(), fbRoom.getEmailPlayer2());
         }
+    }
+
+    public interface Listener extends RoomListener {
+        void updatePlayers(@Nullable String login1, @Nullable String login2);
+        void win(String email);
+        void end();
+        void changeStatus(RoomState roomState);
     }
 }

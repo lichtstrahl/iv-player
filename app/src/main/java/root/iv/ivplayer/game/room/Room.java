@@ -1,18 +1,18 @@
 package root.iv.ivplayer.game.room;
 
-import lombok.Getter;
 import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.scene.SceneContainer;
 
-// Базовая комната. Имеет состояние и отрисовываемую сцену, больше ничего
-public abstract class Room {
-    @Getter
-    protected Scene scene;
+// Базовая комната. Является контейнером для сцены, имеющим имя
+public abstract class Room extends SceneContainer {
+    protected String name;
 
-    public Room(Scene scene) {
-        this.scene = scene;
+    public Room(String name, Scene scene) {
+        super(scene);
+        this.name = name;
     }
 
     abstract public void addListener(RoomListener listener);
-    abstract public void exitFromRoom();
+    abstract public void exit();
     abstract public void init();
 }

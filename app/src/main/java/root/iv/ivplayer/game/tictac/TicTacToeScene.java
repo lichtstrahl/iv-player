@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import root.iv.ivplayer.game.TicTacTextures;
 import root.iv.ivplayer.game.controller.Controller;
 import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Group;

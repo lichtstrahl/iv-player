@@ -1,4 +1,4 @@
-package root.iv.ivplayer.game;
+package root.iv.ivplayer.game.tictac;
 
 import android.graphics.drawable.Drawable;
 

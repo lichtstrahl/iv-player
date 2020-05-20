@@ -24,14 +24,13 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.game.TicTacTextures;
-import root.iv.ivplayer.game.tictac.TicTacRoom;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.tictac.TicTacRoom;
+import root.iv.ivplayer.game.tictac.TicTacTextures;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
@@ -128,12 +127,8 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     public void onDetach() {
         super.onDetach();
         Timber.i("detach");
-        room.exitFromRoom();
+        room.exit();
         listener = null;
-    }
-
-    @OnClick(R.id.viewRolePlayer1)
-    protected void clickRole1() {
     }
 
     @Override
