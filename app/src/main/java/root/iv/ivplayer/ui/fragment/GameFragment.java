@@ -92,10 +92,6 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         room = buildRoom(roomName, fbAuth.getCurrentUser(), gameView);
         configGameView(room.getScene());
 
-//        gameView.post(() -> {
-//            room.getScene().resize(gameView.getWidth(), gameView.getHeight());
-//        });
-
         viewRoomName.setText(roomName);
         return view;
     }
@@ -172,6 +168,9 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     private void configGameView(Scene scene) {
         gameView.loadScene(scene);
         gameView.setOnTouchListener(scene.getMainController());
+        gameView.post(() -> {
+            room.resize(gameView.getWidth(), gameView.getHeight());
+        });
     }
 
     private Room buildRoom(String name, FirebaseUser user, GameView gameView) {

@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 
 // Непосредственно движок игры
@@ -21,16 +19,22 @@ public class TicTacEngine implements TicTacEngineAPI {
     private List<TicTacProgressDTO> history;
 
     public TicTacEngine(List<Block> blocks) {
-        this.blocks = new Block[9];
         this.currentState = BlockState.FREE;
         this.history = new ArrayList<>();
 
-        for (int i = 0; i < 9; i++)
-            loadBlock(i, blocks.get(i));
+        loadBlocks(blocks);
     }
 
     public void loadBlock(int index, Block block) {
         this.blocks[index] = block;
+    }
+
+    @Override
+    public void loadBlocks(List<Block> blocks) {
+        this.blocks = new Block[9];
+
+        for (int i = 0; i < 9; i++)
+            loadBlock(i, blocks.get(i));
     }
 
     public void markBlock(int index, BlockState state) {

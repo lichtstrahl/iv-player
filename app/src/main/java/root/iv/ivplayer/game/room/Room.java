@@ -13,6 +13,7 @@ public abstract class Room extends SceneContainer {
     }
 
     abstract public void addListener(RoomListener listener);
+    abstract public void resize(int width, int height);
     abstract public void exit();
     abstract public void init();
 }

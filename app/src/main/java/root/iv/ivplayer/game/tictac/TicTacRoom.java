@@ -184,6 +184,12 @@ public class TicTacRoom extends Room {
         }
     }
 
+    @Override
+    public void resize(int width, int height) {
+        getScene().resize(width, height);
+        engine.loadBlocks(((TicTacToeScene)getScene()).getAllBlocks());
+    }
+
     // Следим за обновлением хода противника
     class ProgressObserver implements ValueEventListener {
 
