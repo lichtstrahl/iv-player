@@ -57,7 +57,7 @@ public class FBRoom {
     }
 
     public String getCurrentPlayerPath(String uid) {
-        return (uid.equals(player1.getUid()))
+        return (player1 != null && uid.equals(player1.getUid()))
                 ? "player1"
                 : "player2";
     }
