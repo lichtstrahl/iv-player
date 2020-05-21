@@ -6,6 +6,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -15,11 +16,17 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
+import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.network.firebase.FBDataListener;
+import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
+import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.ui.fragment.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
 import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
@@ -101,9 +108,14 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void authSuccessful(FirebaseUser user) {
         Timber.i("Игрок успешно вошёл");
+
+        // Перед запуском удаляем существующие комнаты со своим именем
+        FBDatabaseAdapter.getRooms()
+                .addListenerForSingleValueEvent(new RoomsFBRemoveDead(user));
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFrame, RoomsFragment.getInstance(user.getEmail()), RoomsFragment.TAG)
+                .replace(R.id.mainFrame, RoomsFragment.getInstance(), RoomsFragment.TAG)
                 .commit();
     }
 
@@ -117,5 +129,20 @@ public class MainActivity extends AppCompatActivity implements
                 .remove(removedFragment)
                 .commit();
         fragmentManager.popBackStack();
+    }
+
+    @AllArgsConstructor
+    private class RoomsFBRemoveDead extends FBDataListener {
+        private FirebaseUser user;
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            for (DataSnapshot room : dataSnapshot.getChildren()) {
+                String roomName = room.getKey();
+                FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
+                if (fbRoom.isPresent(user.getUid()))
+                    FBDatabaseAdapter.getRoom(roomName).removeValue();
+            }
+        }
     }
 }

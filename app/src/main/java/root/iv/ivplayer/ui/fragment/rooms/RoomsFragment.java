@@ -54,7 +54,7 @@ public class RoomsFragment extends Fragment {
 
     private RoomsFBListener roomsFBListener;
 
-    public static RoomsFragment getInstance(String login) {
+    public static RoomsFragment getInstance() {
         RoomsFragment fragment = new RoomsFragment();
 
         return fragment;
@@ -176,7 +176,6 @@ public class RoomsFragment extends Fragment {
      *
      *  Каждая комната обновляется (если её не было, то будет создана в адаптере)
      *  Запоминается список уже имеющихся комнат, чтобы те что не пришли от FB были удалены
-     *  При просмотре очередной комнаты проверяется, что там нет текущего аккаунта (т.е. комната мёртвая)
       */
     private class RoomsFBListener extends FBDataListener {
         @Override
@@ -186,12 +185,8 @@ public class RoomsFragment extends Fragment {
             for (DataSnapshot room : dataSnapshot.getChildren()) {
                 String roomName = room.getKey();
                 FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
-                if (fbRoom.isPresent(fbCurrentUser.getUid())) {
-                    FBDatabaseAdapter.getRoom(roomName).removeValue();
-                } else {
-                    roomsAdapter.roomNotify(roomName, fbRoom);
-                    removedRooms.remove(roomName);
-                }
+                roomsAdapter.roomNotify(roomName, fbRoom);
+                removedRooms.remove(roomName);
             }
 
             for (String removedName : removedRooms)
