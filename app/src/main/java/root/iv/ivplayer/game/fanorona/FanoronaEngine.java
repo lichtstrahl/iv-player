@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.view.GameView;
 
 /**
  * Игровой движок фанороны
@@ -31,7 +32,11 @@ public class FanoronaEngine {
         slotWays = new SlotWay[0];
 
         // Создаём сцену
-        this.scene = new FanoronaScene(textures);
+        this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN);
         this.scene.getSensorController().setTouchHandler(touchHandler);
+    }
+
+    public void connect(GameView gameView) {
+        scene.connect(gameView);
     }
 }

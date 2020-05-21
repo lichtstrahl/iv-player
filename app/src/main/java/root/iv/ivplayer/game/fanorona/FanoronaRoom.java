@@ -34,17 +34,17 @@ public class FanoronaRoom extends Room {
 
     @Override
     public void addListener(RoomListener listener) {
-
+        this.roomListener = (Listener) listener;
     }
 
     @Override
     public void resize(int width, int height) {
-
+        // resize пока не реализован у FanoronaScene
     }
 
     @Override
     public void connect(GameView gameView) {
-
+        engine.connect(gameView);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class FanoronaRoom extends Room {
 
     @Override
     public void init() {
-
+        // Здесь подписка на событие изменения комнаты
     }
 
     private void touchHandler(MotionEvent event) {

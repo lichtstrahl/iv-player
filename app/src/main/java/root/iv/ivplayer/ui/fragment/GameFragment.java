@@ -25,18 +25,27 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.game.fanorona.FanoronaRoom;
+import root.iv.ivplayer.game.fanorona.FanoronaTextures;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
-import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.tictac.TicTacRoom;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
-public class GameFragment extends Fragment implements TicTacRoom.Listener {
+public class GameFragment extends Fragment
+        implements
+        TicTacRoom.Listener,
+        FanoronaRoom.Listener
+
+{
+    private static final int GAME_TIC_TAC = 1;
+    private static final int GAME_FANORONA = 2;
+
     public static final String TAG = "fragment:game";
     private static final String ARG_ROOM_NAME = "arg:room-name";
-    private static final String ARG_LOGIN = "arg:login";
+    private static final String ARG_GAME_TYPE = "arg:game-type";
 
     @BindView(R.id.gameView)
     protected GameView gameView;
@@ -64,11 +73,12 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     private Listener listener;
     private Room room;
 
-    public static GameFragment getInstance(String roomName) {
+    public static GameFragment getInstance(String roomName, int gameType) {
         GameFragment fragment = new GameFragment();
 
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ROOM_NAME, roomName);
+        bundle.putInt(ARG_GAME_TYPE, gameType);
         fragment.setArguments(bundle);
 
         return fragment;
@@ -87,10 +97,23 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
         viewRoomName.setText(roomName);
 
-        room = buildRoom(roomName, fbAuth.getCurrentUser());
-        room.addListener(this);
-        room.connect(gameView);
-        gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
+
+        int gameType = args.getInt(ARG_GAME_TYPE);
+        switch (gameType) {
+            case GAME_TIC_TAC:
+                room = buildRoomTicTac(roomName, fbAuth.getCurrentUser());
+                room.addListener(this);
+                room.connect(gameView);
+                gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
+                break;
+
+            case GAME_FANORONA:
+                room = buildRoomFanorona(roomName, fbAuth.getCurrentUser());
+                room.addListener(this);
+                room.connect(gameView);
+                gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
+                break;
+        }
 
         return view;
     }
@@ -168,7 +191,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         panelPlayer2.setBackgroundColor(Color.LTGRAY);
     }
 
-    private Room buildRoom(String name, FirebaseUser user) {
+    private Room buildRoomTicTac(String name, FirebaseUser user) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -181,7 +204,20 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
                 .create(square, circle, cross, Color.WHITE, background);
 
         return new TicTacRoom(textures, name, user);
+    }
 
+    private Room buildRoomFanorona(String name, FirebaseUser user) {
+        Resources resources = getResources();
+        Context context = Objects.requireNonNull(getContext());
+
+        Drawable background = resources.getDrawable(R.drawable.background_texture_of_dark_wood, context.getTheme());
+        Drawable slot = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
+        Drawable chipWhite = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
+        Drawable chipBlack = resources.getDrawable(R.drawable.ic_square, context.getTheme());
+
+        FanoronaTextures textures = FanoronaTextures.create(background, chipWhite, chipBlack, slot);
+
+        return new FanoronaRoom(textures, name, user);
     }
 
     public interface Listener {

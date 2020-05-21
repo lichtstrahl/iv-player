@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .replace(R.id.mainFrame, GameFragment.getInstance(roomName), GameFragment.TAG)
+                .replace(R.id.mainFrame, GameFragment.getInstance(roomName, 2), GameFragment.TAG)
                 .commit();
     }
 

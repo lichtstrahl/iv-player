@@ -1,6 +1,9 @@
 package root.iv.ivplayer.game.fanorona.slot;
 
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+
+import androidx.annotation.ColorInt;
 
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -16,8 +19,8 @@ public class Slot extends StaticObject2 {
     private Circle2 bounds;
     private SlotState state;
 
-    public Slot(Point2 position, Drawable drawable, int radius) {
-        super(position, drawable, 0, 0);
+    public Slot(StaticObject2 object2, int radius) {
+        super(object2.getPosition(), object2.getDrawable(), object2.getWidth(), object2.getHeight());
         this.bounds = GeometryFactory.newFactory()
                 .pivotCircle(position, radius);
         this.state = SlotState.FREE;
@@ -26,5 +29,18 @@ public class Slot extends StaticObject2 {
     @Override
     public boolean contain(Point2 point) {
         return bounds.contain(point);
+    }
+
+    public static Slot of(StaticObject2 object2, int radius,
+                          Drawable chipWhite, @ColorInt int colorWhite,
+                          Drawable chipBlack, @ColorInt int colorBlack) {
+        Slot slot = new Slot(object2, radius);
+
+        return slot;
+    }
+
+    @Override
+    public void render(Canvas canvas) {
+        super.render(canvas);
     }
 }
