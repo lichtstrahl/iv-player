@@ -1,5 +1,9 @@
 package root.iv.ivplayer.game.fanorona;
 
+import android.view.MotionEvent;
+
+import androidx.core.util.Consumer;
+
 import java.util.Arrays;
 
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
@@ -13,8 +17,9 @@ public class FanoronaEngine {
     private static final int COUNT_COLUMN = 9;
     private SlotState[][] slots;
     private SlotWay[] slotWays;
+    private FanoronaScene scene;
 
-    public FanoronaEngine() {
+    public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
 
         // Заполняем все слоты пустыми
@@ -24,5 +29,9 @@ public class FanoronaEngine {
 
         // Пустой массив связей
         slotWays = new SlotWay[0];
+
+        // Создаём сцену
+        this.scene = new FanoronaScene(textures);
+        this.scene.getSensorController().setTouchHandler(touchHandler);
     }
 }

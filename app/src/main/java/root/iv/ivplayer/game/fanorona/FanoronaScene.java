@@ -51,17 +51,18 @@ public class FanoronaScene extends SensorScene {
 
     @Override
     public void resize(int width, int height) {
-
+        // TODO РЕализовать динамическое изменение размеров сцены под экран (TicTacScene)
     }
 
     @Override
     public void connect(GameView gameView) {
-
+        gameView.loadScene(this);
+        gameView.setOnTouchListener(sensorController);
+        gameView.setOnClickListener(sensorController);
     }
 
     private Group<Slot> slotsConstruct(int startMargin, int topMargin, int delta, int radius) {
         Group<Slot> slots = Group.empty();
-
 
         return slots;
     }

@@ -190,6 +190,18 @@ public class TicTacRoom extends Room {
         engine.resize(width, height);
     }
 
+
+    public interface Listener extends RoomListener {
+        void updatePlayers(@Nullable String displayName1, @Nullable String displayName2);
+        void win(int numberPlayer);
+        void end();
+        void changeStatus(RoomState roomState);
+    }
+
+    // ---
+    // Observers
+    // ---
+
     // Следим за обновлением хода противника
     class ProgressObserver implements ValueEventListener {
 
@@ -209,13 +221,6 @@ public class TicTacRoom extends Room {
         public void onCancelled(@NonNull DatabaseError databaseError) {
             Timber.w(databaseError.getMessage());
         }
-    }
-
-    public interface Listener extends RoomListener {
-        void updatePlayers(@Nullable String displayName1, @Nullable String displayName2);
-        void win(int numberPlayer);
-        void end();
-        void changeStatus(RoomState roomState);
     }
 
     // Следим за обновлением поля WAIT (кто ждёт ход)
