@@ -10,14 +10,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-import root.iv.ivplayer.game.room.Room;
+import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
-import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
@@ -26,47 +23,25 @@ import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
-public class TicTacRoom extends Room {
+public class TicTacRoom extends FirebaseRoom {
     private TicTacEngineAPI engine;
     @Nullable
     private Listener roomListener;
-    private FBRoom fbRoom;
-    private FirebaseUser fbUser;
-    private List<ValueEventListener> fbObservers;
 
     public TicTacRoom(TicTacTextures textures, String name, FirebaseUser user) {
-        super(name);
-
-        this.fbUser = user;
-        fbObservers = new ArrayList<>();
-
+        super(name, user);
         engine = new TicTacEngine(textures, this::touchHandler);
     }
 
     @Override
     public void init() {
         RoomObserver roomObserver = new RoomObserver();
-        FBDatabaseAdapter.getRoom(name)
-                .addValueEventListener(roomObserver);
-        fbObservers.add(roomObserver);
+        registerRoomObserver(roomObserver);
     }
 
     @Override
     public void addListener(RoomListener listener) {
         this.roomListener = (Listener) listener;
-    }
-
-    private void updateLocalStatus(RoomState newState) {
-            boolean transit = RoomStateJump.of(fbRoom.getState()).possibleTransit(newState);
-            if (transit) {
-                Timber.i("%s -> %s", fbRoom.getState().name(), newState.name());
-                fbRoom.setState(newState);
-                if (roomListener != null) {
-                    roomListener.changeStatus(fbRoom.getState());
-                }
-            }
-            else
-                Timber.w("Переход %s -> %s невозможен", fbRoom.getState().name(), newState.name());
     }
 
     private void touchHandler(MotionEvent event) {
@@ -83,6 +58,13 @@ public class TicTacRoom extends Room {
                 }
                 break;
         }
+    }
+
+    private void updateStatus(RoomState state) {
+        boolean updated = updateLocalStatus(state);
+        if (updated && roomListener != null)
+            roomListener.changeStatus(state);
+
     }
 
     // Публикуем в соответствующем поле (progressCROSS, progressCIRCLE)
@@ -133,37 +115,31 @@ public class TicTacRoom extends Room {
         WaitProgressObserver waitProgressObserver = new WaitProgressObserver();
         FBDatabaseAdapter.getWaitField(name)
                 .addValueEventListener(waitProgressObserver);
-        fbObservers.add(waitProgressObserver);
+        addFBObserver(waitProgressObserver);
 
         if (currentRole == BlockState.CIRCLE) {
             FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getUid());
-            updateLocalStatus(RoomState.GAME);
+            updateStatus(RoomState.WAIT_PROGRESS);
         } else {
-            updateLocalStatus(RoomState.WAIT_PROGRESS);
+            updateStatus(RoomState.GAME);
         }
 
         String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getUid());
         ProgressObserver progressObserver = new ProgressObserver();
         FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
                 .addValueEventListener(progressObserver);
-        fbObservers.add(progressObserver);
+        addFBObserver(progressObserver);
     }
 
     // Обновление комнаты (email1, email2 и статуса)
     // Если комната не была создана, то она создаётся как WAIT_PLAYERS
     // Для второго зашедшего игрока необходимо предусмотреть:
     private void updateRoom(FBRoom newRoom) {
-        if (fbRoom == null) {
-            fbRoom = new FBRoom();
-            fbRoom.setState(RoomState.WAIT_PLAYERS);
-        }
-
-        fbRoom.setPlayer1(newRoom.getPlayer1());
-        fbRoom.setPlayer2(newRoom.getPlayer2());
+        updateRoomPlayersAndStatus(newRoom);
 
         // Если игрок ждёт хода, то обновлять статус не следует, это делается в соответствующем наблюдателе.
         if (fbRoom.getState() != RoomState.WAIT_PROGRESS) {
-            updateLocalStatus(newRoom.getState());
+            updateStatus(newRoom.getState());
         }
     }
 
@@ -172,12 +148,10 @@ public class TicTacRoom extends Room {
         // Ищем путь до uid для очистки его
         String currentEmailPath = fbRoom.getCurrentPlayerPath(fbUser.getUid());
 
-        updateLocalStatus(RoomState.CLOSE);
+        updateStatus(RoomState.CLOSE);
         FBDatabaseAdapter.getPlayerEmail(name, currentEmailPath).removeValue();
         // Отписка от событий Firebase
-        for (ValueEventListener listener : fbObservers) {
-            FBDatabaseAdapter.getRoom(name).removeEventListener(listener);
-        }
+        unsubscribeFirebaseAll();
     }
 
     @Override
@@ -231,9 +205,9 @@ public class TicTacRoom extends Room {
             String waitEmail = dataSnapshot.getValue(String.class);
 
             if (waitEmail != null && waitEmail.equals(fbUser.getUid()))
-                updateLocalStatus(RoomState.WAIT_PROGRESS);
+                updateStatus(RoomState.WAIT_PROGRESS);
             else
-                updateLocalStatus(RoomState.GAME);
+                updateStatus(RoomState.GAME);
         }
 
         @Override
@@ -267,7 +241,7 @@ public class TicTacRoom extends Room {
                 // Выход игрока
                 if (newRoom.isLeavePlayer(fbRoom)) {
                     Timber.i("Из комнаты кто-то вышел");
-                    updateLocalStatus(RoomState.CLOSE);
+                    updateStatus(RoomState.CLOSE);
                     newRoom.setState(RoomState.CLOSE);
                     FBDatabaseAdapter.getRoom(name)
                             .setValue(newRoom);

@@ -7,13 +7,10 @@ import androidx.annotation.Nullable;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-import root.iv.ivplayer.game.room.Room;
+import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
@@ -23,19 +20,13 @@ import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
-public class FanoronaRoom extends Room {
+public class FanoronaRoom extends FirebaseRoom {
     private FanoronaEngine engine;
     @Nullable
     private Listener roomListener;
-    private FBRoom fbRoom;
-    private FirebaseUser fbUser;
-    private List<ValueEventListener> fbObservers;
 
     public FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user) {
-        super(name);
-
-        this.fbUser = user;
-        fbObservers = new ArrayList<>();
+        super(name, user);
 
         engine = new FanoronaEngine(textures, this::touchHandler);
     }
@@ -64,34 +55,24 @@ public class FanoronaRoom extends Room {
         FBDatabaseAdapter.getPlayerEmail(name, currentPlayerPath).removeValue();
 
         // Отписка от всех событий FB
-        for (ValueEventListener listener : fbObservers)
-            FBDatabaseAdapter.getRoom(name).removeEventListener(listener);
+        unsubscribeFirebaseAll();
     }
 
     @Override
     public void init() {
         // Здесь подписка на событие изменения комнаты
         RoomObserver roomObserver = new RoomObserver();
-        FBDatabaseAdapter.getRoom(name)
-                .addValueEventListener(roomObserver);
-        fbObservers.add(roomObserver);
+        registerRoomObserver(roomObserver);
     }
 
     private void touchHandler(MotionEvent event) {
 
     }
 
-    private void updateLocalStatus(RoomState newState) {
-        boolean transit = RoomStateJump.of(fbRoom.getState()).possibleTransit(newState);
-        if (transit) {
-            Timber.i("%s -> %s", fbRoom.getState().name(), newState.name());
-            fbRoom.setState(newState);
-            if (roomListener != null) {
-                roomListener.changeStatus(fbRoom.getState());
-            }
-        }
-        else
-            Timber.w("Переход %s -> %s невозможен", fbRoom.getState().name(), newState.name());
+    private void updateStatus(RoomState newState) {
+        boolean updated = updateLocalStatus(newState);
+        if (updated && roomListener != null)
+            roomListener.changeStatus(newState);
     }
 
     private void updateRoom(FBRoom newRoom) {
@@ -105,7 +86,7 @@ public class FanoronaRoom extends Room {
 
         // Если игрок ждёт хода, то обновлять статус не следует, это делается в соответствующем наблюдателе.
         if (fbRoom.getState() != RoomState.WAIT_PROGRESS) {
-            updateLocalStatus(newRoom.getState());
+            updateStatus(newRoom.getState());
         }
     }
 
@@ -126,10 +107,12 @@ public class FanoronaRoom extends Room {
 
             if (fbRoom != null) { // Уже в комнате
 
+                updateRoom(newRoom);
             } else { // Только вошли в игру
+                updateRoom(newRoom);
             }
 
-            updateRoom(newRoom);
+
             roomListener.updatePlayers(fbRoom.name1(), fbRoom.name2());
         }
     }
