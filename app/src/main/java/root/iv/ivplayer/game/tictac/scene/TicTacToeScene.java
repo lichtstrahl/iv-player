@@ -4,19 +4,18 @@ import android.graphics.Canvas;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import root.iv.ivplayer.game.controller.SensorController;
 import root.iv.ivplayer.game.object.DrawableObject;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
-import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.tictac.Block;
 import root.iv.ivplayer.game.tictac.TicTacController;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
 
-public class TicTacToeScene implements TicTacSceneAPI {
+public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
 
     // Генераторы для создания объектов
     private ObjectGenerator squareGenerator;
@@ -114,15 +113,5 @@ public class TicTacToeScene implements TicTacSceneAPI {
     @Override
     public SensorController getMainController() {
         return controller;
-    }
-
-    @Override
-    public void addDrawableObject(DrawableObject object2) {
-
-    }
-
-    @Override
-    public void moveOnObject(int index, float dx, float dy) {
-
     }
 }
