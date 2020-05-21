@@ -25,7 +25,7 @@ public class TicTacToeScene implements Scene {
 
     // Объекты для отрисовки
     private List<DrawableObject> drawableObjects;
-    private Group grid;
+    private Group<Block> grid;
 
     // Элменты управления
     private SensorController controller;
@@ -53,14 +53,11 @@ public class TicTacToeScene implements Scene {
     }
 
     public List<Block> getAllBlocks() {
-        return this.grid.getObjects()
-                .stream()
-                .map(obj -> (Block)obj)
-                .collect(Collectors.toList());
+        return this.grid.getObjects();
     }
 
-    public Group gridConstruct(int startMargin, int topMargin, int squareSize) {
-        Group group = Group.empty();
+    private Group<Block> gridConstruct(int startMargin, int topMargin, int squareSize) {
+        Group<Block> group = Group.empty();
         for (int i = 0; i < 9; i++) {
             StaticObject2 square = squareGenerator.buildStatic(
                     startMargin + (i % 3)*squareSize,
@@ -103,13 +100,12 @@ public class TicTacToeScene implements Scene {
         squareGenerator.setFixSize(size, size);
 
         // Создаём новую группу блоков с новыми размерами
-        Group newGrid = gridConstruct(startMargin, topMargin, size);
+        Group<Block> newGrid = gridConstruct(startMargin, topMargin, size);
         // Переносим старые состояния
         int count = grid.size();
         for (int i = 0; i < count; i++) {
-            Block oldBlock = (Block) grid.getObjects().get(i);
-            Block newBlock = (Block) newGrid.getObjects().get(i);
-            newBlock.mark(oldBlock.getState());
+            newGrid.getObjects().get(i)
+                    .mark(grid.getObjects().get(i).getState());
         }
         grid = newGrid;
     }

@@ -10,22 +10,22 @@ import java.util.stream.Collectors;
 import lombok.Data;
 
 @Data
-public class Group {
-    private List<DrawableObject> objects;
+public class Group<T extends DrawableObject> {
+    private List<T> objects;
 
     public Group() {
         objects = new ArrayList<>();
     }
 
-    public Group(DrawableObject ... objects) {
+    public Group(T ... objects) {
         this.objects = Arrays.stream(objects).collect(Collectors.toList());
     }
 
-    public static Group empty() {
-        return new Group();
+    public static <T extends DrawableObject> Group<T> empty() {
+        return new Group<>();
     }
 
-    public void add(DrawableObject object) {
+    public void add(T object) {
         objects.add(object);
     }
 
