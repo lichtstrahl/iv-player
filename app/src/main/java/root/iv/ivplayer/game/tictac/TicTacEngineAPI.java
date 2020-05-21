@@ -1,5 +1,7 @@
 package root.iv.ivplayer.game.tictac;
 
+import androidx.annotation.Nullable;
+
 import root.iv.ivplayer.game.engine.Engine;
 import root.iv.ivplayer.game.engine.StepEngine;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
@@ -21,4 +23,7 @@ public interface TicTacEngineAPI extends Engine, StepEngine<TicTacProgressDTO> {
     TicTacProgressDTO progress(int index, BlockState state);
     BlockState getCurrentRole();
     void setCurrentRole(BlockState state);
+    void resize(int w, int h);
+    @Nullable
+    TicTacProgressDTO touchUp(float x, float y);
 }

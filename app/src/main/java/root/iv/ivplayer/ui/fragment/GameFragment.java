@@ -9,8 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +27,6 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
-import root.iv.ivplayer.game.scene.Scene;
 import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.tictac.TicTacRoom;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
@@ -65,7 +62,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     protected TextView viewRoomName;
 
     private Listener listener;
-    private Room<SensorScene> room;
+    private Room room;
 
     public static GameFragment getInstance(String roomName) {
         GameFragment fragment = new GameFragment();
@@ -88,11 +85,13 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
 
         Bundle args = Objects.requireNonNull(getArguments());
         String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
-
-        room = buildRoom(roomName, fbAuth.getCurrentUser(), gameView);
-        configGameView(room.getScene());
-
         viewRoomName.setText(roomName);
+
+        room = buildRoom(roomName, fbAuth.getCurrentUser());
+        room.addListener(this);
+        room.connect(gameView);
+        gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
+
         return view;
     }
 
@@ -169,15 +168,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         panelPlayer2.setBackgroundColor(Color.LTGRAY);
     }
 
-    private void configGameView(SensorScene scene) {
-        gameView.loadScene(scene);
-        gameView.setOnTouchListener(scene.getSensorController());
-        gameView.post(() -> {
-            room.resize(gameView.getWidth(), gameView.getHeight());
-        });
-    }
-
-    private Room buildRoom(String name, FirebaseUser user, GameView gameView) {
+    private Room buildRoom(String name, FirebaseUser user) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -189,9 +180,8 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         TicTacTextures textures = TicTacTextures
                 .create(square, circle, cross, Color.WHITE, background);
 
-        TicTacRoom ticTacRoom =  new TicTacRoom(textures, name, user);
-        ticTacRoom.addListener(this);
-        return ticTacRoom;
+        return new TicTacRoom(textures, name, user);
+
     }
 
     public interface Listener {

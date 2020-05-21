@@ -20,8 +20,9 @@ import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.TicTacController;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.game.view.GameView;
 
-public class TicTacToeScene extends SensorScene {
+public class TicTacScene extends SensorScene {
 
     // Генераторы для создания объектов
     private ObjectGenerator squareGenerator;
@@ -32,7 +33,7 @@ public class TicTacToeScene extends SensorScene {
     private List<DrawableObject> drawableObjects;
     private Group<Block> grid;
 
-    public TicTacToeScene(TicTacTextures textures, int squareSize, int startMargin, int topMargin) {
+    public TicTacScene(TicTacTextures textures, int squareSize, int startMargin, int topMargin) {
         super(new TicTacController());
         this.textures = textures;
 
@@ -53,11 +54,8 @@ public class TicTacToeScene extends SensorScene {
         this.drawableObjects = new ArrayList<>();
     }
 
-    public List<BlockState> getAllBlocks() {
-        return this.grid.getObjects()
-                .stream()
-                .map(Block::getState)
-                .collect(Collectors.toList());
+    public void markBlock(int index, BlockState state) {
+        grid.getObject(index).mark(state);
     }
 
     private Group<Block> gridConstruct(int startMargin, int topMargin, int squareSize) {
@@ -114,13 +112,21 @@ public class TicTacToeScene extends SensorScene {
         grid = newGrid;
     }
 
+    @Override
+    public void connect(GameView gameView) {
+        gameView.loadScene(this);
+        gameView.setOnTouchListener(sensorController);
+        gameView.setOnClickListener(sensorController);
+    }
+
     @Nullable
-    public Integer touchUpBlock(float x, float y) {
+    public Integer touchUpBlock(float x, float y, BlockState currentState) {
         for (int i = 0; i < grid.size(); i++) {
             Block b = grid.getObject(i);
             RectF bounds = b.getBounds();
             boolean click = bounds.contains(x, y);
             if (click && b.getState() == BlockState.FREE) {
+                b.mark(currentState);
                 return i;
             }
         }

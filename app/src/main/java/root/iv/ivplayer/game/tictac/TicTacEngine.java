@@ -1,10 +1,18 @@
 package root.iv.ivplayer.game.tictac;
 
+import android.view.MotionEvent;
+
+import androidx.annotation.Nullable;
+import androidx.core.util.Consumer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.game.tictac.scene.TicTacScene;
+import root.iv.ivplayer.game.tictac.scene.TicTacSceneFactory;
+import root.iv.ivplayer.game.view.GameView;
 
 // Непосредственно движок игры
 // Здесь будут храниться необходимые данные для рассчетов
@@ -16,17 +24,23 @@ public class TicTacEngine implements TicTacEngineAPI {
     private BlockState currentState;
     private List<TicTacProgressDTO> history;
 
-    public TicTacEngine() {
+    private TicTacScene scene;
+
+    public TicTacEngine(TicTacTextures textures, Consumer<MotionEvent> touchHandler) {
         this.currentState = BlockState.FREE;
         this.history = new ArrayList<>();
 
         blocks = new BlockState[9];
         Arrays.fill(blocks, BlockState.FREE);
+
+        this.scene = TicTacSceneFactory.newFactory().defaultScene(textures);
+        this.scene.getSensorController().setTouchHandler(touchHandler);
     }
 
     @Override
     public void markBlock(int index, BlockState state) {
         this.blocks[index] = state;
+        scene.markBlock(index, state);
     }
 
     @Override
@@ -45,6 +59,28 @@ public class TicTacEngine implements TicTacEngineAPI {
     @Override
     public void setCurrentRole(BlockState state) {
         this.currentState = state;
+    }
+
+    @Override
+    public void resize(int w, int h) {
+        scene.resize(w, h);
+    }
+
+    @Nullable
+    @Override
+    public TicTacProgressDTO touchUp(float x, float y) {
+        Integer index = scene.touchUpBlock(x, y, currentState);
+
+        if (index != null) {
+            return progress(index, currentState);
+        }
+
+        return null;
+    }
+
+    @Override
+    public void connect(GameView gameView) {
+        this.scene.connect(gameView);
     }
 
     @Override

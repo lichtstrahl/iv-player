@@ -19,15 +19,14 @@ import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
-import root.iv.ivplayer.game.tictac.scene.TicTacSceneFactory;
-import root.iv.ivplayer.game.tictac.scene.TicTacToeScene;
+import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
-public class TicTacRoom extends Room<TicTacToeScene> {
+public class TicTacRoom extends Room {
     private TicTacEngineAPI engine;
     @Nullable
     private Listener roomListener;
@@ -36,13 +35,12 @@ public class TicTacRoom extends Room<TicTacToeScene> {
     private List<ValueEventListener> fbObservers;
 
     public TicTacRoom(TicTacTextures textures, String name, FirebaseUser user) {
-        super(name, TicTacSceneFactory.newFactory().defaultScene(textures));
+        super(name);
 
         this.fbUser = user;
         fbObservers = new ArrayList<>();
 
-        engine = new TicTacEngine();
-        getScene().getSensorController().setTouchHandler(this::touchHandler);
+        engine = new TicTacEngine(textures, this::touchHandler);
     }
 
     @Override
@@ -79,12 +77,10 @@ public class TicTacRoom extends Room<TicTacToeScene> {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
-                Integer index = getScene().touchUpBlock(event.getX(), event.getY());
-                if (index != null) {
-                    TicTacProgressDTO progress = engine.progress(index, engine.getCurrentRole());
+                TicTacProgressDTO progress = engine.touchUp(event.getX(), event.getY());
+                if (progress != null) {
                     publishProgress(progress, engine.win(), engine.end());
                 }
-
                 break;
         }
     }
@@ -185,8 +181,13 @@ public class TicTacRoom extends Room<TicTacToeScene> {
     }
 
     @Override
+    public void connect(GameView gameView) {
+        engine.connect(gameView);
+    }
+
+    @Override
     public void resize(int width, int height) {
-        getScene().resize(width, height);
+        engine.resize(width, height);
     }
 
     // Следим за обновлением хода противника
@@ -196,7 +197,7 @@ public class TicTacRoom extends Room<TicTacToeScene> {
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBProgress enemyProgress = dataSnapshot.getValue(FBProgress.class);
             if (enemyProgress != null) {
-                engine.markBlock(enemyProgress.getIndex(), enemyProgress.getState());
+                engine.progress(enemyProgress.getIndex(), enemyProgress.getState());
                 if (engine.win())
                     win(enemyProgress.getUid());
                 else if (engine.end())
