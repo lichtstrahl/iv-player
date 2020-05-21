@@ -237,7 +237,7 @@ public class TicTacRoom extends Room {
         }
     }
 
-    // Следим за изменением комнаты (вход-выход) игроков
+    // Следим за изменением комнаты (вход-выход) игроков + внешнее закрытие комнаты
     class RoomObserver extends FBDataListener {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

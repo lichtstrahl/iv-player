@@ -87,6 +87,17 @@ public class FBRoom {
                 : player2.getUid();
     }
 
+    // Находится ли в комнате данный игрок
+    public boolean isPresent(String uid) {
+        if (player1 != null && player1.getUid().equals(uid))
+            return true;
+
+        if (player2 != null && player2.getUid().equals(uid))
+            return true;
+
+        return false;
+    }
+
     // Номер игрока по id
     public int numberPlayer(String uid) {
         return (player1 != null && player1.getUid().equals(uid))
