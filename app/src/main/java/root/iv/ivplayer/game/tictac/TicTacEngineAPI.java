@@ -3,6 +3,7 @@ package root.iv.ivplayer.game.tictac;
 import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.game.engine.Engine;
+import root.iv.ivplayer.game.engine.RoleEngine;
 import root.iv.ivplayer.game.engine.StepEngine;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 
@@ -18,11 +19,9 @@ import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
  * 3. Отдавать и получать информацию о текущей роли игрока
  * 4. Загружать новые блоки (для смены размеров)
  */
-public interface TicTacEngineAPI extends Engine, StepEngine<TicTacProgressDTO> {
+public interface TicTacEngineAPI extends Engine, StepEngine<TicTacProgressDTO>, RoleEngine<BlockState> {
     void markBlock(int index, BlockState state);
     TicTacProgressDTO progress(int index, BlockState state);
-    BlockState getCurrentRole();
-    void setCurrentRole(BlockState state);
     void resize(int w, int h);
     @Nullable
     TicTacProgressDTO touchUp(float x, float y);
