@@ -7,4 +7,8 @@ import root.iv.ivplayer.game.controller.SensorController;
  */
 public abstract class SensorScene implements Scene {
     protected SensorController sensorController;
+
+    public SensorScene(SensorController controller) {
+        sensorController = controller;
+    }
 }

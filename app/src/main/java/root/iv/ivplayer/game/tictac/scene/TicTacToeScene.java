@@ -26,10 +26,8 @@ public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
     private List<DrawableObject> drawableObjects;
     private Group<Block> grid;
 
-    // Элменты управления
-    private SensorController controller;
-
     public TicTacToeScene(TicTacTextures textures, int squareSize, int startMargin, int topMargin) {
+        super(new TicTacController());
         this.textures = textures;
 
 
@@ -47,8 +45,6 @@ public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
 
         // Прочие отрисовываемые объекты
         this.drawableObjects = new ArrayList<>();
-        // Контроллер для управления касаниями
-        this.controller = new TicTacController();
     }
 
     @Override
@@ -112,6 +108,6 @@ public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
 
     @Override
     public SensorController getMainController() {
-        return controller;
+        return sensorController;
     }
 }
