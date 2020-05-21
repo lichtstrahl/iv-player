@@ -16,7 +16,7 @@ import root.iv.ivplayer.game.tictac.Block;
 import root.iv.ivplayer.game.tictac.TicTacController;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
 
-public class TicTacToeScene implements Scene {
+public class TicTacToeScene implements TicTacSceneAPI {
 
     // Генераторы для создания объектов
     private ObjectGenerator squareGenerator;
@@ -52,6 +52,7 @@ public class TicTacToeScene implements Scene {
         this.controller = new TicTacController();
     }
 
+    @Override
     public List<Block> getAllBlocks() {
         return this.grid.getObjects();
     }

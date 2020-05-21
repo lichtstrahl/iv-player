@@ -19,6 +19,7 @@ import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
+import root.iv.ivplayer.game.tictac.scene.TicTacSceneAPI;
 import root.iv.ivplayer.game.tictac.scene.TicTacSceneFactory;
 import root.iv.ivplayer.game.tictac.scene.TicTacToeScene;
 import root.iv.ivplayer.network.firebase.FBDataListener;
@@ -40,7 +41,7 @@ public class TicTacRoom extends Room {
 
         this.fbUser = user;
         fbObservers = new ArrayList<>();
-        TicTacToeScene ticTacToeScene = (TicTacToeScene) getScene();
+        TicTacSceneAPI ticTacToeScene = (TicTacSceneAPI) getScene();
         engine = new TicTacEngine(ticTacToeScene.getAllBlocks());
         getScene().getMainController().setTouchHandler(this::touchHandler);
     }
