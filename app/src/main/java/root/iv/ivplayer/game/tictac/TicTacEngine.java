@@ -1,7 +1,5 @@
 package root.iv.ivplayer.game.tictac;
 
-import android.graphics.RectF;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,32 +12,21 @@ public class TicTacEngine implements TicTacEngineAPI {
     private static final int COUNT_COLUMNS = 3;
     private static final int COUNT_ROWS = 3;
 
-    private Block[] blocks;
+    private BlockState[] blocks;
     private BlockState currentState;
     private List<TicTacProgressDTO> history;
 
-    public TicTacEngine(List<Block> blocks) {
+    public TicTacEngine() {
         this.currentState = BlockState.FREE;
         this.history = new ArrayList<>();
 
-        loadBlocks(blocks);
-    }
-
-    public void loadBlock(int index, Block block) {
-        this.blocks[index] = block;
-    }
-
-    @Override
-    public void loadBlocks(List<Block> blocks) {
-        this.blocks = new Block[9];
-
-        for (int i = 0; i < 9; i++)
-            loadBlock(i, blocks.get(i));
+        blocks = new BlockState[9];
+        Arrays.fill(blocks, BlockState.FREE);
     }
 
     @Override
     public void markBlock(int index, BlockState state) {
-        this.blocks[index].mark(state);
+        this.blocks[index] = state;
     }
 
     @Override
@@ -60,20 +47,6 @@ public class TicTacEngine implements TicTacEngineAPI {
         this.currentState = state;
     }
 
-    // Отрыв пальца от экрана. Должен ли блок реагировать?
-    @Override
-    public void touchUp(float x, float y) {
-        for (int i = 0; i < blocks.length; i++) {
-            Block b = blocks[i];
-            RectF bounds = b.getBounds();
-            boolean click = bounds.contains(x, y);
-            if (click && b.getState() == BlockState.FREE) {
-                b.mark(currentState);
-                history.add(new TicTacProgressDTO(null, currentState, i));
-            }
-        }
-    }
-
     @Override
     public boolean end() {
         return !hasFreeBlocks();
@@ -90,7 +63,7 @@ public class TicTacEngine implements TicTacEngineAPI {
     }
 
     public boolean hasFreeBlocks() {
-        return Arrays.stream(blocks).anyMatch(b -> b.getState() == BlockState.FREE);
+        return Arrays.stream(blocks).anyMatch(b -> b == BlockState.FREE);
     }
 
     private boolean winColumns() {
@@ -111,22 +84,22 @@ public class TicTacEngine implements TicTacEngineAPI {
     }
 
     private boolean winMainDiagonal() {
-        BlockState state = blocks[0].getState();
+        BlockState state = blocks[0];
         if (state == BlockState.FREE) return false;
 
         for (int i = 1; i < COUNT_COLUMNS; i++) {
-            if (!blocks[(COUNT_COLUMNS*i) + i].getState().equals(state)) return false;
+            if (!blocks[(COUNT_COLUMNS*i) + i].equals(state)) return false;
         }
 
         return true;
     }
 
     private boolean winSecondDiagonal() {
-        BlockState state = blocks[COUNT_COLUMNS-1].getState();
+        BlockState state = blocks[COUNT_COLUMNS-1];
         if (state == BlockState.FREE) return false;
 
         for (int i = 1; i < COUNT_COLUMNS; i++) {
-            if (!blocks[COUNT_COLUMNS*(i+1)-(i+1)].getState().equals(state)) return false;
+            if (!blocks[COUNT_COLUMNS*(i+1)-(i+1)].equals(state)) return false;
         }
 
         return true;
@@ -136,11 +109,11 @@ public class TicTacEngine implements TicTacEngineAPI {
     // Если оно свободно, то проверка бессмысленна
     // Проверяем, есть ли отличающиеся блоки
     private boolean winColumn(int column) {
-        BlockState state = blocks[column].getState();
+        BlockState state = blocks[column];
         if (state == BlockState.FREE) return false;
 
         for (int i = column + COUNT_COLUMNS; i < 9; i += COUNT_COLUMNS) {
-            if (!blocks[i].getState().equals(state)) {
+            if (!blocks[i].equals(state)) {
                 return false;
             }
         }
@@ -152,11 +125,11 @@ public class TicTacEngine implements TicTacEngineAPI {
     // Если оно свободно, то проверка бессмысленна
     // Проверяем, есть ли отличающиеся блоки
     private boolean winRow(int row) {
-        BlockState state = blocks[row*COUNT_COLUMNS].getState();
+        BlockState state = blocks[row*COUNT_COLUMNS];
         if (state == BlockState.FREE) return false;
 
         for (int j = row*COUNT_COLUMNS+1; j < (row*COUNT_COLUMNS + COUNT_COLUMNS); j++) {
-            if (!blocks[j].getState().equals(state)) return false;
+            if (!blocks[j].equals(state)) return false;
         }
 
         return true;

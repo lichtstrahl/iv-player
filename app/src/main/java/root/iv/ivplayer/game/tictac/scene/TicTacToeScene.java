@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import root.iv.ivplayer.game.controller.SensorController;
 import root.iv.ivplayer.game.object.DrawableObject;
@@ -52,8 +53,11 @@ public class TicTacToeScene extends SensorScene {
         this.drawableObjects = new ArrayList<>();
     }
 
-    public List<Block> getAllBlocks() {
-        return this.grid.getObjects();
+    public List<BlockState> getAllBlocks() {
+        return this.grid.getObjects()
+                .stream()
+                .map(Block::getState)
+                .collect(Collectors.toList());
     }
 
     private Group<Block> gridConstruct(int startMargin, int topMargin, int squareSize) {

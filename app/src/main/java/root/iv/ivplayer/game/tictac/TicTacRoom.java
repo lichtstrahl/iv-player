@@ -41,7 +41,7 @@ public class TicTacRoom extends Room<TicTacToeScene> {
         this.fbUser = user;
         fbObservers = new ArrayList<>();
 
-        engine = new TicTacEngine(getScene().getAllBlocks());
+        engine = new TicTacEngine();
         getScene().getSensorController().setTouchHandler(this::touchHandler);
     }
 
@@ -187,7 +187,6 @@ public class TicTacRoom extends Room<TicTacToeScene> {
     @Override
     public void resize(int width, int height) {
         getScene().resize(width, height);
-        engine.loadBlocks(((TicTacToeScene)getScene()).getAllBlocks());
     }
 
     // Следим за обновлением хода противника

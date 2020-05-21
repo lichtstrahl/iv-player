@@ -21,18 +21,4 @@ public class TicTacSceneFactory {
     public TicTacToeScene fixSize(TicTacTextures textures, int margin, int size) {
         return new TicTacToeScene(textures, size, margin, margin);
     }
-
-    // Автоподбор под размеры экрана. Задача: Заполнить всю ширину экрана (экран вертикален)
-    public TicTacToeScene autoSize(TicTacTextures textures, int width, int height, double scale) {
-
-        if (width < height) { // Поле расположено вертикально
-            int size = width/3;
-            int margin = height-width / 2;
-            return new TicTacToeScene(textures, size, 0, margin);
-        } else { // Поле горизонтально
-            int size = height/3;
-            int margin = width-height / 2;
-            return new TicTacToeScene(textures, size, margin, 0);
-        }
-    }
 }
