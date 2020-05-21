@@ -14,4 +14,8 @@ public abstract class Object2 {
         this.position = position;
         visible = true;
     }
+
+    public boolean contain(Point2 point) {
+        return position.equals(point);
+    }
 }
