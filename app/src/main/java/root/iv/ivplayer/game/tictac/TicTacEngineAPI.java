@@ -15,11 +15,13 @@ import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
  *
  * Помимо этого может:
  * 1. Помечать какую-то клетку
- * 2. Отдавать и получать информацию о текущей роли игрока
- * 3. Загружать новые блоки (для смены размеров)
+ * 2. Сделать ход (пометив клетку и запомнив ход в историю)
+ * 3. Отдавать и получать информацию о текущей роли игрока
+ * 4. Загружать новые блоки (для смены размеров)
  */
 public interface TicTacEngineAPI extends Engine, StepEngine<TicTacProgressDTO>, SensorEngine {
     void markBlock(int index, BlockState state);
+    void progress(int index, BlockState state);
     BlockState getCurrentRole();
     void setCurrentRole(BlockState state);
     void loadBlocks(List<Block> blocks);

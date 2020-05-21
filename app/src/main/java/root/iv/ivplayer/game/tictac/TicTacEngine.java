@@ -37,8 +37,15 @@ public class TicTacEngine implements TicTacEngineAPI {
             loadBlock(i, blocks.get(i));
     }
 
+    @Override
     public void markBlock(int index, BlockState state) {
         this.blocks[index].mark(state);
+    }
+
+    @Override
+    public void progress(int index, BlockState state) {
+        markBlock(index, state);
+        history.add(new TicTacProgressDTO(null, currentState, index));
     }
 
     @Override
