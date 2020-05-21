@@ -30,6 +30,7 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.scene.Scene;
+import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.tictac.TicTacRoom;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
 import root.iv.ivplayer.game.view.GameView;
@@ -64,7 +65,7 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
     protected TextView viewRoomName;
 
     private Listener listener;
-    private Room room;
+    private Room<SensorScene> room;
 
     public static GameFragment getInstance(String roomName) {
         GameFragment fragment = new GameFragment();
@@ -168,9 +169,9 @@ public class GameFragment extends Fragment implements TicTacRoom.Listener {
         panelPlayer2.setBackgroundColor(Color.LTGRAY);
     }
 
-    private void configGameView(Scene scene) {
+    private void configGameView(SensorScene scene) {
         gameView.loadScene(scene);
-        gameView.setOnTouchListener(scene.getMainController());
+        gameView.setOnTouchListener(scene.getSensorController());
         gameView.post(() -> {
             room.resize(gameView.getWidth(), gameView.getHeight());
         });

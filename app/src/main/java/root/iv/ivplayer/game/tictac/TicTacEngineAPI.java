@@ -21,7 +21,7 @@ import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
  */
 public interface TicTacEngineAPI extends Engine, StepEngine<TicTacProgressDTO>, SensorEngine {
     void markBlock(int index, BlockState state);
-    void progress(int index, BlockState state);
+    TicTacProgressDTO progress(int index, BlockState state);
     BlockState getCurrentRole();
     void setCurrentRole(BlockState state);
     void loadBlocks(List<Block> blocks);

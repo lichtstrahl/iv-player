@@ -18,9 +18,7 @@ import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
-import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
-import root.iv.ivplayer.game.tictac.scene.TicTacSceneAPI;
 import root.iv.ivplayer.game.tictac.scene.TicTacSceneFactory;
 import root.iv.ivplayer.game.tictac.scene.TicTacToeScene;
 import root.iv.ivplayer.network.firebase.FBDataListener;
@@ -29,7 +27,7 @@ import root.iv.ivplayer.network.firebase.dto.FBProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
-public class TicTacRoom extends Room {
+public class TicTacRoom extends Room<TicTacToeScene> {
     private TicTacEngineAPI engine;
     @Nullable
     private Listener roomListener;
@@ -42,9 +40,9 @@ public class TicTacRoom extends Room {
 
         this.fbUser = user;
         fbObservers = new ArrayList<>();
-        TicTacSceneAPI ticTacToeScene = (TicTacSceneAPI) getScene();
-        engine = new TicTacEngine(ticTacToeScene.getAllBlocks());
-        ticTacToeScene.getMainController().setTouchHandler(this::touchHandler);
+
+        engine = new TicTacEngine(getScene().getAllBlocks());
+        getScene().getSensorController().setTouchHandler(this::touchHandler);
     }
 
     @Override
@@ -81,12 +79,10 @@ public class TicTacRoom extends Room {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
-                int oldHistorySize = engine.getProgressHistorySize();
-                engine.touchUp(event.getX(), event.getY());
-
-                if (engine.getProgressHistorySize() > oldHistorySize) {
-                    TicTacProgressDTO lastProgress = engine.getLastProgress();
-                    publishProgress(lastProgress, engine.win(), engine.end());
+                Integer index = getScene().touchUpBlock(event.getX(), event.getY());
+                if (index != null) {
+                    TicTacProgressDTO progress = engine.progress(index, engine.getCurrentRole());
+                    publishProgress(progress, engine.win(), engine.end());
                 }
 
                 break;

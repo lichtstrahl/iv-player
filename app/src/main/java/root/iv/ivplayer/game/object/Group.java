@@ -36,4 +36,8 @@ public class Group<T extends DrawableObject> {
     public int size() {
         return objects.size();
     }
+
+    public T getObject(int i) {
+        return objects.get(i);
+    }
 }

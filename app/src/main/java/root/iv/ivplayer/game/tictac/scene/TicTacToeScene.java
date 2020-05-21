@@ -1,6 +1,9 @@
 package root.iv.ivplayer.game.tictac.scene;
 
 import android.graphics.Canvas;
+import android.graphics.RectF;
+
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +15,12 @@ import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.tictac.Block;
+import root.iv.ivplayer.game.tictac.BlockState;
 import root.iv.ivplayer.game.tictac.TicTacController;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
+import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 
-public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
+public class TicTacToeScene extends SensorScene {
 
     // Генераторы для создания объектов
     private ObjectGenerator squareGenerator;
@@ -47,7 +52,6 @@ public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
         this.drawableObjects = new ArrayList<>();
     }
 
-    @Override
     public List<Block> getAllBlocks() {
         return this.grid.getObjects();
     }
@@ -106,8 +110,17 @@ public class TicTacToeScene extends SensorScene implements TicTacSceneAPI {
         grid = newGrid;
     }
 
-    @Override
-    public SensorController getMainController() {
-        return sensorController;
+    @Nullable
+    public Integer touchUpBlock(float x, float y) {
+        for (int i = 0; i < grid.size(); i++) {
+            Block b = grid.getObject(i);
+            RectF bounds = b.getBounds();
+            boolean click = bounds.contains(x, y);
+            if (click && b.getState() == BlockState.FREE) {
+                return i;
+            }
+        }
+
+        return null;
     }
 }

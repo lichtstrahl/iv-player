@@ -4,15 +4,12 @@ import lombok.Getter;
 
 // Контейнер для сцены хрянит внутри себя сцену и даёт доступ к ней
 // Сцену заменить нельзя
-public abstract class SceneContainer {
+public abstract class SceneContainer<T extends Scene> {
     @Getter
-    private final Scene scene;
+    private final T scene;
 
-    public SceneContainer(Scene scene) {
+    public SceneContainer(T scene) {
         this.scene = scene;
     }
 
-    public void autoResize(int width, int height) {
-
-    }
 }

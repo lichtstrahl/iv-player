@@ -13,17 +13,17 @@ public class TicTacSceneFactory {
     }
 
     // Размеры по умолчанию. Тестовый вариант, чтобы хоть как-то отобразить сцену
-    public TicTacSceneAPI defaultScene(TicTacTextures textures) {
+    public TicTacToeScene defaultScene(TicTacTextures textures) {
         return new TicTacToeScene(textures, SQUARE_DEFAULT_SIZE, MARGIN_DEFAULT, MARGIN_DEFAULT);
     }
 
     // Задаются конкретные значения
-    public TicTacSceneAPI fixSize(TicTacTextures textures, int margin, int size) {
+    public TicTacToeScene fixSize(TicTacTextures textures, int margin, int size) {
         return new TicTacToeScene(textures, size, margin, margin);
     }
 
     // Автоподбор под размеры экрана. Задача: Заполнить всю ширину экрана (экран вертикален)
-    public TicTacSceneAPI autoSize(TicTacTextures textures, int width, int height, double scale) {
+    public TicTacToeScene autoSize(TicTacTextures textures, int width, int height, double scale) {
 
         if (width < height) { // Поле расположено вертикально
             int size = width/3;
