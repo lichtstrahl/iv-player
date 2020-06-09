@@ -8,6 +8,7 @@ import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.view.GameView;
+import timber.log.Timber;
 
 public class FanoronaScene extends SensorScene {
     private static final int SLOT_RADIUS = 50;
@@ -64,18 +65,25 @@ public class FanoronaScene extends SensorScene {
     @Override
     public void resize(int width, int height) {
         double k = 9.0/5.0;
+        int horizontalMargin = 20;
+        int verticalMargin = 10;
 
         // Масштабирование поля (слотов)
         if (height > width) {
-            int gameW = width;
-            int gameH = Math.round(width/(float)k);
+            int gameW = width - horizontalMargin*2;
+            int gameH = Math.round(width/(float)k) - verticalMargin*2;
 
             int widthElement = gameW / 17;
             int heightElement = gameH / 9;
 
             int size = Math.min(widthElement, heightElement);
 
-            Group<Slot> resizedSlots = slotsConstruct(0,0, size, size/2);
+            Timber.i("View: width %d, height %d", width, height);
+            Timber.i("Game width: %d, height %d", gameW, gameH);
+            Timber.i("wElement %d, hElement %d", widthElement, heightElement);
+            Timber.i("Size: %d", size);
+
+            Group<Slot> resizedSlots = slotsConstruct(horizontalMargin/2,verticalMargin/2, widthElement, heightElement, size/2);
             // Перенос старых состояний
             int count = slotGroup.size();
             for (int i = 0; i < count; i++) {
@@ -96,12 +104,16 @@ public class FanoronaScene extends SensorScene {
     }
 
     private Group<Slot> slotsConstruct(int startMargin, int topMargin, int delta, int radius) {
+        return slotsConstruct(startMargin, topMargin, delta, delta, radius);
+    }
+
+    private Group<Slot> slotsConstruct(int startMargin, int topMargin, int hDelta, int vDelta, int radius) {
         Group<Slot> slots = Group.empty();
 
         for (int i = 0; i < countRows; i++) {
             for (int j = 0; j < countColumns; j++) {
-                int x0 = startMargin + j*(delta+radius*2);
-                int y0 = topMargin + i*(delta+radius*2);
+                int x0 = startMargin + j*(hDelta+radius*2);
+                int y0 = topMargin + i*(vDelta+radius*2);
 
                 StaticObject2 staticObject2 = slotGenerator.buildStatic(x0, y0);
                 Slot slot = Slot.of(staticObject2, radius, textures.getChipWhite(), textures.getChipWhiteColor(),
