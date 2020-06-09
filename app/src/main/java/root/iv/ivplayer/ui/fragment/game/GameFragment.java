@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ui.fragment;
+package root.iv.ivplayer.ui.fragment.game;
 
 import android.content.Context;
 import android.content.res.Resources;

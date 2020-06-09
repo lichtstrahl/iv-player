@@ -1,6 +1,7 @@
 package root.iv.ivplayer.ui.activity;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,7 +28,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
-import root.iv.ivplayer.ui.fragment.GameFragment;
+import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
 import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
 import timber.log.Timber;
