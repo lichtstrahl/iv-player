@@ -89,7 +89,7 @@ public class GameFragment extends Fragment
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_game, container, false);
         ButterKnife.bind(this, view);
-        listener.createGameFragment();
+
 
         FirebaseAuth fbAuth = FirebaseAuth.getInstance();
 
@@ -105,6 +105,7 @@ public class GameFragment extends Fragment
                 room.addListener(this);
                 room.connect(gameView);
                 gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
+                listener.createGameFragment(GameFragmentParams.ticTacParam());
                 break;
 
             case GAME_FANORONA:
@@ -112,6 +113,7 @@ public class GameFragment extends Fragment
                 room.addListener(this);
                 room.connect(gameView);
                 gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
+                listener.createGameFragment(GameFragmentParams.fanoronaParam());
                 break;
         }
 
@@ -221,7 +223,7 @@ public class GameFragment extends Fragment
     }
 
     public interface Listener {
-        void createGameFragment();
+        void createGameFragment(ScreenParam screenParam);
         void stopGameFragment();
     }
 }

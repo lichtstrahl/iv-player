@@ -30,6 +30,7 @@ import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
+import root.iv.ivplayer.ui.fragment.game.ScreenParam;
 import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
 import timber.log.Timber;
 
@@ -86,9 +87,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void createGameFragment() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        if (getSupportActionBar() != null) getSupportActionBar().hide();
+    public void createGameFragment(ScreenParam screenParam) {
+        if (screenParam.isFullScreen()) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+
+        if (!screenParam.isVisibleActionBar() && getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
+        int currentOrientation = getRequestedOrientation();
+        if (screenParam.getOrientation() != currentOrientation) {
+            setRequestedOrientation(screenParam.getOrientation());
+        }
     }
 
     @Override
