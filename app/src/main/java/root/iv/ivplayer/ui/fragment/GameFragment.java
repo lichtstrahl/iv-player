@@ -215,7 +215,7 @@ public class GameFragment extends Fragment
         Drawable chipWhite = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
         Drawable chipBlack = resources.getDrawable(R.drawable.ic_square, context.getTheme());
 
-        FanoronaTextures textures = FanoronaTextures.create(background, chipWhite, chipBlack, slot);
+        FanoronaTextures textures = FanoronaTextures.light(background, chipWhite, chipBlack, slot);
 
         return new FanoronaRoom(textures, name, user);
     }

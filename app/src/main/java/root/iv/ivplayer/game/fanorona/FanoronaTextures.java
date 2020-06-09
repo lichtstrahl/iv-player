@@ -29,4 +29,9 @@ public class FanoronaTextures {
     public static FanoronaTextures create(Drawable background, Drawable chipWhite, Drawable chipBlack, Drawable slot) {
         return new FanoronaTextures(Color.GRAY, background, Color.WHITE, chipWhite, Color.BLACK, chipBlack, Color.BLACK, slot);
     }
+
+    public static FanoronaTextures light(Drawable background, Drawable chipWhite, Drawable chipBlack, Drawable slot) {
+        return new FanoronaTextures(Color.GRAY, background, Color.WHITE, chipWhite, Color.DKGRAY, chipBlack, Color.LTGRAY, slot);
+    }
 }
+
