@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
 
+import lombok.Getter;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.object.simple.geometry.Circle2;
@@ -17,6 +18,7 @@ import root.iv.ivplayer.game.object.simple.geometry.GeometryFactory;
  */
 public class Slot extends StaticObject2 {
     private Circle2 bounds;
+    @Getter
     private SlotState state;
 
     public Slot(StaticObject2 object2, int radius) {
@@ -42,5 +44,9 @@ public class Slot extends StaticObject2 {
     @Override
     public void render(Canvas canvas) {
         super.render(canvas);
+    }
+
+    public void mark(SlotState state) {
+        this.state = state;
     }
 }

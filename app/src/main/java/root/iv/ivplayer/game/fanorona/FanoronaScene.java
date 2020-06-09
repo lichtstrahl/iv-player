@@ -63,7 +63,29 @@ public class FanoronaScene extends SensorScene {
 
     @Override
     public void resize(int width, int height) {
-        // TODO РЕализовать динамическое изменение размеров сцены под экран (TicTacScene)
+        double k = 9.0/5.0;
+
+        // Масштабирование поля (слотов)
+        if (height > width) {
+            int gameW = width;
+            int gameH = Math.round(width/(float)k);
+
+            int widthElement = gameW / 17;
+            int heightElement = gameH / 9;
+
+            int size = Math.min(widthElement, heightElement);
+
+            Group<Slot> resizedSlots = slotsConstruct(0,0, size, size/2);
+            // Перенос старых состояний
+            int count = slotGroup.size();
+            for (int i = 0; i < count; i++) {
+                resizedSlots.getObject(i)
+                        .mark(slotGroup.getObject(i).getState());
+            }
+            slotGroup = resizedSlots;
+        }
+
+
     }
 
     @Override

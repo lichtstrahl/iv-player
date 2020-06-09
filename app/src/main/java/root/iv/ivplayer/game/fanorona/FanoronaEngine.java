@@ -39,4 +39,8 @@ public class FanoronaEngine {
     public void connect(GameView gameView) {
         scene.connect(gameView);
     }
+
+    public void resize(int width, int height) {
+        scene.resize(width, height);
+    }
 }

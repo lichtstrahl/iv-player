@@ -38,7 +38,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
     @Override
     public void resize(int width, int height) {
-        // resize пока не реализован у FanoronaScene
+        engine.resize(width, height);
     }
 
     @Override
