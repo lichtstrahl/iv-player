@@ -39,21 +39,25 @@ public class MainActivity extends AppCompatActivity implements
         LoginFragment.Listener,
         RoomsFragment.Listener
 {
-    public static final String CHANNEL_NAME = "ch:global";
-    private static final String SHARED_LOGIN_KEY = "shared:login";
-
-    private static final FragmentTag FRAGMENT_LOGIN = FragmentTag
-            .builder()
-            .fragment(LoginFragment.getInstance())
-            .tag("fragment:login")
-            .build();
     private static final int RC_SIGN_IN = 101;
+    private static final String ARG_REORIENTATION = "arg:reorientation";
+
+    private boolean rotateScreen = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+        // Если это первый запуск Activity или смена конфигурации не связанная с повторотом: auth
+        if (savedInstanceState == null || !savedInstanceState.getBoolean(ARG_REORIENTATION)) {
+            auth();
+        }
+
+    }
+
+    private void auth() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
                 new AuthUI.IdpConfig.EmailBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build()
@@ -78,12 +82,10 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void setFragment() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.mainFrame, FRAGMENT_LOGIN.getFragment(), FRAGMENT_LOGIN.getTag())
-                .commit();
-
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(ARG_REORIENTATION, rotateScreen);
     }
 
     @Override
@@ -98,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements
 
         int currentOrientation = getRequestedOrientation();
         if (screenParam.getOrientation() != currentOrientation) {
+            rotateScreen = true;
             setRequestedOrientation(screenParam.getOrientation());
         }
     }
@@ -106,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements
     public void stopGameFragment() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (getSupportActionBar() != null) getSupportActionBar().show();
+        rotateScreen = true;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     @Override

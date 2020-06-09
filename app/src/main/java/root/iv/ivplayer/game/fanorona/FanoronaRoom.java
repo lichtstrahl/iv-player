@@ -48,6 +48,10 @@ public class FanoronaRoom extends FirebaseRoom {
 
     @Override
     public void exit() {
+        // Выход вызвался до входа. Происходит при повороте экрана.
+        if (fbRoom == null)
+            return;
+
         // Ищем путь до своего игрока для его очистки
         String currentPlayerPath = fbRoom.getCurrentPlayerPath(fbUser.getUid());
 

@@ -17,7 +17,7 @@ public abstract class GameFragmentParams {
                 .builder()
                 .fullScreen(true)
                 .visibleActionBar(false)
-                .orientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                .orientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
                 .build();
     }
 }
