@@ -96,7 +96,7 @@ public class FanoronaEngine {
 
             scene.releaseAllSlots();
             // Если после выполнения хода агрессивных ходов больше нет, то завершаем последовательность ходов
-            if (findAgressiveProgress(touched).isEmpty()) {
+            if (!hasAggressiveProgress(selected, touched)) {
                 Timber.i("Агрессивные ходы кончились. step=0");
                 progressStep = 0;
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
@@ -113,6 +113,16 @@ public class FanoronaEngine {
         for (Integer progress : aggressiveProgress) {
             scene.progressSlot(progress);
         }
+    }
+
+    // Есть хотя бы один агрессивный ход, который не продолжает линию from->to
+    private boolean hasAggressiveProgress(Integer from, Integer to) {
+        return findAgressiveProgress(to)
+                .stream()
+                .anyMatch(progress -> { // Следующий ход (to -> progress) не должен быть по той же линии что и перед этим (from -> to)
+                    Integer next = nextSlotForLine(from, to);
+                    return next == null || !next.equals(progress);
+                });
     }
 
     public void connect(GameView gameView) {
