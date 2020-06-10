@@ -29,7 +29,9 @@ public class Slot extends StaticObject2 {
     private SlotState state;
     private ObjectGenerator blackGenerator;
     private ObjectGenerator whiteGenerator;
+    @Getter
     private boolean selected;
+    @Getter
     private boolean progress;
     private Paint paintSelect;
     private Paint paintProgress;

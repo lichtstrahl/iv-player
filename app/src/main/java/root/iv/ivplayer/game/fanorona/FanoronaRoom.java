@@ -31,7 +31,7 @@ public class FanoronaRoom extends FirebaseRoom {
         super(name, user);
 
         engine = new FanoronaEngine(textures, this::touchHandler);
-        engine.setCurrentState(SlotState.BLACK);
+        engine.setCurrentRole(SlotState.BLACK);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
     private void startGame(FBRoom newRoom, SlotState currentRole) {
         newRoom.setState(RoomState.GAME);
-        engine.setCurrentState(currentRole);
+        engine.setCurrentRole(currentRole);
         FBDatabaseAdapter.getRoomStatus(name)
                 .setValue(RoomState.GAME);
 

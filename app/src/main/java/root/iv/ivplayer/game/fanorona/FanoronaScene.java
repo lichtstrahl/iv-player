@@ -136,11 +136,10 @@ public class FanoronaScene extends SensorScene {
 
     // Пробуем выбрать слот
     @Nullable
-    public Integer selectSlot(Point2 touchPoint) {
+    public Integer touchSlot(Point2 touchPoint) {
         for (int i = 0; i < slotGroup.getObjects().size(); i++) {
             Slot slot = slotGroup.getObject(i);
             if (slot.getBounds().contain(touchPoint)) {
-                slot.select();
                 return i;
             }
         }
@@ -150,6 +149,21 @@ public class FanoronaScene extends SensorScene {
 
     public void selectSlot(int i) {
         slotGroup.getObject(i).select();
+    }
+
+    @Nullable
+    public Integer getSelectedSlot() {
+        for (int i = 0; i < slotGroup.size(); i++) {
+            Slot slot = slotGroup.getObject(i);
+            if (slot.isSelected())
+                return i;
+        }
+
+        return null;
+    }
+
+    public boolean possibleProgress(int i) {
+        return slotGroup.getObject(i).isProgress();
     }
 
     public void progressSlot(int i) {

@@ -2,7 +2,6 @@ package root.iv.ivplayer.game.fanorona;
 
 import android.view.MotionEvent;
 
-import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
 import java.util.Arrays;
@@ -13,10 +12,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
-import root.iv.ivplayer.game.fanorona.slot.Way;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
 
@@ -31,7 +28,7 @@ public class FanoronaEngine {
     private FanoronaScene scene;
     @Getter
     @Setter
-    private SlotState currentState;
+    private SlotState currentRole;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
@@ -69,23 +66,35 @@ public class FanoronaEngine {
     }
 
     public void touch(float x, float y) {
+        // Запоминаем прошлую выбранную ячейку и проверяем возможен ли ход в текущую.
+        Integer selected = scene.getSelectedSlot();
+        Integer touched = scene.touchSlot(Point2.point(x, y));
+        boolean possibleProgress = (touched != null) && scene.possibleProgress(touched);
+
         scene.releaseAllSlots();
 
 
-        Integer touched = scene.selectSlot(Point2.point(x, y));
-
         // Было касание какого-то слота
         if (touched != null) {
+            scene.selectSlot(touched);
+
             int ti = touched / COUNT_COLUMN;
             int tj = touched % COUNT_COLUMN;
             List<Integer> friends = findFriends(ti, tj);
 
             // Если нажатие было на свою фишку и соседняя фишка свободна, то она помечается под возможный ход
-            for (int f : friends) {
-                int fi = f / COUNT_COLUMN;
-                int fj = f % COUNT_COLUMN;
-                if (slots[ti][tj] == currentState && slots[fi][fj] == SlotState.FREE)
-                    scene.progressSlot(f);
+            if (slots[ti][tj] == currentRole) {
+                for (int f : friends) {
+                    int fi = f / COUNT_COLUMN;
+                    int fj = f % COUNT_COLUMN;
+                    if (slots[fi][fj] == SlotState.FREE)
+                        scene.progressSlot(f);
+                }
+            }
+
+            // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
+            if (selected != null && slots[selected/COUNT_COLUMN][selected%COUNT_COLUMN] == currentRole && possibleProgress) {
+                progress(selected, touched);
             }
         }
 
@@ -136,6 +145,10 @@ public class FanoronaEngine {
         scene.markSlot(i*COUNT_COLUMN + j, state);
     }
 
+    private void mark(int globalIndex, SlotState state) {
+        mark(globalIndex / COUNT_COLUMN, globalIndex % COUNT_COLUMN, state);
+    }
+
     // Находим соседние слоты
     private List<Integer> findFriends(int i, int j) {
         List<Integer> friends = new LinkedList<>();
@@ -147,6 +160,11 @@ public class FanoronaEngine {
         }
 
         return friends;
+    }
+
+    private void progress(int oldIndex, int newIndex) {
+        mark(oldIndex, SlotState.FREE);
+        mark(newIndex, currentRole);
     }
 
     @Data
