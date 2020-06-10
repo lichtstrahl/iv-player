@@ -28,8 +28,7 @@ public class FanoronaEngine {
             Arrays.fill(slots[i], SlotState.FREE);
         }
 
-        // Пустой массив связей
-        slotWays = new SlotWay[0];
+        fillWays();
 
         // Создаём сцену
         this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, slotWays);
@@ -50,6 +49,37 @@ public class FanoronaEngine {
 
     public void resize(int width, int height) {
         scene.resize(width, height);
+    }
+
+    private void fillWays() {
+        slotWays = new SlotWay[108];
+        int index = 0;
+
+        // Заполняем строки
+        for (int i = 0; i < COUNT_ROW; i++) {
+            for (int j = 0; j < COUNT_COLUMN-1; j++)
+                slotWays[index++] = new SlotWay(i,j, i, j+1);
+        }
+
+        // Заполняем столбцы
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            for (int i = 0; i < COUNT_ROW-1; i++)
+                slotWays[index++] = new SlotWay(i,j, i+1, j);
+        }
+
+        // Заполняем диагонали
+        for (int i = 1; i < COUNT_ROW; i += 2) {
+            for (int j = 1; j < COUNT_COLUMN; j += 2) {
+                // Нужно соединить эту вершину со всеми возможными диагоналями (центр паука). Рисуем лапки
+                slotWays[index++] = new SlotWay(i,j, i-1,j-1);
+                slotWays[index++] = new SlotWay(i,j, i-1,j+1);
+                slotWays[index++] = new SlotWay(i,j, i+1,j-1);
+                slotWays[index++] = new SlotWay(i,j, i+1, j+1);
+            }
+        }
+
+        if (index != 108)
+            throw new IllegalStateException("Массив дорожек заполнен не до конца");
     }
 
     private void mark(int i, int j, SlotState state) {

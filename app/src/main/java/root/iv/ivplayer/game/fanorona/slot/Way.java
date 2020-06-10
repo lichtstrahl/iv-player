@@ -30,6 +30,8 @@ public class Way extends StaticObject2 {
         Paint paint = new Paint();
         paint.setStrokeWidth(5.0f);
         paint.setColor(color);
+        // Полупрозрачный
+        paint.setAlpha(120);
 
         canvas.drawLine(position.x, position.y, dist.x, dist.y, paint);
     }

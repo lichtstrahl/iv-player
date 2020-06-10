@@ -3,6 +3,8 @@ package root.iv.ivplayer.game.fanorona;
 import android.graphics.Canvas;
 import android.graphics.Color;
 
+import androidx.annotation.ColorInt;
+
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
@@ -19,6 +21,8 @@ import timber.log.Timber;
 public class FanoronaScene extends SensorScene {
     private static final int SLOT_RADIUS = 50;
     private static final double k = 9.0/5.0;
+    private static final int COUNT_ROW = 5;
+    private static final int COUNT_COLUMN = 9;
 
     // Текстуры
     private FanoronaTextures textures;
@@ -61,7 +65,7 @@ public class FanoronaScene extends SensorScene {
         this.startMargin = startMargin;
         this.topMargin = topMargin;
         slotGroup = slotsConstruct(startMargin, topMargin, 50, SLOT_RADIUS);
-        wayGroup = wayConstruct(ways);
+        wayGroup = wayConstruct(ways, textures.getSlotColor());
     }
 
     @Override
@@ -164,15 +168,19 @@ public class FanoronaScene extends SensorScene {
         return slots;
     }
 
-    private Group<Way> wayConstruct(SlotWay[] ways) {
+    private Group<Way> wayConstruct(SlotWay[] ways, @ColorInt int wayColor) {
         Group<Way> group = Group.empty();
 
-        group.add(
-            Way.of(
-                slotGroup.getObject(0).getBounds().getCenter(),
-                slotGroup.getObject(1).getBounds().getCenter(),
-                Color.YELLOW)
-        );
+
+        for (SlotWay way : ways) {
+            int index1 = way.getI1()*COUNT_COLUMN + way.getJ1();
+            int index2 = way.getI2()*COUNT_COLUMN + way.getJ2();
+
+            Point2 center1 = slotGroup.getObject(index1).getBounds().getCenter();
+            Point2 center2 = slotGroup.getObject(index2).getBounds().getCenter();
+
+            group.add(Way.of(center1, center2, wayColor));
+        }
 
         return group;
     }
