@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 
 import lombok.Getter;
 import root.iv.ivplayer.game.object.ObjectGenerator;
@@ -39,8 +40,8 @@ public class Slot extends StaticObject2 {
     }
 
     public static Slot of(StaticObject2 object2, int radius,
-                          Drawable chipWhite, @ColorInt int colorWhite,
-                          Drawable chipBlack, @ColorInt int colorBlack) {
+                          Drawable chipWhite, @Nullable @ColorInt Integer colorWhite,
+                          Drawable chipBlack, @Nullable @ColorInt Integer colorBlack) {
         Slot slot = new Slot(object2, radius);
 
         int iconW = slot.width - margin*2;
@@ -48,13 +49,15 @@ public class Slot extends StaticObject2 {
 
         slot.whiteGenerator = new ObjectGenerator();
         slot.whiteGenerator.setDrawable(chipWhite);
-        slot.whiteGenerator.setTintColor(colorWhite);
         slot.whiteGenerator.setFixSize(iconW, iconH);
+        if (colorWhite != null)
+            slot.whiteGenerator.setTintColor(colorWhite);
 
         slot.blackGenerator = new ObjectGenerator();
         slot.blackGenerator.setDrawable(chipBlack);
-        slot.blackGenerator.setTintColor(colorBlack);
         slot.blackGenerator.setFixSize(iconW, iconH);
+        if (colorBlack != null)
+            slot.blackGenerator.setTintColor(colorBlack);
 
         return slot;
     }

@@ -4,9 +4,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
@@ -17,9 +17,11 @@ public class FanoronaTextures {
     private Drawable background;
 
     // CHIP
-    private @ColorInt int chipWhiteColor;
+    @Nullable
+    private @ColorInt Integer chipWhiteColor;
     private Drawable chipWhite;
-    private @ColorInt int chipBlackColor;
+    @Nullable
+    private @ColorInt Integer chipBlackColor;
     private Drawable chipBlack;
 
     // SLOT
@@ -31,7 +33,7 @@ public class FanoronaTextures {
     }
 
     public static FanoronaTextures light(Drawable background, Drawable chipWhite, Drawable chipBlack, Drawable slot) {
-        return new FanoronaTextures(Color.GRAY, background, Color.WHITE, chipWhite, Color.DKGRAY, chipBlack, Color.LTGRAY, slot);
+        return new FanoronaTextures(Color.GRAY, background, Color.WHITE, chipWhite, null, chipBlack, Color.LTGRAY, slot);
     }
 }
 

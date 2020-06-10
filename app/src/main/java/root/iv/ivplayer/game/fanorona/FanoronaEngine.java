@@ -34,6 +34,14 @@ public class FanoronaEngine {
         // Создаём сцену
         this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10);
         this.scene.getSensorController().setTouchHandler(touchHandler);
+
+        // Первая строка BLACK
+        for (int j = 0; j < COUNT_COLUMN; j++)
+            mark(0, j, SlotState.BLACK);
+
+        // Третья строка WHITE
+        for (int j = 0; j < COUNT_COLUMN; j++)
+            mark(2, j, SlotState.WHITE);
     }
 
     public void connect(GameView gameView) {
