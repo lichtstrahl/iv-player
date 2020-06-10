@@ -11,6 +11,8 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
@@ -27,6 +29,9 @@ public class FanoronaEngine {
     private SlotState[][] slots;
     private SlotWay[] slotWays;
     private FanoronaScene scene;
+    @Getter
+    @Setter
+    private SlotState currentState;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
