@@ -18,6 +18,7 @@ import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
+import timber.log.Timber;
 
 /**
  * Игровой движок фанороны
@@ -31,6 +32,7 @@ public class FanoronaEngine {
     @Getter
     @Setter
     private SlotState currentRole;
+    private int progressStep;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
@@ -71,27 +73,46 @@ public class FanoronaEngine {
         // Запоминаем прошлую выбранную ячейку и проверяем возможен ли ход в текущую.
         Integer selected = scene.getSelectedSlot();
         Integer touched = scene.touchSlot(Point2.point(x, y));
-        boolean possibleProgress = (touched != null) && scene.possibleProgress(touched);
+        boolean possibleProgress = touched != null && scene.possibleProgress(touched);
 
-        scene.releaseAllSlots();
+        // Если касание было вне поля и последовательность ходов завершена, то отметки сбрасываются
+        if (touched == null && progressStep == 0) {
+            scene.releaseAllSlots();
+            return;
+        }
 
-
-        // Было касание какого-то слота
-        if (touched != null) {
-            scene.selectSlot(touched);
-            // Пробуем нарисовать возможные агрессивные ходы:
-            List<Integer> aggressiveProgress = findAgressiveProgress(touched);
-            for (Integer progress : aggressiveProgress) {
-                scene.progressSlot(progress);
-            }
-
-            // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
-            if (selected != null && slots[selected/COUNT_COLUMN][selected%COUNT_COLUMN] == currentRole && possibleProgress) {
-                progress(selected, touched);
-            }
+        // Было касание какого-то слота, последовательность ходов не начата, ход невозможен.
+        if (progressStep == 0 && !possibleProgress) {
+            scene.releaseAllSlots();
+            Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
+            prepareProgress(touched);
         }
 
 
+        // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
+        if (selected != null && slots[selected/COUNT_COLUMN][selected%COUNT_COLUMN] == currentRole && possibleProgress) {
+            progress(selected, touched, currentRole);
+
+
+            scene.releaseAllSlots();
+            // Если после выполнения хода агрессивных ходов больше нет, то завершаем последовательность ходов
+            if (findAgressiveProgress(touched).isEmpty()) {
+                Timber.i("Агрессивные ходы кончились. step=0");
+                progressStep = 0;
+            } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
+                Timber.i("Агрессивные ходы продолжаются step: %d", progressStep);
+                prepareProgress(touched);
+            }
+        }
+    }
+
+    private void prepareProgress(Integer touched) {
+        scene.selectSlot(touched);
+        // Пробуем нарисовать возможные агрессивные ходы:
+        List<Integer> aggressiveProgress = findAgressiveProgress(touched);
+        for (Integer progress : aggressiveProgress) {
+            scene.progressSlot(progress);
+        }
     }
 
     public void connect(GameView gameView) {
@@ -173,9 +194,11 @@ public class FanoronaEngine {
                 .collect(Collectors.toList());
     }
 
-    private void progress(int oldIndex, int newIndex) {
+    private void progress(int oldIndex, int newIndex, SlotState state) {
+        progressStep++;
         mark(oldIndex, SlotState.FREE);
-        mark(newIndex, currentRole);
+        mark(newIndex, state);
+        Timber.i("Ход, step:  %d", progressStep);
 
         // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
         for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
