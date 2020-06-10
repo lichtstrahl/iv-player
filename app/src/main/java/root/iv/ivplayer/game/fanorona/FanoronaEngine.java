@@ -113,6 +113,14 @@ public class FanoronaEngine {
         for (Integer progress : aggressiveProgress) {
             scene.progressSlot(progress);
         }
+
+        // Если агрессивных ходов нет, а это начало цепочки, то можно просто походить на пустую клетку
+        if (aggressiveProgress.isEmpty() && progressStep == 0) {
+            List<Integer> freeFriends = findFreeFriends(touched);
+
+            for (Integer free : freeFriends)
+                scene.progressSlot(free);
+        }
     }
 
     public void connect(GameView gameView) {
