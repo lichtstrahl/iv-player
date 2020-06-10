@@ -30,12 +30,26 @@ public class Slot extends StaticObject2 {
     private ObjectGenerator blackGenerator;
     private ObjectGenerator whiteGenerator;
     private boolean selected;
+    private boolean progress;
+    private Paint paintSelect;
+    private Paint paintProgress;
 
     private Slot(StaticObject2 object2, int radius) {
         super(object2.getPosition(), object2.getDrawable(), object2.getWidth(), object2.getHeight());
         this.bounds = GeometryFactory.newFactory()
                 .pivotCircle(position, radius);
         this.state = SlotState.FREE;
+
+        this.paintSelect = new Paint();
+        paintSelect.setColor(Color.YELLOW);
+        paintSelect.setAlpha(90);
+        paintSelect.setStyle(Paint.Style.FILL);
+
+
+        this.paintProgress = new Paint();
+        paintProgress.setColor(Color.RED);
+        paintProgress.setAlpha(90);
+        paintProgress.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -72,14 +86,15 @@ public class Slot extends StaticObject2 {
         int y0 = Math.round(position.y) + margin;
 
         // Помечаем ячейку выбранной
-        if (selected) {
-            Point2 center = bounds.getCenter();
-            Paint paint = new Paint();
-            paint.setColor(Color.YELLOW);
-            paint.setAlpha(90);
-            paint.setStyle(Paint.Style.FILL);
+        Point2 center = bounds.getCenter();
 
-            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paint);
+
+        if (selected) {
+            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintSelect);
+        }
+
+        if (progress) {
+            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintProgress);
         }
 
         // Рисуем круглую ячейку
@@ -107,7 +122,12 @@ public class Slot extends StaticObject2 {
         this.selected = true;
     }
 
+    public void progress() {
+        this.progress = true;
+    }
+
     public void release() {
         this.selected = false;
+        this.progress = false;
     }
 }

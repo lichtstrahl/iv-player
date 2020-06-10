@@ -152,6 +152,10 @@ public class FanoronaScene extends SensorScene {
         slotGroup.getObject(i).select();
     }
 
+    public void progressSlot(int i) {
+        slotGroup.getObject(i).progress();
+    }
+
     public void releaseAllSlots() {
         for (Slot slot : slotGroup.getObjects())
             slot.release();

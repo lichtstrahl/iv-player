@@ -65,7 +65,7 @@ public class FanoronaEngine {
         }
 
         // Очищаем серединку
-        mark(2, 5, SlotState.FREE);
+        mark(2, 4, SlotState.FREE);
     }
 
     public void touch(float x, float y) {
@@ -76,12 +76,17 @@ public class FanoronaEngine {
 
         // Было касание какого-то слота
         if (touched != null) {
-            int i = touched / COUNT_COLUMN;
-            int j = touched % COUNT_COLUMN;
-            List<Integer> friends = findFriends(i, j);
+            int ti = touched / COUNT_COLUMN;
+            int tj = touched % COUNT_COLUMN;
+            List<Integer> friends = findFriends(ti, tj);
 
-            for (int f : friends)
-                scene.selectSlot(f);
+            // Если нажатие было на свою фишку и соседняя фишка свободна, то она помечается под возможный ход
+            for (int f : friends) {
+                int fi = f / COUNT_COLUMN;
+                int fj = f % COUNT_COLUMN;
+                if (slots[ti][tj] == currentState && slots[fi][fj] == SlotState.FREE)
+                    scene.progressSlot(f);
+            }
         }
 
 
