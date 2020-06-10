@@ -19,7 +19,7 @@ import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
-import root.iv.ivplayer.network.firebase.dto.FBProgress;
+import root.iv.ivplayer.network.firebase.dto.FBTicTacProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
@@ -71,7 +71,7 @@ public class TicTacRoom extends FirebaseRoom {
     // А также устанавлиаем поле wait на себя
     private void publishProgress(TicTacProgressDTO lastProgress, boolean win, boolean end) {
         String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
-        FBProgress progress = new FBProgress(lastProgress.getBlockIndex(), win,
+        FBTicTacProgress progress = new FBTicTacProgress(lastProgress.getBlockIndex(), win,
                 end, engine.getCurrentRole(), fbUser.getUid());
         FBDatabaseAdapter.getProgressInRoom(name, progressPath)
                 .setValue(progress);
@@ -181,7 +181,7 @@ public class TicTacRoom extends FirebaseRoom {
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            FBProgress enemyProgress = dataSnapshot.getValue(FBProgress.class);
+            FBTicTacProgress enemyProgress = dataSnapshot.getValue(FBTicTacProgress.class);
             if (enemyProgress != null) {
                 engine.progress(enemyProgress.getIndex(), enemyProgress.getState());
                 if (engine.win())

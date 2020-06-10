@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -69,7 +70,8 @@ public class FanoronaEngine {
         mark(2, 4, SlotState.FREE);
     }
 
-    public void touch(float x, float y) {
+    @Nullable
+    public FanoronaProgressDTO touch(float x, float y) {
         // Запоминаем прошлую выбранную ячейку и проверяем возможен ли ход в текущую.
         Integer selected = scene.getSelectedSlot();
         Integer touched = scene.touchSlot(Point2.point(x, y));
@@ -78,7 +80,7 @@ public class FanoronaEngine {
         // Если касание было вне поля и последовательность ходов завершена, то отметки сбрасываются
         if (touched == null && progressStep == 0) {
             scene.releaseAllSlots();
-            return;
+            return null;
         }
 
         // Было касание какого-то слота, последовательность ходов не начата, ход невозможен.
@@ -104,6 +106,8 @@ public class FanoronaEngine {
                 prepareProgress(selected, touched);
             }
         }
+
+        return null;
     }
 
     private void prepareProgress(@Nullable Integer selected, Integer touched) {
@@ -129,6 +133,14 @@ public class FanoronaEngine {
 
     public void resize(int width, int height) {
         scene.resize(width, height);
+    }
+
+    public boolean win() {
+        return false;
+    }
+
+    public boolean end() {
+        return false;
     }
 
     private void fillWays() {
@@ -198,29 +210,35 @@ public class FanoronaEngine {
     private List<Integer> findEnemyFriends(int globalIndex) {
         return findFriends(globalIndex)
                 .stream()
-                .filter(i -> slots[i/COUNT_COLUMN][i%COUNT_COLUMN] == enemyRole())
+                .filter(i -> slots[i/COUNT_COLUMN][i%COUNT_COLUMN] == enemyRoleFor(currentRole))
                 .collect(Collectors.toList());
     }
 
-    private void progress(int oldIndex, int newIndex, SlotState state) {
-        progressStep++;
+    public FanoronaProgressDTO progress(int oldIndex, int newIndex, SlotState state) {
         mark(oldIndex, SlotState.FREE);
         mark(newIndex, state);
-        Timber.i("Ход, step:  %d", progressStep);
+
+        // Если это ход текущего игрока
+        if (state == currentRole) {
+            progressStep++;
+            Timber.i("Ход, step:  %d", progressStep);
+        }
 
         // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
-        for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
+        for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
                 mark(nextSlot, SlotState.FREE);
                 oldIndex = newIndex;
                 newIndex = nextSlot;
         }
 
         // Убираем всех соперников по обратной линии
-        for (Integer nextSlot = nextSlotForLine(newIndex, oldIndex); nextSlot != null && isEnemy(nextSlot); nextSlot = nextSlotForLine(newIndex, oldIndex)) {
+        for (Integer nextSlot = nextSlotForLine(newIndex, oldIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(newIndex, oldIndex)) {
             mark(nextSlot, SlotState.FREE);
             newIndex = oldIndex;
             oldIndex = nextSlot;
         }
+
+        return new FanoronaProgressDTO(state, oldIndex, newIndex);
     }
 
     /**
@@ -240,7 +258,7 @@ public class FanoronaEngine {
         for (Integer freeFriend : freeFriends) {
             Integer nextSlot = nextSlotForLine(to, freeFriend);
 
-            if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == enemyRole()) {
+            if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == enemyRoleFor(currentRole)) {
                 aggressiveProgress.add(freeFriend);
             }
         }
@@ -288,8 +306,8 @@ public class FanoronaEngine {
         return j >= 0 && j < COUNT_COLUMN;
     }
 
-    private SlotState enemyRole() {
-        return (currentRole == SlotState.BLACK)
+    private SlotState enemyRoleFor(SlotState role) {
+        return (role == SlotState.BLACK)
                 ? SlotState.WHITE
                 : SlotState.BLACK;
     }
@@ -298,8 +316,8 @@ public class FanoronaEngine {
         return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == SlotState.FREE;
     }
 
-    private boolean isEnemy(int globalIndex) {
-        return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == enemyRole();
+    private boolean isEnemy(int globalIndex, SlotState role) {
+        return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == enemyRoleFor(role);
     }
 
     @Data

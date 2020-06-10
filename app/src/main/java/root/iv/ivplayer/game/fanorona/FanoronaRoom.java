@@ -12,6 +12,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
+import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;
@@ -19,6 +20,8 @@ import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
+import root.iv.ivplayer.network.firebase.dto.FBFanoronaProgress;
+import root.iv.ivplayer.network.firebase.dto.FBTicTacProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
@@ -73,12 +76,12 @@ public class FanoronaRoom extends FirebaseRoom {
     }
 
     private void touchHandler(MotionEvent event) {
-//        if (fbRoom.getState() != RoomState.GAME)
-//            return;
+        if (fbRoom.getState() != RoomState.GAME)
+            return;
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
-                engine.touch(event.getX(), event.getY());
+                FanoronaProgressDTO progressDTO = engine.touch(event.getX(), event.getY());
                 break;
         }
 
@@ -98,6 +101,18 @@ public class FanoronaRoom extends FirebaseRoom {
         if (fbRoom.getState() != RoomState.WAIT_PROGRESS) {
             updateStatus(newRoom.getState());
         }
+    }
+
+    private void win(String uid) {
+        String winner = fbUser.getUid().equals(uid)
+                ? "Я"
+                : "Соперник";
+
+        Timber.i("Выиграл %s", winner);
+    }
+
+    private void end() {
+
     }
 
     private void startGame(FBRoom newRoom, SlotState currentRole) {
@@ -121,11 +136,11 @@ public class FanoronaRoom extends FirebaseRoom {
         }
 
         // Подписка на ходы соперника
-//        String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getUid());
-//        TicTacRoom.ProgressObserver progressObserver = new TicTacRoom.ProgressObserver();
-//        FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
-//                .addValueEventListener(progressObserver);
-//        addFBObserver(progressObserver);
+        String enemyProgressPath = newRoom.getEnemyProgressPath(fbUser.getUid());
+        ProgressObserver progressObserver = new ProgressObserver();
+        FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
+                .addValueEventListener(progressObserver);
+        addFBObserver(progressObserver);
     }
 
     public interface Listener extends RoomListener {
@@ -184,7 +199,7 @@ public class FanoronaRoom extends FirebaseRoom {
     }
 
     // Следим за обновлением поля WAIT (кто ждёт ход)
-    class WaitProgressObserver implements ValueEventListener {
+    private class WaitProgressObserver implements ValueEventListener {
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -194,6 +209,27 @@ public class FanoronaRoom extends FirebaseRoom {
                 updateStatus(RoomState.WAIT_PROGRESS);
             else
                 updateStatus(RoomState.GAME);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Timber.w(databaseError.getMessage());
+        }
+    }
+
+    // Следим за обновлением хода противника
+    private class ProgressObserver implements ValueEventListener {
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            FBFanoronaProgress enemyProgress = dataSnapshot.getValue(FBFanoronaProgress.class);
+            if (enemyProgress != null) {
+                engine.progress(enemyProgress.getFrom(), enemyProgress.getTo(), enemyProgress.getState());
+                if (engine.win())
+                    win(enemyProgress.getUid());
+                else if (engine.end())
+                    end();
+            }
         }
 
         @Override

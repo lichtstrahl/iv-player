@@ -9,7 +9,7 @@ import root.iv.ivplayer.game.tictac.BlockState;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FBProgress {
+public class FBTicTacProgress {
     private int index;
     private boolean win;
     private boolean end;
