@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
     <root.iv.ivplayer.game.view.GameView
         android:id="@+id/gameView"
@@ -15,14 +15,17 @@
     <RelativeLayout
         android:id="@+id/bottomBlock"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="110dp"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/background_light_wood">
+        android:background="@drawable/background_paperlight">
         <TextView
             android:id="@+id/viewRoomName"
+            style="@style/TicTacBottomLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/TicTacBottomLabel"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/center"
             android:textSize="20sp"
             tools:text="@tools:sample/cities"
             />
@@ -30,40 +33,51 @@
             android:id="@+id/statusPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/viewRoomName">
+            android:layout_alignParentStart="true"
+            android:layout_alignParentBottom="true"
+            android:layout_toStartOf="@id/center">
             <TextView
                 android:id="@+id/labelRoomStatus"
+                style="@style/TicTacBottomLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TicTacBottomLabel"
-                android:text="@string/label_room_status"
-                android:layout_gravity="center_vertical"/>
+                android:layout_gravity="center_vertical"
+                android:text="@string/label_room_status"/>
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switchRoomState"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:enabled="false"
-                android:layout_margin="@dimen/stdMargin"/>
+                android:layout_margin="@dimen/stdMargin"
+                android:enabled="false"/>
         </LinearLayout>
+
+        <View
+            android:id="@+id/center"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"/>
+
         <RelativeLayout
             android:id="@+id/panelPlayer1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/center"
-            android:layout_toStartOf="@id/center">
+            android:layout_above="@id/center"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/center">
             <TextView
                 android:id="@+id/viewLoginPlayer1"
+                style="@style/TicTacBottomLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@id/viewRolePlayer1"
                 android:layout_alignTop="@id/viewRolePlayer1"
                 android:layout_alignBottom="@id/viewRolePlayer1"
-                tools:text="@tools:sample/first_names"
-                android:textSize="@dimen/login_text_size"
-                android:textAlignment="gravity"
+                android:layout_marginStart="@dimen/stdMargin"
+                android:layout_toStartOf="@id/viewRolePlayer1"
                 android:gravity="center_vertical"
-                style="@style/TicTacBottomLabel"
-                android:layout_marginStart="@dimen/stdMargin"/>
+                android:textAlignment="gravity"
+                android:textSize="@dimen/login_text_size"
+                tools:text="@tools:sample/first_names"/>
             <ImageView
                 android:id="@+id/viewRolePlayer1"
                 android:layout_width="48dp"
@@ -74,32 +88,26 @@
                 android:src="@drawable/ic_cross"/>
         </RelativeLayout>
 
-        <View
-            android:id="@+id/center"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_below="@id/statusPanel"
-            android:layout_centerHorizontal="true"/>
-
         <RelativeLayout
             android:id="@+id/panelPlayer2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/center"
+            android:layout_below="@id/center"
+            android:layout_alignParentBottom="true"
             android:layout_toEndOf="@id/center">
             <TextView
                 android:id="@+id/viewLoginPlayer2"
+                style="@style/TicTacBottomLabel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toStartOf="@id/viewRolePlayer2"
                 android:layout_alignTop="@id/viewRolePlayer2"
                 android:layout_alignBottom="@id/viewRolePlayer2"
-                tools:text="@tools:sample/first_names"
-                android:textSize="@dimen/login_text_size"
-                android:textAlignment="gravity"
+                android:layout_marginStart="@dimen/stdMargin"
+                android:layout_toStartOf="@id/viewRolePlayer2"
                 android:gravity="center_vertical"
-                style="@style/TicTacBottomLabel"
-                android:layout_marginStart="@dimen/stdMargin"/>
+                android:textAlignment="gravity"
+                android:textSize="@dimen/login_text_size"
+                tools:text="@tools:sample/first_names"/>
 
             <ImageView
                 android:id="@+id/viewRolePlayer2"
