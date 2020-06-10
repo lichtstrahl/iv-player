@@ -6,6 +6,8 @@ import android.graphics.Color;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
+import java.util.List;
+
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
@@ -122,12 +124,32 @@ public class FanoronaScene extends SensorScene {
     }
 
 
-    // Пробуем выбрать слот
-    public void selectSlot(Point2 touchPoint) {
+    // Смотрим какие возможны ходы
+    public void viewPossibleProgress(Point2 touchPoint) {
         for (Slot slot : slotGroup.getObjects()) {
-            if (slot.getBounds().contain(touchPoint))
-                slot.select();
+            if (slot.getBounds().contain(touchPoint)) {
+
+
+            }
         }
+    }
+
+    // Пробуем выбрать слот
+    @Nullable
+    public Integer selectSlot(Point2 touchPoint) {
+        for (int i = 0; i < slotGroup.getObjects().size(); i++) {
+            Slot slot = slotGroup.getObject(i);
+            if (slot.getBounds().contain(touchPoint)) {
+                slot.select();
+                return i;
+            }
+        }
+
+        return null;
+    }
+
+    public void selectSlot(int i) {
+        slotGroup.getObject(i).select();
     }
 
     public void releaseAllSlots() {
@@ -199,4 +221,6 @@ public class FanoronaScene extends SensorScene {
 
         return group;
     }
+
+
 }

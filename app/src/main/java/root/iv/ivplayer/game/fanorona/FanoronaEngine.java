@@ -6,10 +6,15 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.fanorona.slot.Way;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
 
@@ -48,7 +53,21 @@ public class FanoronaEngine {
 
     public void touch(float x, float y) {
         scene.releaseAllSlots();
-        scene.selectSlot(Point2.point(x, y));
+
+
+        Integer touched = scene.selectSlot(Point2.point(x, y));
+
+        // Было касание какого-то слота
+        if (touched != null) {
+            int i = touched / COUNT_COLUMN;
+            int j = touched % COUNT_COLUMN;
+            List<Integer> friends = findFriends(i, j);
+
+            for (int f : friends)
+                scene.selectSlot(f);
+        }
+
+
     }
 
     public void connect(GameView gameView) {
@@ -93,5 +112,25 @@ public class FanoronaEngine {
     private void mark(int i, int j, SlotState state) {
         slots[i][j] = state;
         scene.markSlot(i*COUNT_COLUMN + j, state);
+    }
+
+    // Находим соседние слоты
+    private List<Integer> findFriends(int i, int j) {
+        List<Integer> friends = new LinkedList<>();
+
+        for (SlotWay way : slotWays) {
+            if (way.connect(i, j)) {
+                friends.add(way.iFriend(i)*COUNT_COLUMN + way.jFriend(j));
+            }
+        }
+
+        return friends;
+    }
+
+    @Data
+    @AllArgsConstructor
+    class Indexes {
+        private int i;
+        private int j;
     }
 }
