@@ -3,6 +3,7 @@ package root.iv.ivplayer.game.fanorona;
 import android.graphics.Canvas;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
+import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
@@ -94,6 +95,18 @@ public class FanoronaScene extends SensorScene {
 //        slotGroup = resizedSlots;
     }
 
+
+    @Override
+    public void connect(GameView gameView) {
+        gameView.loadScene(this);
+        gameView.setOnTouchListener(sensorController);
+        gameView.setOnClickListener(sensorController);
+    }
+
+    public void markSlot(int index, SlotState state) {
+        slotGroup.getObject(index).mark(state);
+    }
+
     private float avg(float ... numbers) {
         float sum = 0.0f;
 
@@ -118,13 +131,6 @@ public class FanoronaScene extends SensorScene {
         }
 
         return new Rect2(pivot, w, h);
-    }
-
-    @Override
-    public void connect(GameView gameView) {
-        gameView.loadScene(this);
-        gameView.setOnTouchListener(sensorController);
-        gameView.setOnClickListener(sensorController);
     }
 
     private Group<Slot> slotsConstruct(int startMargin, int topMargin, int delta, int radius) {

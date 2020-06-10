@@ -43,4 +43,9 @@ public class FanoronaEngine {
     public void resize(int width, int height) {
         scene.resize(width, height);
     }
+
+    private void mark(int i, int j, SlotState state) {
+        slots[i][j] = state;
+        scene.markSlot(i*COUNT_COLUMN + j, state);
+    }
 }
