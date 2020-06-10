@@ -243,11 +243,11 @@ public class FanoronaEngine {
     }
 
     private boolean correctI(int i) {
-        return i > 0 && i < COUNT_ROW;
+        return i >= 0 && i < COUNT_ROW;
     }
 
     private boolean correctJ(int j) {
-        return j > 0 && j < COUNT_COLUMN;
+        return j >= 0 && j < COUNT_COLUMN;
     }
 
     private SlotState enemyRole() {
