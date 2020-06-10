@@ -33,7 +33,7 @@ public class FanoronaTextures {
     }
 
     public static FanoronaTextures light(Drawable background, Drawable chipWhite, Drawable chipBlack, Drawable slot) {
-        return new FanoronaTextures(Color.GRAY, background, Color.WHITE, chipWhite, null, chipBlack, Color.LTGRAY, slot);
+        return new FanoronaTextures(Color.GRAY, background, null, chipWhite, null, chipBlack, Color.LTGRAY, slot);
     }
 }
 

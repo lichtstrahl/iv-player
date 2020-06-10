@@ -214,12 +214,12 @@ public class GameFragment extends Fragment
 
         Drawable background = resources.getDrawable(R.drawable.background_texture_of_dark_wood, context.getTheme());
         Drawable slot = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
-        Drawable chipBlack = resources.getDrawable(R.drawable.ic_robot, context.getTheme());
-        Drawable chipWhite = resources.getDrawable(R.drawable.ic_cross, context.getTheme());
+        Drawable chipBlack = resources.getDrawable(R.drawable.ic_dog, context.getTheme());
+        Drawable chipWhite = resources.getDrawable(R.drawable.ic_cat, context.getTheme());
 
         FanoronaTextures textures = FanoronaTextures.light(background, chipWhite, chipBlack, slot);
-        viewRole1.setImageResource(R.drawable.ic_robot);
-        viewRole2.setImageResource(R.drawable.ic_cross);
+        viewRole1.setImageResource(R.drawable.ic_dog);
+        viewRole2.setImageResource(R.drawable.ic_cat);
 
         return new FanoronaRoom(textures, name, user);
     }
