@@ -32,7 +32,7 @@ public class FanoronaEngine {
         slotWays = new SlotWay[0];
 
         // Создаём сцену
-        this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10);
+        this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, slotWays);
         this.scene.getSensorController().setTouchHandler(touchHandler);
 
         // Первая строка BLACK

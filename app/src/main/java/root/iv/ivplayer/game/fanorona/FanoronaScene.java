@@ -1,9 +1,12 @@
 package root.iv.ivplayer.game.fanorona;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
+import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.fanorona.slot.Way;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
@@ -26,6 +29,8 @@ public class FanoronaScene extends SensorScene {
 
     // Группа: слоты под фишки
     private Group<Slot> slotGroup;
+    // Группы: соединения слотов
+    private Group<Way> wayGroup;
 
     // Размер матрицы
     private int countRows;
@@ -35,7 +40,7 @@ public class FanoronaScene extends SensorScene {
     private int startMargin;
     private int topMargin;
 
-    public FanoronaScene(FanoronaTextures textures, int countRows, int countColumns, int startMargin, int topMargin) {
+    public FanoronaScene(FanoronaTextures textures, int countRows, int countColumns, int startMargin, int topMargin, SlotWay[] ways) {
         super(new FanoronaController());
         this.textures = textures;
 
@@ -56,6 +61,7 @@ public class FanoronaScene extends SensorScene {
         this.startMargin = startMargin;
         this.topMargin = topMargin;
         slotGroup = slotsConstruct(startMargin, topMargin, 50, SLOT_RADIUS);
+        wayGroup = wayConstruct(ways);
     }
 
     @Override
@@ -67,6 +73,9 @@ public class FanoronaScene extends SensorScene {
         } else {
             canvas.drawColor(textures.getBackgroundColor());
         }
+
+        // Отрисовка дорожек
+        wayGroup.render(canvas);
 
         // Отрисовка поля
         slotGroup.render(canvas);
@@ -153,5 +162,18 @@ public class FanoronaScene extends SensorScene {
         }
 
         return slots;
+    }
+
+    private Group<Way> wayConstruct(SlotWay[] ways) {
+        Group<Way> group = Group.empty();
+
+        group.add(
+            Way.of(
+                slotGroup.getObject(0).getBounds().getCenter(),
+                slotGroup.getObject(1).getBounds().getCenter(),
+                Color.YELLOW)
+        );
+
+        return group;
     }
 }

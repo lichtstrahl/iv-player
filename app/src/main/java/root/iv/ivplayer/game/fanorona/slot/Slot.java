@@ -21,6 +21,7 @@ import root.iv.ivplayer.game.object.simple.geometry.GeometryFactory;
 public class Slot extends StaticObject2 {
     private static final int margin = 10;
 
+    @Getter
     private Circle2 bounds;
     @Getter
     private SlotState state;
