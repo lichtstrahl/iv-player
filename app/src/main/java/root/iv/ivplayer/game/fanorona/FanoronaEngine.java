@@ -85,7 +85,7 @@ public class FanoronaEngine {
         if (progressStep == 0 && !possibleProgress) {
             scene.releaseAllSlots();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
-            prepareProgress(touched);
+            prepareProgress(null, touched);
         }
 
 
@@ -96,33 +96,23 @@ public class FanoronaEngine {
 
             scene.releaseAllSlots();
             // Если после выполнения хода агрессивных ходов больше нет, то завершаем последовательность ходов
-            if (!hasAggressiveProgress(selected, touched)) {
+            if (findAgressiveProgress(selected, touched).isEmpty()) {
                 Timber.i("Агрессивные ходы кончились. step=0");
                 progressStep = 0;
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
                 Timber.i("Агрессивные ходы продолжаются step: %d", progressStep);
-                prepareProgress(touched);
+                prepareProgress(selected, touched);
             }
         }
     }
 
-    private void prepareProgress(Integer touched) {
+    private void prepareProgress(@Nullable Integer selected, Integer touched) {
         scene.selectSlot(touched);
         // Пробуем нарисовать возможные агрессивные ходы:
-        List<Integer> aggressiveProgress = findAgressiveProgress(touched);
+        List<Integer> aggressiveProgress = findAgressiveProgress(selected, touched);
         for (Integer progress : aggressiveProgress) {
             scene.progressSlot(progress);
         }
-    }
-
-    // Есть хотя бы один агрессивный ход, который не продолжает линию from->to
-    private boolean hasAggressiveProgress(Integer from, Integer to) {
-        return findAgressiveProgress(to)
-                .stream()
-                .anyMatch(progress -> { // Следующий ход (to -> progress) не должен быть по той же линии что и перед этим (from -> to)
-                    Integer next = nextSlotForLine(from, to);
-                    return next == null || !next.equals(progress);
-                });
     }
 
     public void connect(GameView gameView) {
@@ -231,16 +221,16 @@ public class FanoronaEngine {
         1. Среди друзей есть фишки соперника, по обраткой линии от этого соперника есть свободная клетка
         2. Среди друзей естьсвободная клетка, по линии этой клетки есть соперник.
     */
-    private List<Integer> findAgressiveProgress(int globalIndex) {
+    private List<Integer> findAgressiveProgress(@Nullable Integer from, int to) {
         List<Integer> aggressiveProgress = new LinkedList<>();
 
-        if (slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] != currentRole)
+        if (slots[to/COUNT_COLUMN][to%COUNT_COLUMN] != currentRole)
             return aggressiveProgress;
 
         // Перебираем свободных друзей и смотрим есть ли на линии фишка соперника
-        List<Integer> freeFriends = findFreeFriends(globalIndex);
+        List<Integer> freeFriends = findFreeFriends(to);
         for (Integer freeFriend : freeFriends) {
-            Integer nextSlot = nextSlotForLine(globalIndex, freeFriend);
+            Integer nextSlot = nextSlotForLine(to, freeFriend);
 
             if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == enemyRole()) {
                 aggressiveProgress.add(freeFriend);
@@ -248,9 +238,9 @@ public class FanoronaEngine {
         }
 
         // Перебираем фишки противника среди друзей
-        List<Integer> enemyFriends = findEnemyFriends(globalIndex);
+        List<Integer> enemyFriends = findEnemyFriends(to);
         for (Integer enemyFriend : enemyFriends) {
-            Integer nextSlot = nextSlotForLine(enemyFriend, globalIndex);
+            Integer nextSlot = nextSlotForLine(enemyFriend, to);
 
             if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == SlotState.FREE) {
                 aggressiveProgress.add(nextSlot);
@@ -258,7 +248,14 @@ public class FanoronaEngine {
         }
 
 
-        return aggressiveProgress;
+        // Из всех возможных агрессивных ходов выбираем только те, что не продолжают линию (from->to)
+        return aggressiveProgress
+                .stream()
+                .filter(progress -> {
+                    Integer next = (from != null) ? nextSlotForLine(from, to) : null;
+                    return next == null || !next.equals(progress);
+                })
+                .collect(Collectors.toList());
     }
 
     @Nullable
