@@ -47,13 +47,25 @@ public class FanoronaEngine {
         this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, slotWays);
         this.scene.getSensorController().setTouchHandler(touchHandler);
 
-        // Первая строка BLACK
-        for (int j = 0; j < COUNT_COLUMN; j++)
-            mark(0, j, SlotState.BLACK);
+        // Расставляем тылы BLACK
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            mark(4, j, SlotState.BLACK);
+            mark(3, j, SlotState.BLACK);
+        }
 
-        // Третья строка WHITE
-        for (int j = 0; j < COUNT_COLUMN; j++)
-            mark(2, j, SlotState.WHITE);
+        // Расставляем тылы WHITE
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            mark(0, j, SlotState.WHITE);
+            mark(1, j, SlotState.WHITE);
+        }
+
+        // Линия фронта (начиная с BLACK)
+        for (int j = 0; j < COUNT_COLUMN; j++) {
+            mark(2, j, (j%2) == 0 ? SlotState.WHITE : SlotState.BLACK);
+        }
+
+        // Очищаем серединку
+        mark(2, 5, SlotState.FREE);
     }
 
     public void touch(float x, float y) {
