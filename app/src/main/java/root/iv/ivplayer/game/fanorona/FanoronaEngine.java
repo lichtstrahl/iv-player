@@ -2,11 +2,13 @@ package root.iv.ivplayer.game.fanorona;
 
 import android.view.MotionEvent;
 
+import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -77,19 +79,10 @@ public class FanoronaEngine {
         // Было касание какого-то слота
         if (touched != null) {
             scene.selectSlot(touched);
-
-            int ti = touched / COUNT_COLUMN;
-            int tj = touched % COUNT_COLUMN;
-            List<Integer> friends = findFriends(ti, tj);
-
-            // Если нажатие было на свою фишку и соседняя фишка свободна, то она помечается под возможный ход
-            if (slots[ti][tj] == currentRole) {
-                for (int f : friends) {
-                    int fi = f / COUNT_COLUMN;
-                    int fj = f % COUNT_COLUMN;
-                    if (slots[fi][fj] == SlotState.FREE)
-                        scene.progressSlot(f);
-                }
+            // Пробуем нарисовать возможные агрессивные ходы:
+            List<Integer> aggressiveProgress = findAgressiveProgress(touched);
+            for (Integer progress : aggressiveProgress) {
+                scene.progressSlot(progress);
             }
 
             // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
@@ -162,9 +155,113 @@ public class FanoronaEngine {
         return friends;
     }
 
+    private List<Integer> findFriends(int globalIndex) {
+        return findFriends(globalIndex/COUNT_COLUMN, globalIndex%COUNT_COLUMN);
+    }
+
+    private List<Integer> findFreeFriends(int globalIndex) {
+        return findFriends(globalIndex)
+                .stream()
+                .filter(i -> slots[i/COUNT_COLUMN][i%COUNT_COLUMN] == SlotState.FREE)
+                .collect(Collectors.toList());
+    }
+
+    private List<Integer> findEnemyFriends(int globalIndex) {
+        return findFriends(globalIndex)
+                .stream()
+                .filter(i -> slots[i/COUNT_COLUMN][i%COUNT_COLUMN] == enemyRole())
+                .collect(Collectors.toList());
+    }
+
     private void progress(int oldIndex, int newIndex) {
         mark(oldIndex, SlotState.FREE);
         mark(newIndex, currentRole);
+
+        // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
+        for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
+                mark(nextSlot, SlotState.FREE);
+                oldIndex = newIndex;
+                newIndex = nextSlot;
+        }
+
+        // Убираем всех соперников по обратной линии
+        for (Integer nextSlot = nextSlotForLine(newIndex, oldIndex); nextSlot != null && isEnemy(nextSlot); nextSlot = nextSlotForLine(newIndex, oldIndex)) {
+            mark(nextSlot, SlotState.FREE);
+            newIndex = oldIndex;
+            oldIndex = nextSlot;
+        }
+    }
+
+    /**
+        Фишка имеет агрессивные ходы: (это должна быть наша фишка)
+        Два типа агрессии:
+        1. Среди друзей есть фишки соперника, по обраткой линии от этого соперника есть свободная клетка
+        2. Среди друзей естьсвободная клетка, по линии этой клетки есть соперник.
+    */
+    private List<Integer> findAgressiveProgress(int globalIndex) {
+        List<Integer> aggressiveProgress = new LinkedList<>();
+
+        if (slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] != currentRole)
+            return aggressiveProgress;
+
+        // Перебираем свободных друзей и смотрим есть ли на линии фишка соперника
+        List<Integer> freeFriends = findFreeFriends(globalIndex);
+        for (Integer freeFriend : freeFriends) {
+            Integer nextSlot = nextSlotForLine(globalIndex, freeFriend);
+
+            if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == enemyRole()) {
+                aggressiveProgress.add(freeFriend);
+            }
+        }
+
+        // Перебираем фишки противника среди друзей
+        List<Integer> enemyFriends = findEnemyFriends(globalIndex);
+        for (Integer enemyFriend : enemyFriends) {
+            Integer nextSlot = nextSlotForLine(enemyFriend, globalIndex);
+
+            if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == SlotState.FREE) {
+                aggressiveProgress.add(nextSlot);
+            }
+        }
+
+
+        return aggressiveProgress;
+    }
+
+    @Nullable
+    private Integer nextSlotForLine(int startIndex, int endIndex) {
+        int deltaI = endIndex/COUNT_COLUMN - startIndex/COUNT_COLUMN;
+        int deltaJ = endIndex%COUNT_COLUMN - startIndex%COUNT_COLUMN;
+
+        int nextI = endIndex/COUNT_COLUMN + deltaI;
+        int nextJ = endIndex%COUNT_COLUMN + deltaJ;
+
+        if (correctI(nextI) && correctJ(nextJ))
+            return nextI*COUNT_COLUMN + nextJ;
+        else
+            return null;
+    }
+
+    private boolean correctI(int i) {
+        return i > 0 && i < COUNT_ROW;
+    }
+
+    private boolean correctJ(int j) {
+        return j > 0 && j < COUNT_COLUMN;
+    }
+
+    private SlotState enemyRole() {
+        return (currentRole == SlotState.BLACK)
+                ? SlotState.WHITE
+                : SlotState.BLACK;
+    }
+
+    private boolean isFree(int globalIndex) {
+        return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == SlotState.FREE;
+    }
+
+    private boolean isEnemy(int globalIndex) {
+        return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == enemyRole();
     }
 
     @Data
