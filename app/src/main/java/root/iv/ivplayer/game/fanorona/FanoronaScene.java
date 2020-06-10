@@ -6,12 +6,15 @@ import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
+import root.iv.ivplayer.game.object.simple.Point2;
+import root.iv.ivplayer.game.object.simple.geometry.Rect2;
 import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
 public class FanoronaScene extends SensorScene {
     private static final int SLOT_RADIUS = 50;
+    private static final double k = 9.0/5.0;
 
     // Текстуры
     private FanoronaTextures textures;
@@ -27,7 +30,11 @@ public class FanoronaScene extends SensorScene {
     private int countRows;
     private int countColumns;
 
-    public FanoronaScene(FanoronaTextures textures, int countRows, int countColumns) {
+    // Отступы от краёв экрана
+    private int startMargin;
+    private int topMargin;
+
+    public FanoronaScene(FanoronaTextures textures, int countRows, int countColumns, int startMargin, int topMargin) {
         super(new FanoronaController());
         this.textures = textures;
 
@@ -45,7 +52,9 @@ public class FanoronaScene extends SensorScene {
         slotGenerator.setTintColor(textures.getSlotColor());
         slotGenerator.setFixSize(SLOT_RADIUS*2, SLOT_RADIUS*2);
 
-        slotGroup = slotsConstruct(100, 100, 50, SLOT_RADIUS);
+        this.startMargin = startMargin;
+        this.topMargin = topMargin;
+        slotGroup = slotsConstruct(startMargin, topMargin, 50, SLOT_RADIUS);
     }
 
     @Override
@@ -64,36 +73,51 @@ public class FanoronaScene extends SensorScene {
 
     @Override
     public void resize(int width, int height) {
-        double k = 9.0/5.0;
-        int horizontalMargin = 20;
-        int verticalMargin = 10;
+        Rect2 gameView = gameSize(width, height);
+        int delta = Math.round(avg(gameView.getWidth()/17.0f, gameView.getHeight()/9.0f));
+        int radius = Math.round(avg(gameView.getWidth()/17.0f/2.0f, gameView.getHeight()/9.0f/2.0f));
 
-        // Масштабирование поля (слотов)
-        if (height > width) {
-            int gameW = width - horizontalMargin*2;
-            int gameH = Math.round(width/(float)k) - verticalMargin*2;
 
-            int widthElement = gameW / 17;
-            int heightElement = gameH / 9;
+        Timber.i("View: width %d, height %d", width, height);
+        Timber.i("Game width: %d, height %d", gameView.getWidth(), gameView.getHeight());
+        Timber.i("delta: %d, radius: %d", delta, radius);
+        Timber.i("Horizontal: delta*8 + radius*2*9 = %d", delta*8 + radius*2*9);
+        Timber.i("Vertical: delta*4 + radius*2*5 = %d", delta*4 + radius*2*5);
 
-            int size = Math.min(widthElement, heightElement);
+//        Group<Slot> resizedSlots = slotsConstruct(horizontalMargin/2,verticalMargin/2, widthElement, heightElement, size/2);
+//        // Перенос старых состояний
+//        int count = slotGroup.size();
+//        for (int i = 0; i < count; i++) {
+//            resizedSlots.getObject(i)
+//                    .mark(slotGroup.getObject(i).getState());
+//        }
+//        slotGroup = resizedSlots;
+    }
 
-            Timber.i("View: width %d, height %d", width, height);
-            Timber.i("Game width: %d, height %d", gameW, gameH);
-            Timber.i("wElement %d, hElement %d", widthElement, heightElement);
-            Timber.i("Size: %d", size);
+    private float avg(float ... numbers) {
+        float sum = 0.0f;
 
-            Group<Slot> resizedSlots = slotsConstruct(horizontalMargin/2,verticalMargin/2, widthElement, heightElement, size/2);
-            // Перенос старых состояний
-            int count = slotGroup.size();
-            for (int i = 0; i < count; i++) {
-                resizedSlots.getObject(i)
-                        .mark(slotGroup.getObject(i).getState());
-            }
-            slotGroup = resizedSlots;
+        for (float number : numbers)
+            sum += number;
+
+        return sum / numbers.length;
+    }
+
+    private Rect2 gameSize(int width, int height) {
+        Point2 pivot = new Point2();
+
+        width -= startMargin*2;
+        height -= topMargin*2;
+
+        int w = width;
+        int h = Math.round(w/(float)k);
+
+        if (w > width || h > height) {
+            h = height;
+            w = Math.round(h*(float)k);
         }
 
-
+        return new Rect2(pivot, w, h);
     }
 
     @Override

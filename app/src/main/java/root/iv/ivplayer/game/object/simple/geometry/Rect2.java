@@ -1,10 +1,13 @@
 package root.iv.ivplayer.game.object.simple.geometry;
 
+import lombok.Getter;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.object.simple.Point2;
 
 public class Rect2 extends Object2 {
+    @Getter
     private int width;
+    @Getter
     private int height;
 
     public Rect2(Point2 position, int w, int h) {
