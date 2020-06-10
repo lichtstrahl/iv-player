@@ -13,12 +13,10 @@ import java.util.Objects;
 import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
-import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
-import timber.log.Timber;
 
 public class FanoronaRoom extends FirebaseRoom {
     private FanoronaEngine engine;
@@ -73,12 +71,6 @@ public class FanoronaRoom extends FirebaseRoom {
 
     }
 
-    private void updateStatus(RoomState newState) {
-        boolean updated = updateLocalStatus(newState);
-        if (updated && roomListener != null)
-            roomListener.changeStatus(newState);
-    }
-
     private void updateRoom(FBRoom newRoom) {
         if (fbRoom == null) {
             fbRoom = new FBRoom();
@@ -90,7 +82,9 @@ public class FanoronaRoom extends FirebaseRoom {
 
         // Если игрок ждёт хода, то обновлять статус не следует, это делается в соответствующем наблюдателе.
         if (fbRoom.getState() != RoomState.WAIT_PROGRESS) {
-            updateStatus(newRoom.getState());
+            boolean updated = updateLocalStatus(newRoom.getState());
+            if (updated && roomListener != null)
+                roomListener.changeStatus(newRoom.getState());
         }
     }
 
@@ -109,13 +103,7 @@ public class FanoronaRoom extends FirebaseRoom {
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBRoom newRoom = Objects.requireNonNull(dataSnapshot.getValue(FBRoom.class));
 
-            if (fbRoom != null) { // Уже в комнате
-
-                updateRoom(newRoom);
-            } else { // Только вошли в игру
-                updateRoom(newRoom);
-            }
-
+            updateRoom(newRoom);
 
             roomListener.updatePlayers(fbRoom.name1(), fbRoom.name2());
         }

@@ -3,10 +3,6 @@ package root.iv.ivplayer.network.firebase.dto;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.firebase.encoders.annotations.Encodable;
-
-import java.util.Optional;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

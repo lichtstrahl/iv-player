@@ -54,7 +54,7 @@ public abstract class FirebaseRoom extends Room {
     }
 
     // Регистрация главного наблюдателя за FB-комнатой
-    public void registerRoomObserver(ValueEventListener roomObserver) {
+    protected void registerRoomObserver(ValueEventListener roomObserver) {
         FBDatabaseAdapter.getRoom(name)
                 .addValueEventListener(roomObserver);
         fbObservers.add(roomObserver);
