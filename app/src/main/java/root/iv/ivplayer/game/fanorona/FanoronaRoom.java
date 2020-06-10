@@ -21,7 +21,6 @@ import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBFanoronaProgress;
-import root.iv.ivplayer.network.firebase.dto.FBTicTacProgress;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import timber.log.Timber;
 
@@ -82,6 +81,25 @@ public class FanoronaRoom extends FirebaseRoom {
         switch (event.getAction()) {
             case MotionEvent.ACTION_UP:
                 FanoronaProgressDTO progressDTO = engine.touch(event.getX(), event.getY());
+                if (progressDTO != null) {
+                    boolean win = engine.win();
+                    boolean end = engine.end();
+
+                    FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
+                            progressDTO.getFrom(), progressDTO.getTo(), end, win);
+
+                    String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
+                    FBDatabaseAdapter.getProgressInRoom(name, progressPath)
+                            .setValue(fbProgress);
+                    FBDatabaseAdapter.getWaitField(name)
+                            .setValue(fbUser.getUid());
+
+                    if (win)
+                        win(fbUser.getUid());
+                    else if (end)
+                        end();
+                }
+
                 break;
         }
 

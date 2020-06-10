@@ -92,7 +92,7 @@ public class FanoronaEngine {
 
 
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
-        if (selected != null && slots[selected/COUNT_COLUMN][selected%COUNT_COLUMN] == currentRole && possibleProgress) {
+        if (selected != null && getState(selected) == currentRole && possibleProgress) {
             progress(selected, touched, currentRole);
 
 
@@ -203,14 +203,14 @@ public class FanoronaEngine {
     private List<Integer> findFreeFriends(int globalIndex) {
         return findFriends(globalIndex)
                 .stream()
-                .filter(i -> slots[i/COUNT_COLUMN][i%COUNT_COLUMN] == SlotState.FREE)
+                .filter(i -> getState(i) == SlotState.FREE)
                 .collect(Collectors.toList());
     }
 
     private List<Integer> findEnemyFriends(int globalIndex) {
         return findFriends(globalIndex)
                 .stream()
-                .filter(i -> slots[i/COUNT_COLUMN][i%COUNT_COLUMN] == enemyRoleFor(currentRole))
+                .filter(i -> getState(i) == enemyRoleFor(currentRole))
                 .collect(Collectors.toList());
     }
 
@@ -250,7 +250,7 @@ public class FanoronaEngine {
     private List<Integer> findAgressiveProgress(@Nullable Integer from, int to) {
         List<Integer> aggressiveProgress = new LinkedList<>();
 
-        if (slots[to/COUNT_COLUMN][to%COUNT_COLUMN] != currentRole)
+        if (getState(to) != currentRole)
             return aggressiveProgress;
 
         // Перебираем свободных друзей и смотрим есть ли на линии фишка соперника
@@ -258,7 +258,7 @@ public class FanoronaEngine {
         for (Integer freeFriend : freeFriends) {
             Integer nextSlot = nextSlotForLine(to, freeFriend);
 
-            if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == enemyRoleFor(currentRole)) {
+            if (nextSlot != null && getState(nextSlot) == enemyRoleFor(currentRole)) {
                 aggressiveProgress.add(freeFriend);
             }
         }
@@ -268,7 +268,7 @@ public class FanoronaEngine {
         for (Integer enemyFriend : enemyFriends) {
             Integer nextSlot = nextSlotForLine(enemyFriend, to);
 
-            if (nextSlot != null && slots[nextSlot/COUNT_COLUMN][nextSlot%COUNT_COLUMN] == SlotState.FREE) {
+            if (nextSlot != null && getState(nextSlot) == SlotState.FREE) {
                 aggressiveProgress.add(nextSlot);
             }
         }
@@ -313,11 +313,15 @@ public class FanoronaEngine {
     }
 
     private boolean isFree(int globalIndex) {
-        return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == SlotState.FREE;
+        return getState(globalIndex) == SlotState.FREE;
     }
 
     private boolean isEnemy(int globalIndex, SlotState role) {
-        return slots[globalIndex/COUNT_COLUMN][globalIndex%COUNT_COLUMN] == enemyRoleFor(role);
+        return getState(globalIndex) == enemyRoleFor(role);
+    }
+
+    private SlotState getState(int globalInex) {
+        return slots[globalInex/COUNT_COLUMN][globalInex%COUNT_COLUMN];
     }
 
     @Data
