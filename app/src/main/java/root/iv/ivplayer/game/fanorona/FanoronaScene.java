@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
@@ -118,6 +119,20 @@ public class FanoronaScene extends SensorScene {
 
     public void markSlot(int index, SlotState state) {
         slotGroup.getObject(index).mark(state);
+    }
+
+
+    // Пробуем выбрать слот
+    public void selectSlot(Point2 touchPoint) {
+        for (Slot slot : slotGroup.getObjects()) {
+            if (slot.getBounds().contain(touchPoint))
+                slot.select();
+        }
+    }
+
+    public void releaseAllSlots() {
+        for (Slot slot : slotGroup.getObjects())
+            slot.release();
     }
 
     private float avg(float ... numbers) {

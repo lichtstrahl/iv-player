@@ -2,12 +2,15 @@ package root.iv.ivplayer.game.fanorona;
 
 import android.view.MotionEvent;
 
+import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
 import java.util.Arrays;
 
+import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
 
 /**
@@ -41,6 +44,11 @@ public class FanoronaEngine {
         // Третья строка WHITE
         for (int j = 0; j < COUNT_COLUMN; j++)
             mark(2, j, SlotState.WHITE);
+    }
+
+    public void touch(float x, float y) {
+        scene.releaseAllSlots();
+        scene.selectSlot(Point2.point(x, y));
     }
 
     public void connect(GameView gameView) {

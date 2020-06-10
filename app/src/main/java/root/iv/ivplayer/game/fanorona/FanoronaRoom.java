@@ -68,6 +68,14 @@ public class FanoronaRoom extends FirebaseRoom {
     }
 
     private void touchHandler(MotionEvent event) {
+//        if (fbRoom.getState() != RoomState.GAME)
+//            return;
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_UP:
+                engine.touch(event.getX(), event.getY());
+                break;
+        }
 
     }
 
