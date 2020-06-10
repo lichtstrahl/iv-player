@@ -1,6 +1,8 @@
 package root.iv.ivplayer.game.fanorona.slot;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
@@ -27,6 +29,7 @@ public class Slot extends StaticObject2 {
     private SlotState state;
     private ObjectGenerator blackGenerator;
     private ObjectGenerator whiteGenerator;
+    private boolean selected;
 
     private Slot(StaticObject2 object2, int radius) {
         super(object2.getPosition(), object2.getDrawable(), object2.getWidth(), object2.getHeight());
@@ -65,12 +68,24 @@ public class Slot extends StaticObject2 {
 
     @Override
     public void render(Canvas canvas) {
-        super.render(canvas);
-
         int x0 = Math.round(position.x) + margin;
         int y0 = Math.round(position.y) + margin;
 
-        // Отрисовали саму ячейку, теперь рисуем её состояние
+        // Помечаем ячейку выбранной
+        if (selected) {
+            Point2 center = bounds.getCenter();
+            Paint paint = new Paint();
+            paint.setColor(Color.YELLOW);
+            paint.setAlpha(90);
+            paint.setStyle(Paint.Style.FILL);
+
+            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paint);
+        }
+
+        // Рисуем круглую ячейку
+        super.render(canvas);
+
+        // Рисуем её состояние
         switch (state) {
             case WHITE:
                 StaticObject2 white = whiteGenerator.buildStatic(x0, y0);
@@ -86,5 +101,13 @@ public class Slot extends StaticObject2 {
 
     public void mark(SlotState state) {
         this.state = state;
+    }
+
+    public void select() {
+        this.selected = true;
+    }
+
+    public void release() {
+        this.selected = false;
     }
 }

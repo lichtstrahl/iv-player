@@ -1,9 +1,11 @@
 package root.iv.ivplayer.game.object.simple.geometry;
 
+import lombok.Getter;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.object.simple.Point2;
 
 public class Circle2 extends Object2 {
+    @Getter
     private int radius;
 
     public Circle2(Point2 position, int radius) {
