@@ -164,7 +164,7 @@ public class RoomsFragment extends Fragment {
     }
 
     public interface Listener {
-        void clickRoom(String roomName);
+        void clickRoom(String roomName, int gType);
     }
 
     /**
@@ -246,7 +246,7 @@ public class RoomsFragment extends Fragment {
                     .setValue(room);
 
 
-            listener.clickRoom(roomName);
+            listener.clickRoom(roomName, 2);
         }
     }
 }

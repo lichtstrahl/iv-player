@@ -110,9 +110,8 @@ public class MainActivity extends AppCompatActivity implements
 
     // TODO Сюда должен передаваться параметр int gType
     @Override
-    public void clickRoom(String roomName) {
-        int gType = 2;
-        ScreenParam screenParam = GameFragmentParams.param(gType);
+    public void clickRoom(String roomName, int gType) {
+        ScreenParam sParam = GameFragmentParams.param(gType);
 
         // Перед возможным поворотом экрана удаляем фрагмент с комнатами
         Fragment roomsFragment = getSupportFragmentManager().findFragmentByTag(RoomsFragment.TAG);
@@ -122,14 +121,14 @@ public class MainActivity extends AppCompatActivity implements
                 .commit();
 
         // Готовим экран. Возможно был вызван поворот
-        prepareScreen(screenParam);
+        prepareScreen(sParam);
 
         // Если был запрошен поворот экрана, то передаём название комнаты и тип игры.
         // Если смены экрана не будет, то можно запустить игру прямо сейчас
         if (rotateScreen) {
             this.gameType = gType;
             this.roomName = roomName;
-            this.screenParam = screenParam;
+            this.screenParam = sParam;
         } else {
             startGame(roomName, gType);
         }
