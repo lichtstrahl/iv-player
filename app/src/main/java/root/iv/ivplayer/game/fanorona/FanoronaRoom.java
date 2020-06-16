@@ -258,7 +258,7 @@ public class FanoronaRoom extends FirebaseRoom {
             FBFanoronaProgress enemyProgress = dataSnapshot.getValue(FBFanoronaProgress.class);
             if (enemyProgress != null) {
                 engine.progress(enemyProgress.getFrom(), enemyProgress.getTo(), enemyProgress.getState());
-                if (engine.win())
+                if (enemyProgress.isWin() && engine.win())
                     win(enemyProgress.getUid());
                 else if (engine.end())
                     end();
