@@ -110,6 +110,9 @@ public class FanoronaEngine {
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
             FanoronaProgressDTO progressDTO = progress(selected, touched, currentRole);
+            // Если это ход текущего игрока
+            progressSteps.add(progressDTO);
+            Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
 
 
             scene.releaseAllSlots();
@@ -269,12 +272,6 @@ public class FanoronaEngine {
         mark(oldIndex, SlotState.FREE);
         mark(newIndex, state);
 
-        // Если это ход текущего игрока
-        if (state == currentRole) {
-            progressSteps.add(progressDTO);
-            Timber.i("Ход, step: #%d ->%d", progressSteps.size(), newIndex);
-        }
-
         // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
         for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
                 mark(nextSlot, SlotState.FREE);
@@ -329,14 +326,14 @@ public class FanoronaEngine {
         // Из всех возможных агрессивных ходов выбираем только те, что не продолжают линию (last->to)
         // И те что не содержатся среди уже совершенных ходов
         // last - ячейка, где сейчас стоит фишка.
-        Integer last = progressSteps.isEmpty()
+        FanoronaProgressDTO lastProgress = progressSteps.isEmpty()
                 ? null
-                : progressSteps.get(progressSteps.size()-1).getTo();
+                : progressSteps.get(progressSteps.size()-1);
 
         return aggressiveProgress
                 .stream()
                 .filter(progress -> {
-                    Integer next = (last != null) ? nextSlotForLine(last, to) : null;
+                    Integer next = (lastProgress != null) ? nextSlotForLine(lastProgress.getFrom(), to) : null;
                     return next == null || !next.equals(progress);
                 })
                 .filter(progress ->
