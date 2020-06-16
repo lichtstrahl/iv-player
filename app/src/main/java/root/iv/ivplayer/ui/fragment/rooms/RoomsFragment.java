@@ -66,7 +66,6 @@ public class RoomsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_rooms, container, false);
         ButterKnife.bind(this, view);
 
-        compositeDisposable = new CompositeDisposable();
         roomsAdapter = RoomsAdapter.empty(inflater, this::clickRoom, this::createContextMenu);
         fbCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -105,6 +104,7 @@ public class RoomsFragment extends Fragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        compositeDisposable = new CompositeDisposable();
 
         if (context instanceof Listener)
             listener = (Listener) context;
