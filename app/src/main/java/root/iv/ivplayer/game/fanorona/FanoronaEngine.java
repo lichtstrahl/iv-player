@@ -131,7 +131,7 @@ public class FanoronaEngine {
     public void markPossibleProgress(SlotState role) {
         List<Integer> possibleSlots = hasAgressiveProgress(role)
                 ? listSlotsWithAgressiveProgress(role)
-                : listSlotsForRole(role);
+                : listSlotsHasFreeFriend(role);
 
         for (int i : possibleSlots)
             scene.markAsPossibleProgress(i);
@@ -392,6 +392,19 @@ public class FanoronaEngine {
                 slots.add(i);
 
         return slots;
+    }
+
+    // Список фишек, имеющих рядом свободную клетку
+    private List<Integer> listSlotsHasFreeFriend(SlotState role) {
+        List<Integer> allSlotsForRole = listSlotsForRole(role);
+
+        return allSlotsForRole
+                .stream()
+                .filter(index -> {
+                    List<Integer> friends = findFreeFriends(index);
+                    return !friends.isEmpty();
+                })
+                .collect(Collectors.toList());
     }
 
     private SlotState getState(int globalInex) {
