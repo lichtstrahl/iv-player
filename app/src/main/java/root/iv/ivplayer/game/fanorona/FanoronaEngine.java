@@ -223,6 +223,9 @@ public class FanoronaEngine {
     }
 
     public FanoronaProgressDTO progress(int oldIndex, int newIndex, SlotState state) {
+        Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d])",
+                state.name(), oldIndex, newIndex,
+                getNumberRow(oldIndex), getNumberColumn(oldIndex), getNumberRow(newIndex), getNumberColumn(newIndex));
         mark(oldIndex, SlotState.FREE);
         mark(newIndex, state);
 
@@ -330,6 +333,14 @@ public class FanoronaEngine {
 
     private SlotState getState(int globalInex) {
         return slots[globalInex/COUNT_COLUMN][globalInex%COUNT_COLUMN];
+    }
+
+    private int getNumberRow(int globalIndex) {
+        return globalIndex / COUNT_COLUMN;
+    }
+
+    private int getNumberColumn(int globalIndex) {
+        return globalIndex % COUNT_COLUMN;
     }
 
     @Data
