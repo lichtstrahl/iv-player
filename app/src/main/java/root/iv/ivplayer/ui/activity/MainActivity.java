@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
-    // TODO Сюда должен передаваться параметр int gType
     @Override
     public void clickRoom(String roomName, int gType) {
         ScreenParam sParam = GameFragmentParams.param(gType);
