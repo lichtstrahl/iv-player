@@ -157,6 +157,7 @@ public class FanoronaRoom extends FirebaseRoom {
             updateStatus(RoomState.WAIT_PROGRESS);
         } else {
             updateStatus(RoomState.GAME);
+            engine.markPossibleProgress(currentRole);
         }
 
         // Подписка на ходы соперника
@@ -231,8 +232,10 @@ public class FanoronaRoom extends FirebaseRoom {
 
             if (waitEmail != null && waitEmail.equals(fbUser.getUid()))
                 updateStatus(RoomState.WAIT_PROGRESS);
-            else
+            else {
+                engine.markPossibleProgress(engine.getCurrentRole());
                 updateStatus(RoomState.GAME);
+            }
         }
 
         @Override

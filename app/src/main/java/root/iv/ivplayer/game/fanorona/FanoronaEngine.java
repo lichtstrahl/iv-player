@@ -88,6 +88,7 @@ public class FanoronaEngine {
         // Если касание было вне поля и последовательность ходов завершена, то отметки сбрасываются
         if (touched == null && progressStep == 0) {
             scene.releaseAllSlots();
+            markPossibleProgress(currentRole);
             return null;
         }
 

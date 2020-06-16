@@ -149,5 +149,6 @@ public class Slot extends StaticObject2 {
     public void release() {
         this.selected = false;
         this.progress = false;
+        this.hasProgress = false;
     }
 }
