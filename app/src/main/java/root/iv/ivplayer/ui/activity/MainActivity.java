@@ -60,7 +60,10 @@ public class MainActivity extends AppCompatActivity implements
         // Если это первый запуск Activity или смена конфигурации не связанная с повторотом: auth
         if (savedInstanceState == null || !savedInstanceState.getBoolean(ARG_REORIENTATION)) {
             auth();
-        } else {
+        }
+
+        // Если это перезапуск Activity после смены ориентации экрана и тип игры задан, то старт GameFragment
+        if (savedInstanceState != null && savedInstanceState.getBoolean(ARG_REORIENTATION) && savedInstanceState.getInt(ARG_GAME_TYPE) != 0){
             prepareScreen((ScreenParam) savedInstanceState.getSerializable(ARG_SCREEN_PARAM));
             startGame(savedInstanceState.getString(ARG_ROOM_NAME), savedInstanceState.getInt(ARG_GAME_TYPE));
         }
@@ -104,20 +107,13 @@ public class MainActivity extends AppCompatActivity implements
     public void stopGameFragment() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (getSupportActionBar() != null) getSupportActionBar().show();
-        rotateScreen = true;
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        rotateScreen = reorientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        gameType = 0;
     }
 
     @Override
     public void clickRoom(String roomName, int gType) {
         ScreenParam sParam = GameFragmentParams.param(gType);
-
-        // Перед возможным поворотом экрана удаляем фрагмент с комнатами
-        Fragment roomsFragment = getSupportFragmentManager().findFragmentByTag(RoomsFragment.TAG);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .remove(roomsFragment)
-                .commit();
 
         // Готовим экран. Возможно был вызван поворот
         prepareScreen(sParam);
@@ -177,11 +173,17 @@ public class MainActivity extends AppCompatActivity implements
             getSupportActionBar().hide();
         }
 
+        rotateScreen = reorientation(screenParam.getOrientation());
+    }
+
+    private boolean reorientation(int newOrientation) {
         int currentOrientation = getRequestedOrientation();
-        if (screenParam.getOrientation() != currentOrientation) {
-            rotateScreen = true;
-            setRequestedOrientation(screenParam.getOrientation());
+        if (newOrientation != currentOrientation) {
+            setRequestedOrientation(newOrientation);
+            return true;
         }
+
+        return false;
     }
 
     @AllArgsConstructor
