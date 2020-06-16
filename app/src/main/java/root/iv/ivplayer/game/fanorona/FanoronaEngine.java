@@ -226,6 +226,9 @@ public class FanoronaEngine {
         Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d])",
                 state.name(), oldIndex, newIndex,
                 getNumberRow(oldIndex), getNumberColumn(oldIndex), getNumberRow(newIndex), getNumberColumn(newIndex));
+        // Сразу формируем итоговый ответ о ходе. Т.к. индексы потом будут изменяться.
+        FanoronaProgressDTO progressDTO = new FanoronaProgressDTO(state, oldIndex, newIndex);
+
         mark(oldIndex, SlotState.FREE);
         mark(newIndex, state);
 
@@ -249,7 +252,7 @@ public class FanoronaEngine {
             oldIndex = nextSlot;
         }
 
-        return new FanoronaProgressDTO(state, oldIndex, newIndex);
+        return progressDTO;
     }
 
     /**
