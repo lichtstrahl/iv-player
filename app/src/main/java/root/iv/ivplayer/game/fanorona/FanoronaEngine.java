@@ -5,6 +5,7 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
+import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -131,8 +133,9 @@ public class FanoronaEngine {
             scene.progressSlot(progress);
         }
 
-        // Если агрессивных ходов нет, а это начало цепочки, то можно просто походить на пустую клетку
-        if (aggressiveProgress.isEmpty() && progressStep == 0) {
+        // Если агрессивных ходов из этой позиции нет и для роли их больше не существует вообще
+        // + это начало цепочки, то можно просто походить на пустую клетку
+        if (aggressiveProgress.isEmpty() && progressStep == 0 && !hasAgressiveProgress(currentRole)) {
             List<Integer> freeFriends = findFreeFriends(touched);
 
             for (Integer free : freeFriends)
@@ -265,6 +268,8 @@ public class FanoronaEngine {
         Два типа агрессии:
         1. Среди друзей есть фишки соперника, по обраткой линии от этого соперника есть свободная клетка
         2. Среди друзей естьсвободная клетка, по линии этой клетки есть соперник.
+
+        from == null если это начало цепочки ходов
     */
     private List<Integer> findAgressiveProgress(@Nullable Integer from, int to) {
         List<Integer> aggressiveProgress = new LinkedList<>();
@@ -337,6 +342,26 @@ public class FanoronaEngine {
 
     private boolean isEnemy(int globalIndex, SlotState role) {
         return getState(globalIndex) == enemyRoleFor(role);
+    }
+
+    // Имеет ли указанная роль агрессивные ходы?
+    private boolean hasAgressiveProgress(SlotState role) {
+        return !listSlotsWithAgressiveProgress(role).isEmpty();
+    }
+
+    // Список фишек, имеющих агрессивные ходы. Для указанной роли.
+    private List<Integer> listSlotsWithAgressiveProgress(SlotState role) {
+        int totalCountSlots = COUNT_ROW * COUNT_COLUMN;
+        List<Integer> potentialSlots = new ArrayList<>(totalCountSlots);
+
+        // Перебираем все фишки. Ищем фишки для указанной роли и если для неё есть агрессивные ходы добавляем в итоговый список
+        for (int i = 0; i < totalCountSlots; i++) {
+            if (getState(i) == role && !findAgressiveProgress(null, i).isEmpty()) {
+                potentialSlots.add(i);
+            }
+        }
+
+        return potentialSlots;
     }
 
     private SlotState getState(int globalInex) {
