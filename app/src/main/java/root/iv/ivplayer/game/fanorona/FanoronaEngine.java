@@ -120,6 +120,17 @@ public class FanoronaEngine {
         return null;
     }
 
+    // Пометить фишки с возможными ходами. Для данной роли
+    public void markPossibleProgress(SlotState role) {
+        List<Integer> possibleSlots = hasAgressiveProgress(role)
+                ? listSlotsWithAgressiveProgress(role)
+                : listSlotsForRole(role);
+
+        for (int i : possibleSlots)
+            scene.markAsPossibleProgress(i);
+
+    }
+
     private void prepareProgress(@Nullable Integer selected, Integer touched) {
         scene.selectSlot(touched);
 
@@ -362,6 +373,18 @@ public class FanoronaEngine {
         }
 
         return potentialSlots;
+    }
+
+    // Список всех фишек для данной роли
+    private List<Integer> listSlotsForRole(SlotState role) {
+        int totalCountSlots = COUNT_ROW * COUNT_COLUMN;
+        List<Integer> slots = new ArrayList<>(totalCountSlots);
+
+        for (int i = 0; i < totalCountSlots; i++)
+            if (getState(i) == role)
+                slots.add(i);
+
+        return slots;
     }
 
     private SlotState getState(int globalInex) {
