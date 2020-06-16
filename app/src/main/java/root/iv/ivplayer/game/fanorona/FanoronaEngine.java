@@ -143,8 +143,8 @@ public class FanoronaEngine {
     private void prepareProgress(Integer touched) {
         scene.selectSlot(touched);
 
-        // Если это чужая для нас фишка, то больше ничего не делаем
-        if (isEnemy(touched, currentRole))
+        // Если это пустая ячейка или чужая для нас фишка, то больше ничего не делаем
+        if (isFree(touched) && isEnemy(touched, currentRole))
             return;
 
         // Если рядом нет свободных друзей, то ход очевидно невозможен
