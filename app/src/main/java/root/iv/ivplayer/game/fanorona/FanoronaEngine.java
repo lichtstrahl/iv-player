@@ -36,7 +36,9 @@ public class FanoronaEngine {
     @Setter
     private SlotState currentRole;
     @Getter
-    private List<Integer> progressSteps;
+    private List<FanoronaProgressDTO> progressSteps;
+    @Getter
+    private boolean endSteps;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
@@ -83,6 +85,7 @@ public class FanoronaEngine {
 
     @Nullable
     public FanoronaProgressDTO touch(float x, float y) {
+        this.endSteps = false;
         // Запоминаем прошлую выбранную ячейку и проверяем возможен ли ход в текущую.
         Integer selected = scene.getSelectedSlot();
         Integer touched = scene.touchSlot(Point2.point(x, y));
@@ -112,7 +115,7 @@ public class FanoronaEngine {
             // Если после выполнения хода агрессивных ходов больше нет, то завершаем последовательность ходов
             if (findAgressiveProgress(selected, touched).isEmpty()) {
                 Timber.i("Агрессивные ходы кончились. step=0");
-                progressSteps.clear();
+                this.endSteps = true;
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
                 Timber.i("Агрессивные ходы продолжаются step: %d", progressSteps.size());
                 prepareProgress(selected, touched);
@@ -257,7 +260,7 @@ public class FanoronaEngine {
 
         // Если это ход текущего игрока
         if (state == currentRole) {
-            progressSteps.add(newIndex);
+            progressSteps.add(progressDTO);
             Timber.i("Ход, step: #%d ->%d", progressSteps.size(), newIndex);
         }
 
