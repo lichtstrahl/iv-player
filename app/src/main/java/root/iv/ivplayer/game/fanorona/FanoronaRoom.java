@@ -238,7 +238,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
             if (waitEmail != null && waitEmail.equals(fbUser.getUid()))
                 updateStatus(RoomState.WAIT_PROGRESS);
-            else {
+            else if (waitEmail != null) {
                 engine.markPossibleProgress(engine.getCurrentRole());
                 updateStatus(RoomState.GAME);
             }
