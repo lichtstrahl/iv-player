@@ -104,6 +104,7 @@ public class FanoronaEngine {
             scene.releaseAllSlots();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
             prepareProgress(touched);
+            return null;
         }
 
 
