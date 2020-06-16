@@ -39,6 +39,7 @@ public class FanoronaEngine {
     private List<FanoronaProgressDTO> progressSteps;
     @Getter
     private boolean endSteps;
+    private boolean aggressiveStep;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
@@ -112,8 +113,9 @@ public class FanoronaEngine {
 
 
             scene.releaseAllSlots();
-            // Если после выполнения хода агрессивных ходов больше нет, то завершаем последовательность ходов
-            if (findAgressiveProgress(selected, touched).isEmpty()) {
+            // Если после выполнения хода агрессивных ходов больше нет или сам ход был не агрессивным,
+            // то завершаем последовательность ходов
+            if (findAgressiveProgress(selected, touched).isEmpty() || !aggressiveStep) {
                 Timber.i("Агрессивные ходы кончились. step=0");
                 this.endSteps = true;
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
@@ -145,9 +147,14 @@ public class FanoronaEngine {
         if (isEnemy(touched, currentRole))
             return;
 
+        // Если рядом нет свободных друзей, то ход очевидно невозможен
+        if (findFreeFriends(touched).isEmpty())
+            return;
+
         // Пробуем нарисовать возможные агрессивные ходы:
         List<Integer> aggressiveProgress = findAgressiveProgress(selected, touched);
         for (Integer progress : aggressiveProgress) {
+            aggressiveStep = true;
             scene.progressSlot(progress);
         }
 
@@ -156,8 +163,10 @@ public class FanoronaEngine {
         if (aggressiveProgress.isEmpty() && progressSteps.isEmpty() && !hasAgressiveProgress(currentRole)) {
             List<Integer> freeFriends = findFreeFriends(touched);
 
-            for (Integer free : freeFriends)
+            for (Integer free : freeFriends) {
+                aggressiveStep = false;
                 scene.progressSlot(free);
+            }
         }
     }
 
