@@ -105,7 +105,6 @@ public class GameFragment extends Fragment
                 room.addListener(this);
                 room.connect(gameView);
                 gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
-                listener.createGameFragment(GameFragmentParams.ticTacParam());
                 break;
 
             case GAME_FANORONA:
@@ -113,7 +112,6 @@ public class GameFragment extends Fragment
                 room.addListener(this);
                 room.connect(gameView);
                 gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
-                listener.createGameFragment(GameFragmentParams.fanoronaParam());
                 break;
         }
 
@@ -225,7 +223,6 @@ public class GameFragment extends Fragment
     }
 
     public interface Listener {
-        void createGameFragment(ScreenParam screenParam);
         void stopGameFragment();
     }
 }

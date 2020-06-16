@@ -30,6 +30,7 @@ import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.LoginFragment;
+import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
 import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
 import timber.log.Timber;
@@ -41,8 +42,14 @@ public class MainActivity extends AppCompatActivity implements
 {
     private static final int RC_SIGN_IN = 101;
     private static final String ARG_REORIENTATION = "arg:reorientation";
+    private static final String ARG_ROOM_NAME = "arg:room-name";
+    private static final String ARG_GAME_TYPE = "arg:game-type";
+    private static final String ARG_SCREEN_PARAM = "arg:screen-param";
 
     private boolean rotateScreen = false;
+    private String roomName = "";
+    private int gameType = 0;
+    private ScreenParam screenParam = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,8 +60,10 @@ public class MainActivity extends AppCompatActivity implements
         // Если это первый запуск Activity или смена конфигурации не связанная с повторотом: auth
         if (savedInstanceState == null || !savedInstanceState.getBoolean(ARG_REORIENTATION)) {
             auth();
+        } else {
+            prepareScreen((ScreenParam) savedInstanceState.getSerializable(ARG_SCREEN_PARAM));
+            startGame(savedInstanceState.getString(ARG_ROOM_NAME), savedInstanceState.getInt(ARG_GAME_TYPE));
         }
-
     }
 
     private void auth() {
@@ -86,23 +95,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(ARG_REORIENTATION, rotateScreen);
-    }
-
-    @Override
-    public void createGameFragment(ScreenParam screenParam) {
-        if (screenParam.isFullScreen()) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
-
-        if (!screenParam.isVisibleActionBar() && getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
-
-        int currentOrientation = getRequestedOrientation();
-        if (screenParam.getOrientation() != currentOrientation) {
-            rotateScreen = true;
-            setRequestedOrientation(screenParam.getOrientation());
-        }
+        outState.putString(ARG_ROOM_NAME, roomName);
+        outState.putInt(ARG_GAME_TYPE, gameType);
+        outState.putSerializable(ARG_SCREEN_PARAM, screenParam);
     }
 
     @Override
@@ -113,14 +108,32 @@ public class MainActivity extends AppCompatActivity implements
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
+    // TODO Сюда должен передаваться параметр int gType
     @Override
     public void clickRoom(String roomName) {
+        int gType = 2;
+        ScreenParam screenParam = GameFragmentParams.param(gType);
+
+        // Перед возможным поворотом экрана удаляем фрагмент с комнатами
+        Fragment roomsFragment = getSupportFragmentManager().findFragmentByTag(RoomsFragment.TAG);
         getSupportFragmentManager()
                 .beginTransaction()
-                .addToBackStack(null)
-                .replace(R.id.mainFrame, GameFragment.getInstance(roomName, 2), GameFragment.TAG)
+                .remove(roomsFragment)
                 .commit();
-    }
+
+        // Готовим экран. Возможно был вызван поворот
+        prepareScreen(screenParam);
+
+        // Если был запрошен поворот экрана, то передаём название комнаты и тип игры.
+        // Если смены экрана не будет, то можно запустить игру прямо сейчас
+        if (rotateScreen) {
+            this.gameType = gType;
+            this.roomName = roomName;
+            this.screenParam = screenParam;
+        } else {
+            startGame(roomName, gType);
+        }
+}
 
     @Override
     public void authSuccessful(FirebaseUser user) {
@@ -146,6 +159,31 @@ public class MainActivity extends AppCompatActivity implements
                 .remove(removedFragment)
                 .commit();
         fragmentManager.popBackStack();
+    }
+
+    private void startGame(String rName, int gType) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .addToBackStack(null)
+                .replace(R.id.mainFrame, GameFragment.getInstance(rName, gType), GameFragment.TAG)
+                .commit();
+    }
+
+    // Подготовка экрана, если это необходимо
+    private void prepareScreen(ScreenParam screenParam) {
+        if (screenParam.isFullScreen()) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+
+        if (!screenParam.isVisibleActionBar() && getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
+        int currentOrientation = getRequestedOrientation();
+        if (screenParam.getOrientation() != currentOrientation) {
+            rotateScreen = true;
+            setRequestedOrientation(screenParam.getOrientation());
+        }
     }
 
     @AllArgsConstructor
