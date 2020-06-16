@@ -33,8 +33,13 @@ public class Slot extends StaticObject2 {
     private boolean selected;
     @Getter
     private boolean progress;
+    @Getter
+    private boolean hasProgress;
+
+    // Paints
     private Paint paintSelect;
     private Paint paintProgress;
+    private Paint paintHasProgress;
 
     private Slot(StaticObject2 object2, int radius) {
         super(object2.getPosition(), object2.getDrawable(), object2.getWidth(), object2.getHeight());
@@ -52,6 +57,11 @@ public class Slot extends StaticObject2 {
         paintProgress.setColor(Color.RED);
         paintProgress.setAlpha(90);
         paintProgress.setStyle(Paint.Style.FILL);
+
+        this.paintHasProgress = new Paint();
+        paintHasProgress.setColor(Color.GREEN);
+        paintHasProgress.setAlpha(90);
+        paintHasProgress.setStyle(Paint.Style.FILL);
     }
 
     @Override
@@ -99,6 +109,10 @@ public class Slot extends StaticObject2 {
             canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintProgress);
         }
 
+        if (hasProgress) {
+            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintHasProgress);
+        }
+
         // Рисуем круглую ячейку
         super.render(canvas);
 
@@ -126,6 +140,10 @@ public class Slot extends StaticObject2 {
 
     public void progress() {
         this.progress = true;
+    }
+
+    public void hasAgressiveProgress() {
+        this.hasProgress = true;
     }
 
     public void release() {
