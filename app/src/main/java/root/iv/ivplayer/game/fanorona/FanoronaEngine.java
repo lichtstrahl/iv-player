@@ -103,7 +103,7 @@ public class FanoronaEngine {
         if (progressSteps.isEmpty() && !possibleProgress) {
             scene.releaseAllSlots();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
-            prepareProgress(null, touched);
+            prepareProgress(touched);
         }
 
 
@@ -115,12 +115,12 @@ public class FanoronaEngine {
             scene.releaseAllSlots();
             // Если после выполнения хода агрессивных ходов больше нет или сам ход был не агрессивным,
             // то завершаем последовательность ходов
-            if (findAgressiveProgress(selected, touched).isEmpty() || !aggressiveStep) {
+            if (findAgressiveProgress(touched).isEmpty() || !aggressiveStep) {
                 Timber.i("Агрессивные ходы кончились. step=0");
                 this.endSteps = true;
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
                 Timber.i("Агрессивные ходы продолжаются step: %d", progressSteps.size());
-                prepareProgress(selected, touched);
+                prepareProgress(touched);
             }
 
             return progressDTO;
@@ -140,7 +140,7 @@ public class FanoronaEngine {
 
     }
 
-    private void prepareProgress(@Nullable Integer selected, Integer touched) {
+    private void prepareProgress(Integer touched) {
         scene.selectSlot(touched);
 
         // Если это чужая для нас фишка, то больше ничего не делаем
@@ -152,7 +152,7 @@ public class FanoronaEngine {
             return;
 
         // Пробуем нарисовать возможные агрессивные ходы:
-        List<Integer> aggressiveProgress = findAgressiveProgress(selected, touched);
+        List<Integer> aggressiveProgress = findAgressiveProgress(touched);
         for (Integer progress : aggressiveProgress) {
             aggressiveStep = true;
             scene.progressSlot(progress);
@@ -298,9 +298,8 @@ public class FanoronaEngine {
         1. Среди друзей есть фишки соперника, по обраткой линии от этого соперника есть свободная клетка
         2. Среди друзей естьсвободная клетка, по линии этой клетки есть соперник.
 
-        from == null если это начало цепочки ходов
     */
-    private List<Integer> findAgressiveProgress(@Nullable Integer from, int to) {
+    private List<Integer> findAgressiveProgress(int to) {
         List<Integer> aggressiveProgress = new LinkedList<>();
 
         if (getState(to) != currentRole)
@@ -327,13 +326,26 @@ public class FanoronaEngine {
         }
 
 
-        // Из всех возможных агрессивных ходов выбираем только те, что не продолжают линию (from->to)
+        // Из всех возможных агрессивных ходов выбираем только те, что не продолжают линию (last->to)
+        // И те что не содержатся среди уже совершенных ходов
+        // last - ячейка, где сейчас стоит фишка.
+        Integer last = progressSteps.isEmpty()
+                ? null
+                : progressSteps.get(progressSteps.size()-1).getTo();
+
         return aggressiveProgress
                 .stream()
                 .filter(progress -> {
-                    Integer next = (from != null) ? nextSlotForLine(from, to) : null;
+                    Integer next = (last != null) ? nextSlotForLine(last, to) : null;
                     return next == null || !next.equals(progress);
                 })
+                .filter(progress ->
+                        !progressSteps
+                            .stream()
+                            .map(FanoronaProgressDTO::getFrom)
+                            .collect(Collectors.toList())
+                            .contains(progress)
+                )
                 .collect(Collectors.toList());
     }
 
@@ -385,7 +397,7 @@ public class FanoronaEngine {
 
         // Перебираем все фишки. Ищем фишки для указанной роли и если для неё есть агрессивные ходы добавляем в итоговый список
         for (int i = 0; i < totalCountSlots; i++) {
-            if (getState(i) == role && !findAgressiveProgress(null, i).isEmpty()) {
+            if (getState(i) == role && !findAgressiveProgress(i).isEmpty()) {
                 potentialSlots.add(i);
             }
         }
