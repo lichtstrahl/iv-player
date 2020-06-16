@@ -53,11 +53,19 @@ public abstract class FirebaseRoom extends Room {
         fbObservers.add(listener);
     }
 
+    protected <T> boolean observerExist(Class<T> clazz) {
+        return fbObservers
+                .stream()
+                .map(ValueEventListener::getClass)
+                .anyMatch(cls -> cls.equals(clazz));
+    }
+
+
     // Регистрация главного наблюдателя за FB-комнатой
     protected void registerRoomObserver(ValueEventListener roomObserver) {
         FBDatabaseAdapter.getRoom(name)
                 .addValueEventListener(roomObserver);
-        fbObservers.add(roomObserver);
+        addFBObserver(roomObserver);
     }
 
     // Полная отписка от всего Firebase

@@ -31,7 +31,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
     public FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user) {
         super(name, user);
-
+        Timber.i("Fanorona room create");
         engine = new FanoronaEngine(textures, this::touchHandler);
         engine.setCurrentRole(SlotState.BLACK);
     }
@@ -69,7 +69,11 @@ public class FanoronaRoom extends FirebaseRoom {
 
     @Override
     public void init() {
-        // Здесь подписка на событие изменения комнаты
+        // Проверяем, что такого слушаетеля до этого не было
+        if (observerExist(RoomObserver.class))
+            return;
+
+        // Подписка на событие изменения комнаты
         RoomObserver roomObserver = new RoomObserver();
         registerRoomObserver(roomObserver);
     }
