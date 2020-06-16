@@ -62,9 +62,14 @@ public class FanoronaEngine {
             mark(1, j, SlotState.WHITE);
         }
 
-        // Линия фронта (начиная с BLACK)
+        // Линия фронта (Слева начиная с WHITE, Справа начиная с BLACK)
         for (int j = 0; j < COUNT_COLUMN; j++) {
             mark(2, j, (j%2) == 0 ? SlotState.WHITE : SlotState.BLACK);
+        }
+
+        for (int left = 0, right = COUNT_COLUMN-1; left != right; left++, right--) {
+            mark(2, left, (left%2) == 0 ? SlotState.WHITE : SlotState.BLACK);
+            mark(2, right, (right%2) == 0 ? SlotState.BLACK : SlotState.WHITE);
         }
 
         // Очищаем серединку
