@@ -36,7 +36,7 @@ public class FanoronaEngine {
     @Setter
     private SlotState currentRole;
     @Getter
-    private int progressStep;
+    private List<Integer> progressSteps;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
@@ -76,6 +76,9 @@ public class FanoronaEngine {
 
         // Очищаем серединку
         mark(2, 4, SlotState.FREE);
+
+        // Последовательность ходов (изначально пустая)
+        progressSteps = new ArrayList<>(10);
     }
 
     @Nullable
@@ -86,14 +89,14 @@ public class FanoronaEngine {
         boolean possibleProgress = touched != null && scene.possibleProgress(touched);
 
         // Если касание было вне поля и последовательность ходов завершена, то отметки сбрасываются
-        if (touched == null && progressStep == 0) {
+        if (touched == null && progressSteps.isEmpty()) {
             scene.releaseAllSlots();
             markPossibleProgress(currentRole);
             return null;
         }
 
         // Последовательность ходов не начата, ход невозможен.
-        if (progressStep == 0 && !possibleProgress) {
+        if (progressSteps.isEmpty() && !possibleProgress) {
             scene.releaseAllSlots();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
             prepareProgress(null, touched);
@@ -109,9 +112,9 @@ public class FanoronaEngine {
             // Если после выполнения хода агрессивных ходов больше нет, то завершаем последовательность ходов
             if (findAgressiveProgress(selected, touched).isEmpty()) {
                 Timber.i("Агрессивные ходы кончились. step=0");
-                progressStep = 0;
+                progressSteps.clear();
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
-                Timber.i("Агрессивные ходы продолжаются step: %d", progressStep);
+                Timber.i("Агрессивные ходы продолжаются step: %d", progressSteps.size());
                 prepareProgress(selected, touched);
             }
 
@@ -147,7 +150,7 @@ public class FanoronaEngine {
 
         // Если агрессивных ходов из этой позиции нет и для роли их больше не существует вообще
         // + это начало цепочки, то можно просто походить на пустую клетку
-        if (aggressiveProgress.isEmpty() && progressStep == 0 && !hasAgressiveProgress(currentRole)) {
+        if (aggressiveProgress.isEmpty() && progressSteps.isEmpty() && !hasAgressiveProgress(currentRole)) {
             List<Integer> freeFriends = findFreeFriends(touched);
 
             for (Integer free : freeFriends)
@@ -254,8 +257,8 @@ public class FanoronaEngine {
 
         // Если это ход текущего игрока
         if (state == currentRole) {
-            progressStep++;
-            Timber.i("Ход, step:  %d", progressStep);
+            progressSteps.add(newIndex);
+            Timber.i("Ход, step: #%d ->%d", progressSteps.size(), newIndex);
         }
 
         // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку

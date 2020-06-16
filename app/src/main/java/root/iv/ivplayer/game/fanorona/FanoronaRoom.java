@@ -87,7 +87,7 @@ public class FanoronaRoom extends FirebaseRoom {
                 FanoronaProgressDTO progressDTO = engine.touch(event.getX(), event.getY());
 
                 // Если ход был сделан и он оказался последним в цепочке
-                if (progressDTO != null && engine.getProgressStep() == 0) {
+                if (progressDTO != null && engine.getProgressSteps().isEmpty()) {
                     boolean win = engine.win();
                     boolean end = engine.end();
 
