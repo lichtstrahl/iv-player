@@ -33,6 +33,7 @@ public class FanoronaEngine {
     @Getter
     @Setter
     private SlotState currentRole;
+    @Getter
     private int progressStep;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
@@ -83,7 +84,7 @@ public class FanoronaEngine {
             return null;
         }
 
-        // Было касание какого-то слота, последовательность ходов не начата, ход невозможен.
+        // Последовательность ходов не начата, ход невозможен.
         if (progressStep == 0 && !possibleProgress) {
             scene.releaseAllSlots();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
@@ -93,7 +94,7 @@ public class FanoronaEngine {
 
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
-            progress(selected, touched, currentRole);
+            FanoronaProgressDTO progressDTO = progress(selected, touched, currentRole);
 
 
             scene.releaseAllSlots();
@@ -105,6 +106,8 @@ public class FanoronaEngine {
                 Timber.i("Агрессивные ходы продолжаются step: %d", progressStep);
                 prepareProgress(selected, touched);
             }
+
+            return progressDTO;
         }
 
         return null;
@@ -112,6 +115,11 @@ public class FanoronaEngine {
 
     private void prepareProgress(@Nullable Integer selected, Integer touched) {
         scene.selectSlot(touched);
+
+        // Если это чужая для нас фишка, то больше ничего не делаем
+        if (isEnemy(touched, currentRole))
+            return;
+
         // Пробуем нарисовать возможные агрессивные ходы:
         List<Integer> aggressiveProgress = findAgressiveProgress(selected, touched);
         for (Integer progress : aggressiveProgress) {
