@@ -169,12 +169,14 @@ public class FanoronaEngine {
         scene.resize(width, height);
     }
 
+    // Победа, если у нас ещё есть фишки, а у соперника они кончились
     public boolean win() {
-        return false;
+        return !listSlotsForRole(currentRole).isEmpty() && listSlotsForRole(enemyRoleFor(currentRole)).isEmpty();
     }
 
+    // Конец игры наступает, если нет больше фишек у одного из игроков
     public boolean end() {
-        return false;
+        return listSlotsForRole(currentRole).isEmpty() || listSlotsForRole(enemyRoleFor(currentRole)).isEmpty();
     }
 
     private void fillWays() {
