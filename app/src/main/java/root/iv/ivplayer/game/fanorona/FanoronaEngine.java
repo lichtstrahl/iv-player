@@ -193,7 +193,7 @@ public class FanoronaEngine {
     }
 
     private void mark(int globalIndex, SlotState state) {
-        mark(globalIndex / COUNT_COLUMN, globalIndex % COUNT_COLUMN, state);
+        mark(row(globalIndex), column(globalIndex), state);
     }
 
     // Находим соседние слоты
@@ -210,7 +210,7 @@ public class FanoronaEngine {
     }
 
     private List<Integer> findFriends(int globalIndex) {
-        return findFriends(globalIndex/COUNT_COLUMN, globalIndex%COUNT_COLUMN);
+        return findFriends(row(globalIndex), column(globalIndex));
     }
 
     private List<Integer> findFreeFriends(int globalIndex) {
@@ -230,7 +230,7 @@ public class FanoronaEngine {
     public FanoronaProgressDTO progress(int oldIndex, int newIndex, SlotState state) {
         Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d])",
                 state.name(), oldIndex, newIndex,
-                getNumberRow(oldIndex), getNumberColumn(oldIndex), getNumberRow(newIndex), getNumberColumn(newIndex));
+                row(oldIndex), column(oldIndex), row(newIndex), column(newIndex));
         // Сразу формируем итоговый ответ о ходе. Т.к. индексы потом будут изменяться.
         FanoronaProgressDTO progressDTO = new FanoronaProgressDTO(state, oldIndex, newIndex);
 
@@ -305,11 +305,11 @@ public class FanoronaEngine {
 
     @Nullable
     private Integer nextSlotForLine(int startIndex, int endIndex) {
-        int deltaI = endIndex/COUNT_COLUMN - startIndex/COUNT_COLUMN;
-        int deltaJ = endIndex%COUNT_COLUMN - startIndex%COUNT_COLUMN;
+        int deltaI = row(endIndex) - row(startIndex);
+        int deltaJ = column(endIndex) - column(startIndex);
 
-        int nextI = endIndex/COUNT_COLUMN + deltaI;
-        int nextJ = endIndex%COUNT_COLUMN + deltaJ;
+        int nextI = row(endIndex) + deltaI;
+        int nextJ = column(endIndex) + deltaJ;
 
         if (correctI(nextI) && correctJ(nextJ))
             return nextI*COUNT_COLUMN + nextJ;
@@ -340,14 +340,14 @@ public class FanoronaEngine {
     }
 
     private SlotState getState(int globalInex) {
-        return slots[globalInex/COUNT_COLUMN][globalInex%COUNT_COLUMN];
+        return slots[row(globalInex)][column(globalInex)];
     }
 
-    private int getNumberRow(int globalIndex) {
+    private int row(int globalIndex) {
         return globalIndex / COUNT_COLUMN;
     }
 
-    private int getNumberColumn(int globalIndex) {
+    private int column(int globalIndex) {
         return globalIndex % COUNT_COLUMN;
     }
 
