@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,7 +30,8 @@ import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
-import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
+import root.iv.ivplayer.ui.fragment.rooms.create.CreateRoomFragment;
+import root.iv.ivplayer.ui.fragment.rooms.list.RoomsFragment;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements
@@ -123,6 +123,15 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             startGame(roomName, gType);
         }
+    }
+
+    @Override
+    public void clickCreateRoom() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFrame, CreateRoomFragment.newInstance(), CreateRoomFragment.TAG)
+                .addToBackStack(null)
+                .commit();
     }
 
     public void authSuccessful(FirebaseUser user) {

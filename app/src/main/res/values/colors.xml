@@ -4,4 +4,6 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
     <color name="notification_background">#AED581</color>
+
+    <color name="chip_game_type_selected">#FF0C0C</color>
 </resources>

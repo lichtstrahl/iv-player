@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ui.fragment.rooms;
+package root.iv.ivplayer.ui.fragment.rooms.list;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,8 +30,8 @@ import io.reactivex.disposables.CompositeDisposable;
 import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.game.room.RoomState;
-import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.FBDataListener;
+import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.firebase.dto.FBUser;
 import root.iv.ivplayer.network.firebase.dto.RoomUI;
@@ -44,8 +43,6 @@ public class RoomsFragment extends Fragment {
 
     @BindView(R.id.recyclerListRooms)
     protected RecyclerView recyclerListRooms;
-    @BindView(R.id.inputNewRoomName)
-    protected TextInputEditText inputNewRoomName;
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
@@ -129,15 +126,8 @@ public class RoomsFragment extends Fragment {
     }
 
     @OnClick(R.id.buttonCreateRoom)
-    protected void clickButtonCreateRoom() {
-        String newRoomName = (inputNewRoomName.getText() != null)
-                ? inputNewRoomName.getText().toString()
-                : "";
-        if (!newRoomName.isEmpty()) {
-            FBDatabaseAdapter.getRooms().addListenerForSingleValueEvent(new CreateRoomListener(newRoomName));
-        } else {
-            Toast.makeText(this.getContext(), "Имя не задано", Toast.LENGTH_SHORT).show();
-        }
+    public void createRoom() {
+        listener.clickCreateRoom();
     }
 
     private void clickRoom(View roomItemView) {
@@ -165,6 +155,7 @@ public class RoomsFragment extends Fragment {
 
     public interface Listener {
         void clickRoom(String roomName, int gType);
+        void clickCreateRoom();
     }
 
     /**

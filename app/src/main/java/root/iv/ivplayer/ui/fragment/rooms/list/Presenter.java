@@ -1,4 +1,4 @@
-package root.iv.ivplayer.ui.fragment.rooms;
+package root.iv.ivplayer.ui.fragment.rooms.list;
 
 import lombok.AllArgsConstructor;
 
