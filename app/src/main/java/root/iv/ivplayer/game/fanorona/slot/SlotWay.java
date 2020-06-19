@@ -1,30 +1,32 @@
 package root.iv.ivplayer.game.fanorona.slot;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 // Соединение между двумя слотами, хранит две координаты: значения i,j для каждого слота
 @Data
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class SlotWay {
-    private int i1;
-    private int j1;
-    private int i2;
-    private int j2;
+    private int countColumn;
+    private int from;
+    private int to;
 
-    public boolean connect(int i, int j) {
-        return (i1 == i && j1 == j) || (i2 == i && j2 == j);
+    public static SlotWay column9(int globalIndexFrom, int globalIndexTo) {
+        return new SlotWay(9, globalIndexFrom, globalIndexTo);
     }
 
-    public int iFriend(int i) {
-        return (i == i1)
-                ? i2
-                : i1;
+    public static SlotWay column9(int i1, int j1, int i2, int j2) {
+        return new SlotWay(9, i1*9+j1,i2*9+j2);
     }
 
-    public int jFriend(int j) {
-        return (j == j1)
-                ? j2
-                : j1;
+    public boolean connect(int index) {
+        return to==index || from == index;
+    }
+
+    public int friend(int origin) {
+        return (from == origin)
+                ? to
+                : from;
     }
 }

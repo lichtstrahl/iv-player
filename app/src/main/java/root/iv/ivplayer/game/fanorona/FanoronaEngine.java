@@ -199,23 +199,23 @@ public class FanoronaEngine {
         // Заполняем строки
         for (int i = 0; i < COUNT_ROW; i++) {
             for (int j = 0; j < COUNT_COLUMN-1; j++)
-                slotWays[index++] = new SlotWay(i,j, i, j+1);
+                slotWays[index++] = SlotWay.column9(i,j, i, j+1);
         }
 
         // Заполняем столбцы
         for (int j = 0; j < COUNT_COLUMN; j++) {
             for (int i = 0; i < COUNT_ROW-1; i++)
-                slotWays[index++] = new SlotWay(i,j, i+1, j);
+                slotWays[index++] = SlotWay.column9(i,j, i+1, j);
         }
 
         // Заполняем диагонали
         for (int i = 1; i < COUNT_ROW; i += 2) {
             for (int j = 1; j < COUNT_COLUMN; j += 2) {
                 // Нужно соединить эту вершину со всеми возможными диагоналями (центр паука). Рисуем лапки
-                slotWays[index++] = new SlotWay(i,j, i-1,j-1);
-                slotWays[index++] = new SlotWay(i,j, i-1,j+1);
-                slotWays[index++] = new SlotWay(i,j, i+1,j-1);
-                slotWays[index++] = new SlotWay(i,j, i+1, j+1);
+                slotWays[index++] = SlotWay.column9(i,j, i-1,j-1);
+                slotWays[index++] = SlotWay.column9(i,j, i-1,j+1);
+                slotWays[index++] = SlotWay.column9(i,j, i+1,j-1);
+                slotWays[index++] = SlotWay.column9(i,j, i+1, j+1);
             }
         }
 
@@ -232,21 +232,16 @@ public class FanoronaEngine {
         mark(row(globalIndex), column(globalIndex), state);
     }
 
-    // Находим соседние слоты
-    private List<Integer> findFriends(int i, int j) {
+    private List<Integer> findFriends(int globalIndex) {
         List<Integer> friends = new LinkedList<>();
 
         for (SlotWay way : slotWays) {
-            if (way.connect(i, j)) {
-                friends.add(way.iFriend(i)*COUNT_COLUMN + way.jFriend(j));
+            if (way.connect(globalIndex)) {
+                friends.add(way.friend(globalIndex));
             }
         }
 
         return friends;
-    }
-
-    private List<Integer> findFriends(int globalIndex) {
-        return findFriends(row(globalIndex), column(globalIndex));
     }
 
     private List<Integer> findFreeFriends(int globalIndex) {
@@ -438,12 +433,5 @@ public class FanoronaEngine {
 
     private int column(int globalIndex) {
         return globalIndex % COUNT_COLUMN;
-    }
-
-    @Data
-    @AllArgsConstructor
-    class Indexes {
-        private int i;
-        private int j;
     }
 }

@@ -1,12 +1,9 @@
 package root.iv.ivplayer.game.fanorona;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
-
-import java.util.List;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
@@ -16,16 +13,12 @@ import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Point2;
-import root.iv.ivplayer.game.object.simple.geometry.Rect2;
 import root.iv.ivplayer.game.scene.SensorScene;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
 
 public class FanoronaScene extends SensorScene {
-    private static final int SLOT_RADIUS = 50;
-    private static final double k = 9.0/5.0;
-    private static final int COUNT_ROW = 5;
-    private static final int COUNT_COLUMN = 9;
+    private static final int DEFAULT_SIZE = 50;
 
     // Текстуры
     private FanoronaTextures textures;
@@ -66,7 +59,7 @@ public class FanoronaScene extends SensorScene {
 
         this.startMargin = startMargin;
         this.topMargin = topMargin;
-        slotGroup = slotsConstruct(startMargin, topMargin, 75, 75, SLOT_RADIUS);
+        slotGroup = slotsConstruct(startMargin, topMargin, DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
         wayGroup = wayConstruct(ways, textures.getSlotColor());
     }
 
@@ -134,17 +127,6 @@ public class FanoronaScene extends SensorScene {
 
     public void markSlot(int index, SlotState state) {
         slotGroup.getObject(index).mark(state);
-    }
-
-
-    // Смотрим какие возможны ходы
-    public void viewPossibleProgress(Point2 touchPoint) {
-        for (Slot slot : slotGroup.getObjects()) {
-            if (slot.getBounds().contain(touchPoint)) {
-
-
-            }
-        }
     }
 
     // Пробуем выбрать слот
@@ -216,13 +198,10 @@ public class FanoronaScene extends SensorScene {
 
 
         for (SlotWay way : ways) {
-            int index1 = way.getI1()*COUNT_COLUMN + way.getJ1();
-            int index2 = way.getI2()*COUNT_COLUMN + way.getJ2();
-
-            Point2 center1 = slotGroup.getObject(index1)
+            Point2 center1 = slotGroup.getObject(way.getFrom())
                     .getBounds()
                     .getCenter();
-            Point2 center2 = slotGroup.getObject(index2)
+            Point2 center2 = slotGroup.getObject(way.getTo())
                     .getBounds()
                     .getCenter();
 
