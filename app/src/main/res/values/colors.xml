@@ -7,4 +7,6 @@
 
     <color name="chip_game_type_selected">#FF0C0C</color>
     <color name="shadow_low">#80FFFFFF</color>
+    <color name="tic_tac_room_color">#FFF176</color>
+    <color name="fanorona_room_color">#76ADFF</color>
 </resources>

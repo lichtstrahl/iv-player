@@ -65,6 +65,7 @@
         android:layout_below="@id/horizontalScrollGameType"
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/stdMargin"
+        android:enabled="false"
         android:text="@string/label_create"/>
 
 </RelativeLayout>

@@ -144,14 +144,14 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
                     case TIC_TAC:
                         color = layoutBG.getContext()
                                 .getResources()
-                                .getColor(R.color.colorAccent, theme);
+                                .getColor(R.color.tic_tac_room_color, theme);
                         layoutBG.setBackgroundColor(color);
                         break;
 
                     case FANORONA:
                         color = layoutBG.getContext()
                                 .getResources()
-                                .getColor(R.color.chip_game_type_selected, theme);
+                                .getColor(R.color.fanorona_room_color, theme);
                         break;
                 }
             }

@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
@@ -33,6 +34,8 @@ public class CreateRoomFragment extends Fragment {
     protected TextInputEditText inputNewRoomName;
     @BindView(R.id.gameTypeGroup)
     protected ChipGroup gameTypeGroup;
+    @BindView(R.id.buttonCreateRoom)
+    protected MaterialButton buttonCreateRoom;
 
     private Listener listener;
 
@@ -106,6 +109,8 @@ public class CreateRoomFragment extends Fragment {
                 chip.setClickable(true);
             }
         }
+
+        buttonCreateRoom.setEnabled(true);
     }
 
     public interface Listener {
