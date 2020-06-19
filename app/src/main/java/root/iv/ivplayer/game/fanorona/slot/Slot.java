@@ -9,6 +9,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
 import lombok.Getter;
+import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -25,8 +26,7 @@ public class Slot extends StaticObject2 {
 
     @Getter
     private Circle2 bounds;
-    @Getter
-    private SlotState state;
+    private FanoronaRole role;
     private ObjectGenerator blackGenerator;
     private ObjectGenerator whiteGenerator;
     @Getter
@@ -45,7 +45,7 @@ public class Slot extends StaticObject2 {
         super(object2.getPosition(), object2.getDrawable(), object2.getWidth(), object2.getHeight());
         this.bounds = GeometryFactory.newFactory()
                 .pivotCircle(position, radius);
-        this.state = SlotState.FREE;
+        this.role = FanoronaRole.FREE;
 
         this.paintSelect = new Paint();
         paintSelect.setColor(Color.YELLOW);
@@ -116,8 +116,8 @@ public class Slot extends StaticObject2 {
         // Рисуем круглую ячейку
         super.render(canvas);
 
-        // Рисуем её состояние
-        switch (state) {
+        // Рисуем Фишку
+        switch (role) {
             case WHITE:
                 StaticObject2 white = whiteGenerator.buildStatic(x0, y0);
                 white.render(canvas);
@@ -130,8 +130,12 @@ public class Slot extends StaticObject2 {
         }
     }
 
-    public void mark(SlotState state) {
-        this.state = state;
+    public void mark(FanoronaRole role) {
+        this.role = role;
+    }
+
+    public void mark(Slot slot) {
+        this.role = slot.role;
     }
 
     public void select() {

@@ -13,7 +13,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.Objects;
 
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
-import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
@@ -33,7 +32,7 @@ public class FanoronaRoom extends FirebaseRoom {
         super(name, user);
         Timber.i("Fanorona room create");
         engine = new FanoronaEngine(textures, this::touchHandler);
-        engine.setCurrentRole(SlotState.BLACK);
+        engine.setCurrentRole(FanoronaRole.BLACK);
     }
 
     @Override
@@ -146,7 +145,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
     }
 
-    private void startGame(FBRoom newRoom, SlotState currentRole) {
+    private void startGame(FBRoom newRoom, FanoronaRole currentRole) {
         newRoom.setState(RoomState.GAME);
         engine.setCurrentRole(currentRole);
         FBDatabaseAdapter.getRoomStatus(name)
@@ -159,7 +158,7 @@ public class FanoronaRoom extends FirebaseRoom {
                 .addValueEventListener(waitProgressObserver);
         addFBObserver(waitProgressObserver);
 
-        if (currentRole == SlotState.WHITE) {
+        if (currentRole == FanoronaRole.WHITE) {
             FBDatabaseAdapter.getWaitField(name).setValue(fbUser.getUid());
             updateStatus(RoomState.WAIT_PROGRESS);
         } else {
@@ -201,7 +200,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
                     // Вторым игроком
                     if (oldCount == 1) {
-                        startGame(newRoom, SlotState.BLACK);
+                        startGame(newRoom, FanoronaRole.BLACK);
                     }
                 }
 
@@ -221,7 +220,7 @@ public class FanoronaRoom extends FirebaseRoom {
                 int newCount = newRoom.countPlayer();
                 Timber.i("Локальная комната создана, вошли %d-ым", newCount);
                 if (newCount == 2) {
-                    startGame(newRoom, SlotState.WHITE);
+                    startGame(newRoom, FanoronaRole.WHITE);
                 }
             }
 

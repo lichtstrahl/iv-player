@@ -11,12 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
-import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
@@ -28,12 +25,12 @@ import timber.log.Timber;
 public class FanoronaEngine {
     private static final int COUNT_ROW = 5;
     private static final int COUNT_COLUMN = 9;
-    private SlotState[][] slots;
+    private FanoronaRole[][] slots;
     private SlotWay[] slotWays;
     private FanoronaScene scene;
     @Getter
     @Setter
-    private SlotState currentRole;
+    private FanoronaRole currentRole;
     @Getter
     private List<FanoronaProgressDTO> progressSteps;
     @Getter
@@ -41,11 +38,11 @@ public class FanoronaEngine {
     private boolean aggressiveStep;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
-        slots = new SlotState[COUNT_ROW][COUNT_COLUMN];
+        slots = new FanoronaRole[COUNT_ROW][COUNT_COLUMN];
 
         // Заполняем все слоты пустыми
         for (int i = 0; i < COUNT_ROW; i++) {
-            Arrays.fill(slots[i], SlotState.FREE);
+            Arrays.fill(slots[i], FanoronaRole.FREE);
         }
 
         fillWays();
@@ -56,28 +53,28 @@ public class FanoronaEngine {
 
         // Расставляем тылы BLACK
         for (int j = 0; j < COUNT_COLUMN; j++) {
-            mark(4, j, SlotState.BLACK);
-            mark(3, j, SlotState.BLACK);
+            mark(4, j, FanoronaRole.BLACK);
+            mark(3, j, FanoronaRole.BLACK);
         }
 
         // Расставляем тылы WHITE
         for (int j = 0; j < COUNT_COLUMN; j++) {
-            mark(0, j, SlotState.WHITE);
-            mark(1, j, SlotState.WHITE);
+            mark(0, j, FanoronaRole.WHITE);
+            mark(1, j, FanoronaRole.WHITE);
         }
 
         // Линия фронта (Слева начиная с WHITE, Справа начиная с BLACK)
         for (int j = 0; j < COUNT_COLUMN; j++) {
-            mark(2, j, (j%2) == 0 ? SlotState.WHITE : SlotState.BLACK);
+            mark(2, j, (j%2) == 0 ? FanoronaRole.WHITE : FanoronaRole.BLACK);
         }
 
         for (int left = 0, right = COUNT_COLUMN-1; left != right; left++, right--) {
-            mark(2, left, (left%2) == 0 ? SlotState.WHITE : SlotState.BLACK);
-            mark(2, right, (right%2) == 0 ? SlotState.BLACK : SlotState.WHITE);
+            mark(2, left, (left%2) == 0 ? FanoronaRole.WHITE : FanoronaRole.BLACK);
+            mark(2, right, (right%2) == 0 ? FanoronaRole.BLACK : FanoronaRole.WHITE);
         }
 
         // Очищаем серединку
-        mark(2, 4, SlotState.FREE);
+        mark(2, 4, FanoronaRole.FREE);
 
         // Последовательность ходов (изначально пустая)
         progressSteps = new ArrayList<>(10);
@@ -133,7 +130,7 @@ public class FanoronaEngine {
     }
 
     // Пометить фишки с возможными ходами. Для данной роли
-    public void markPossibleProgress(SlotState role) {
+    public void markPossibleProgress(FanoronaRole role) {
         List<Integer> possibleSlots = hasAgressiveProgress(role)
                 ? listSlotsWithAgressiveProgress(role)
                 : listSlotsHasFreeFriend(role);
@@ -223,12 +220,12 @@ public class FanoronaEngine {
             throw new IllegalStateException("Массив дорожек заполнен не до конца");
     }
 
-    private void mark(int i, int j, SlotState state) {
+    private void mark(int i, int j, FanoronaRole state) {
         slots[i][j] = state;
         scene.markSlot(i*COUNT_COLUMN + j, state);
     }
 
-    private void mark(int globalIndex, SlotState state) {
+    private void mark(int globalIndex, FanoronaRole state) {
         mark(row(globalIndex), column(globalIndex), state);
     }
 
@@ -247,7 +244,7 @@ public class FanoronaEngine {
     private List<Integer> findFreeFriends(int globalIndex) {
         return findFriends(globalIndex)
                 .stream()
-                .filter(i -> getState(i) == SlotState.FREE)
+                .filter(i -> getState(i) == FanoronaRole.FREE)
                 .collect(Collectors.toList());
     }
 
@@ -258,26 +255,26 @@ public class FanoronaEngine {
                 .collect(Collectors.toList());
     }
 
-    public FanoronaProgressDTO progress(int oldIndex, int newIndex, SlotState state) {
+    public FanoronaProgressDTO progress(int oldIndex, int newIndex, FanoronaRole state) {
         Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d])",
                 state.name(), oldIndex, newIndex,
                 row(oldIndex), column(oldIndex), row(newIndex), column(newIndex));
         // Сразу формируем итоговый ответ о ходе. Т.к. индексы потом будут изменяться.
         FanoronaProgressDTO progressDTO = new FanoronaProgressDTO(state, oldIndex, newIndex);
 
-        mark(oldIndex, SlotState.FREE);
+        mark(oldIndex, FanoronaRole.FREE);
         mark(newIndex, state);
 
         // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
         for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
-                mark(nextSlot, SlotState.FREE);
+                mark(nextSlot, FanoronaRole.FREE);
                 oldIndex = newIndex;
                 newIndex = nextSlot;
         }
 
         // Убираем всех соперников по обратной линии
         for (Integer nextSlot = nextSlotForLine(newIndex, oldIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(newIndex, oldIndex)) {
-            mark(nextSlot, SlotState.FREE);
+            mark(nextSlot, FanoronaRole.FREE);
             newIndex = oldIndex;
             oldIndex = nextSlot;
         }
@@ -313,7 +310,7 @@ public class FanoronaEngine {
         for (Integer enemyFriend : enemyFriends) {
             Integer nextSlot = nextSlotForLine(enemyFriend, to);
 
-            if (nextSlot != null && getState(nextSlot) == SlotState.FREE) {
+            if (nextSlot != null && getState(nextSlot) == FanoronaRole.FREE) {
                 aggressiveProgress.add(nextSlot);
             }
         }
@@ -364,27 +361,27 @@ public class FanoronaEngine {
         return j >= 0 && j < COUNT_COLUMN;
     }
 
-    private SlotState enemyRoleFor(SlotState role) {
-        return (role == SlotState.BLACK)
-                ? SlotState.WHITE
-                : SlotState.BLACK;
+    private FanoronaRole enemyRoleFor(FanoronaRole role) {
+        return (role == FanoronaRole.BLACK)
+                ? FanoronaRole.WHITE
+                : FanoronaRole.BLACK;
     }
 
     private boolean isFree(int globalIndex) {
-        return getState(globalIndex) == SlotState.FREE;
+        return getState(globalIndex) == FanoronaRole.FREE;
     }
 
-    private boolean isEnemy(int globalIndex, SlotState role) {
+    private boolean isEnemy(int globalIndex, FanoronaRole role) {
         return getState(globalIndex) == enemyRoleFor(role);
     }
 
     // Имеет ли указанная роль агрессивные ходы?
-    private boolean hasAgressiveProgress(SlotState role) {
+    private boolean hasAgressiveProgress(FanoronaRole role) {
         return !listSlotsWithAgressiveProgress(role).isEmpty();
     }
 
     // Список фишек, имеющих агрессивные ходы. Для указанной роли.
-    private List<Integer> listSlotsWithAgressiveProgress(SlotState role) {
+    private List<Integer> listSlotsWithAgressiveProgress(FanoronaRole role) {
         int totalCountSlots = COUNT_ROW * COUNT_COLUMN;
         List<Integer> potentialSlots = new ArrayList<>(totalCountSlots);
 
@@ -399,7 +396,7 @@ public class FanoronaEngine {
     }
 
     // Список всех фишек для данной роли
-    private List<Integer> listSlotsForRole(SlotState role) {
+    private List<Integer> listSlotsForRole(FanoronaRole role) {
         int totalCountSlots = COUNT_ROW * COUNT_COLUMN;
         List<Integer> slots = new ArrayList<>(totalCountSlots);
 
@@ -411,7 +408,7 @@ public class FanoronaEngine {
     }
 
     // Список фишек, имеющих рядом свободную клетку
-    private List<Integer> listSlotsHasFreeFriend(SlotState role) {
+    private List<Integer> listSlotsHasFreeFriend(FanoronaRole role) {
         List<Integer> allSlotsForRole = listSlotsForRole(role);
 
         return allSlotsForRole
@@ -423,7 +420,7 @@ public class FanoronaEngine {
                 .collect(Collectors.toList());
     }
 
-    private SlotState getState(int globalInex) {
+    private FanoronaRole getState(int globalInex) {
         return slots[row(globalInex)][column(globalInex)];
     }
 

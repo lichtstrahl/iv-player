@@ -6,7 +6,6 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
-import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.fanorona.slot.Way;
 import root.iv.ivplayer.game.object.Group;
@@ -108,7 +107,7 @@ public class FanoronaScene extends SensorScene {
         int count = slotGroup.size();
         for (int i = 0; i < count; i++) {
             resizedSlots.getObject(i)
-                    .mark(slotGroup.getObject(i).getState());
+                    .mark(slotGroup.getObject(i));
         }
         slotGroup = resizedSlots;
     }
@@ -125,7 +124,7 @@ public class FanoronaScene extends SensorScene {
         gameView.setOnClickListener(sensorController);
     }
 
-    public void markSlot(int index, SlotState state) {
+    public void markSlot(int index, FanoronaRole state) {
         slotGroup.getObject(index).mark(state);
     }
 

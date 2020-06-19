@@ -2,12 +2,12 @@ package root.iv.ivplayer.game.fanorona.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import root.iv.ivplayer.game.fanorona.slot.SlotState;
+import root.iv.ivplayer.game.fanorona.FanoronaRole;
 
 @Data
 @AllArgsConstructor
 public class FanoronaProgressDTO {
-    private SlotState state;
+    private FanoronaRole state;
     private Integer from;
     private Integer to;
 }
