@@ -7,16 +7,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.database.DataSnapshot;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.game.GameType;
+import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.ui.fragment.rooms.list.RoomsFragment;
 
@@ -65,21 +71,24 @@ public class CreateRoomFragment extends Fragment {
         String newRoomName = (inputNewRoomName.getText() != null)
                 ? inputNewRoomName.getText().toString()
                 : "";
-        if (!newRoomName.isEmpty()) {
-            int selectedChipId = gameTypeGroup.getCheckedChipId();
-            String game = "";
+
+        int selectedChipId = gameTypeGroup.getCheckedChipId();
+
+        if (!newRoomName.isEmpty() && selectedChipId != View.NO_ID) {
+            GameType gameType = GameType.TIC_TAC;
 
             switch (selectedChipId) {
                 case R.id.gameTypeFanorona:
-                    game = "FANORONA";
+                    gameType = GameType.FANORONA;
                     break;
 
                 case R.id.gameTypeTicTac:
-                    game = "TicTac";
+                    gameType = GameType.TIC_TAC;
                     break;
             }
 
-            Toast.makeText(this.getContext(), "create room " + game, Toast.LENGTH_SHORT).show();
+            FBDatabaseAdapter.getRooms().addListenerForSingleValueEvent(new CreateRoomListener(newRoomName, gameType));
+
         } else {
             Toast.makeText(this.getContext(), "Имя не задано", Toast.LENGTH_SHORT).show();
         }
@@ -101,4 +110,37 @@ public class CreateRoomFragment extends Fragment {
 
     public interface Listener {
     }
+
+    // Смотрим какие сейчас комнаты есть и если нужное нам имя не занято, создаём
+    @AllArgsConstructor
+    private class CreateRoomListener extends FBDataListener {
+        private String roomName;
+        private GameType gameType;
+
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+            boolean busy = false;
+            for (DataSnapshot room : dataSnapshot.getChildren())
+                if (room.getKey() != null && room.getKey().equals(roomName))
+                    busy = true;
+
+            if (!busy) {
+                FBDatabaseAdapter.getRooms()
+                        .child(roomName)
+                        .child("state")
+                        .setValue(RoomState.WAIT_PLAYERS);
+
+                FBDatabaseAdapter.getRooms()
+                        .child(roomName)
+                        .child("gameType")
+                        .setValue(gameType);
+
+                CreateRoomFragment.this.getActivity().onBackPressed();
+            } else {
+                Toast.makeText(CreateRoomFragment.this.getContext(), "Название занято", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }

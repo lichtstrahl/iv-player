@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements
     public void clickCreateRoom() {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFrame, CreateRoomFragment.newInstance(), CreateRoomFragment.TAG)
+                .add(R.id.mainFrame, CreateRoomFragment.newInstance(), CreateRoomFragment.TAG)
                 .addToBackStack(null)
                 .commit();
     }

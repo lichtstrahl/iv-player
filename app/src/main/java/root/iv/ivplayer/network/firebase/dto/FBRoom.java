@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.tictac.BlockState;
 
@@ -21,6 +22,7 @@ public class FBRoom {
     @Nullable
     protected FBUser player2;
     protected RoomState state;
+    protected GameType gameType;
 
     public int countPlayer() {
         int count = 0;

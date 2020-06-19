@@ -6,4 +6,5 @@
     <color name="notification_background">#AED581</color>
 
     <color name="chip_game_type_selected">#FF0C0C</color>
+    <color name="shadow_low">#80FFFFFF</color>
 </resources>

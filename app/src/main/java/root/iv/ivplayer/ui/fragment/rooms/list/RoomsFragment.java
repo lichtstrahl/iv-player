@@ -185,30 +185,6 @@ public class RoomsFragment extends Fragment {
         }
     }
 
-    // Смотрим какие сейчас комнаты есть и если нужное нам имя не занято, создаём
-    @AllArgsConstructor
-    private class CreateRoomListener extends FBDataListener {
-        private String roomName;
-
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-            boolean busy = false;
-            for (DataSnapshot room : dataSnapshot.getChildren())
-                if (room.getKey() != null && room.getKey().equals(roomName))
-                    busy = true;
-
-            if (!busy) {
-                FBDatabaseAdapter.getRooms()
-                        .child(roomName)
-                        .child("state")
-                        .setValue(RoomState.WAIT_PLAYERS);
-            } else {
-                Toast.makeText(RoomsFragment.this.getContext(), "Название занято", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     // Клик на элемент списка, вход в комнату если это возможно
     @AllArgsConstructor
     private class EnterRoomListener extends FBDataListener {
