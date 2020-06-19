@@ -15,5 +15,6 @@ public class RoomUI extends FBRoom {
         this.player1 = fbRoom.getPlayer1();
         this.player2 = fbRoom.getPlayer2();
         this.state = fbRoom.getState();
+        this.gameType = fbRoom.getGameType();
     }
 }

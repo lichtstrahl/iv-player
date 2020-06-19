@@ -1,9 +1,12 @@
 package root.iv.ivplayer.ui.fragment.rooms.list;
 
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -107,6 +110,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
         private final MaterialTextView viewRoomState;
         private final MaterialTextView viewEmail1;
         private final MaterialTextView viewEmail2;
+        private final RelativeLayout layoutBG;
 
         public RoomViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -115,6 +119,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
             viewRoomState = itemView.findViewById(R.id.viewRoomState);
             viewEmail1 = itemView.findViewById(R.id.viewEmailPlayer1);
             viewEmail2 = itemView.findViewById(R.id.viewEmailPlayer2);
+            layoutBG = itemView.findViewById(R.id.layoutBG);
             itemView.setOnClickListener(roomClickListener);
             itemView.setOnCreateContextMenuListener(createContextMenuListener);
         }
@@ -124,6 +129,35 @@ public class RoomsAdapter extends RecyclerView.Adapter<RoomsAdapter.RoomViewHold
             viewRoomState.setText(room.getState().name());
             viewEmail1.setText(room.name1());
             viewEmail2.setText(room.name2());
+
+
+            Resources.Theme theme = layoutBG.getContext().getTheme();
+            int color = layoutBG.getContext()
+                    .getResources()
+                    .getColor(R.color.notification_background, theme);
+
+
+
+
+            if (room.getGameType() != null) {
+                switch (room.getGameType()) {
+                    case TIC_TAC:
+                        color = layoutBG.getContext()
+                                .getResources()
+                                .getColor(R.color.colorAccent, theme);
+                        layoutBG.setBackgroundColor(color);
+                        break;
+
+                    case FANORONA:
+                        color = layoutBG.getContext()
+                                .getResources()
+                                .getColor(R.color.chip_game_type_selected, theme);
+                        break;
+                }
+            }
+
+            layoutBG.setBackgroundColor(color);
+
         }
     }
 }

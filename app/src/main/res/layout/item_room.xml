@@ -12,6 +12,7 @@
     android:backgroundTint="@color/notification_background"
     app:cardCornerRadius="20dp">
     <RelativeLayout
+        android:id="@+id/layoutBG"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <com.google.android.material.textview.MaterialTextView
