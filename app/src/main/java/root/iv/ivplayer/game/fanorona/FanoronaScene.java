@@ -6,6 +6,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
+import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.fanorona.slot.Way;
 import root.iv.ivplayer.game.object.Group;
@@ -153,7 +154,7 @@ public class FanoronaScene extends SensorScene {
     public Integer getSelectedSlot() {
         for (int i = 0; i < slotGroup.size(); i++) {
             Slot slot = slotGroup.getObject(i);
-            if (slot.isSelected())
+            if (slot.getState() == SlotState.SELECTED)
                 return i;
         }
 
@@ -161,7 +162,7 @@ public class FanoronaScene extends SensorScene {
     }
 
     public boolean possibleProgress(int i) {
-        return slotGroup.getObject(i).isProgress();
+        return slotGroup.getObject(i).getState() == SlotState.PROGRESS;
     }
 
     public void progressSlot(int i) {

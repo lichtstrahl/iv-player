@@ -30,11 +30,7 @@ public class Slot extends StaticObject2 {
     private ObjectGenerator blackGenerator;
     private ObjectGenerator whiteGenerator;
     @Getter
-    private boolean selected;
-    @Getter
-    private boolean progress;
-    @Getter
-    private boolean hasProgress;
+    private SlotState state;
 
     // Paints
     private Paint paintSelect;
@@ -62,6 +58,8 @@ public class Slot extends StaticObject2 {
         paintHasProgress.setColor(Color.GREEN);
         paintHasProgress.setAlpha(90);
         paintHasProgress.setStyle(Paint.Style.FILL);
+
+        state = SlotState.DEFAULT;
     }
 
     @Override
@@ -100,23 +98,26 @@ public class Slot extends StaticObject2 {
         // Помечаем ячейку выбранной
         Point2 center = bounds.getCenter();
 
+        // Отрисовываем соответствующее состояние
+        switch (state) {
+            case SELECTED:
+                canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintSelect);
+                break;
+            case PROGRESS:
+                canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintProgress);
+                break;
+            case HAS_PROGRESS:
+                canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintHasProgress);
+                break;
 
-        if (selected) {
-            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintSelect);
-        }
-
-        if (progress) {
-            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintProgress);
-        }
-
-        if (hasProgress) {
-            canvas.drawCircle(center.x, center.y, bounds.getRadius(), paintHasProgress);
+            case DEFAULT:
+            default:
+                super.render(canvas);
         }
 
         // Рисуем круглую ячейку
-        super.render(canvas);
 
-        // Рисуем Фишку
+        // Рисуем Фишку игрока
         switch (role) {
             case WHITE:
                 StaticObject2 white = whiteGenerator.buildStatic(x0, y0);
@@ -139,20 +140,18 @@ public class Slot extends StaticObject2 {
     }
 
     public void select() {
-        this.selected = true;
+        this.state = SlotState.SELECTED;
     }
 
     public void progress() {
-        this.progress = true;
+        this.state = SlotState.PROGRESS;
     }
 
     public void hasAgressiveProgress() {
-        this.hasProgress = true;
+        this.state = SlotState.HAS_PROGRESS;
     }
 
     public void release() {
-        this.selected = false;
-        this.progress = false;
-        this.hasProgress = false;
+        this.state = SlotState.DEFAULT;
     }
 }
