@@ -24,6 +24,7 @@ import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private boolean rotateScreen = false;
     private String roomName = "";
-    private int gameType = 0;
+    private GameType gameType = null;
     private ScreenParam screenParam = null;
 
     @Override
@@ -61,9 +62,10 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         // Если это перезапуск Activity после смены ориентации экрана и тип игры задан, то старт GameFragment
-        if (savedInstanceState != null && savedInstanceState.getBoolean(ARG_REORIENTATION) && savedInstanceState.getInt(ARG_GAME_TYPE) != 0){
+        if (savedInstanceState != null && savedInstanceState.getBoolean(ARG_REORIENTATION) && savedInstanceState.getString(ARG_GAME_TYPE) != null){
             prepareScreen((ScreenParam) savedInstanceState.getSerializable(ARG_SCREEN_PARAM));
-            startGame(savedInstanceState.getString(ARG_ROOM_NAME), savedInstanceState.getInt(ARG_GAME_TYPE));
+            GameType gType = GameType.valueOf(savedInstanceState.getString(ARG_GAME_TYPE));
+            startGame(savedInstanceState.getString(ARG_ROOM_NAME), gType);
         }
     }
 
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
         outState.putBoolean(ARG_REORIENTATION, rotateScreen);
         outState.putString(ARG_ROOM_NAME, roomName);
-        outState.putInt(ARG_GAME_TYPE, gameType);
+        outState.putString(ARG_GAME_TYPE, (gameType != null) ? gameType.name() : null);
         outState.putSerializable(ARG_SCREEN_PARAM, screenParam);
     }
 
@@ -104,11 +106,11 @@ public class MainActivity extends AppCompatActivity implements
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (getSupportActionBar() != null) getSupportActionBar().show();
         rotateScreen = reorientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        gameType = 0;
+        gameType = null;
     }
 
     @Override
-    public void clickRoom(String roomName, int gType) {
+    public void clickRoom(String roomName, GameType gType) {
         ScreenParam sParam = GameFragmentParams.param(gType);
 
         // Готовим экран. Возможно был вызван поворот
@@ -159,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements
         fragmentManager.popBackStack();
     }
 
-    private void startGame(String rName, int gType) {
+    private void startGame(String rName, GameType gType) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)

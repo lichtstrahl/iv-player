@@ -25,6 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.game.fanorona.FanoronaRoom;
 import root.iv.ivplayer.game.fanorona.FanoronaTextures;
 import root.iv.ivplayer.game.room.Room;
@@ -73,12 +74,12 @@ public class GameFragment extends Fragment
     private Listener listener;
     private Room room;
 
-    public static GameFragment getInstance(String roomName, int gameType) {
+    public static GameFragment getInstance(String roomName, GameType gameType) {
         GameFragment fragment = new GameFragment();
 
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ROOM_NAME, roomName);
-        bundle.putInt(ARG_GAME_TYPE, gameType);
+        bundle.putString(ARG_GAME_TYPE, gameType.name());
         fragment.setArguments(bundle);
 
         return fragment;
@@ -98,16 +99,16 @@ public class GameFragment extends Fragment
         viewRoomName.setText(roomName);
 
 
-        int gameType = args.getInt(ARG_GAME_TYPE);
+        GameType gameType = GameType.valueOf(args.getString(ARG_GAME_TYPE));
         switch (gameType) {
-            case GAME_TIC_TAC:
+            case TIC_TAC:
                 room = buildRoomTicTac(roomName, fbAuth.getCurrentUser());
                 room.addListener(this);
                 room.connect(gameView);
                 gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
                 break;
 
-            case GAME_FANORONA:
+            case FANORONA:
                 room = buildRoomFanorona(roomName, fbAuth.getCurrentUser());
                 room.addListener(this);
                 room.connect(gameView);

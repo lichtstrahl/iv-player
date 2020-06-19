@@ -29,6 +29,7 @@ import butterknife.OnClick;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
@@ -154,7 +155,7 @@ public class RoomsFragment extends Fragment {
     }
 
     public interface Listener {
-        void clickRoom(String roomName, int gType);
+        void clickRoom(String roomName, GameType gType);
         void clickCreateRoom();
     }
 
@@ -213,7 +214,7 @@ public class RoomsFragment extends Fragment {
                     .setValue(room);
 
 
-            listener.clickRoom(roomName, 2);
+            listener.clickRoom(roomName, room.getGameType());
         }
     }
 }

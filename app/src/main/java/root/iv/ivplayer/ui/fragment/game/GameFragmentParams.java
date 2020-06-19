@@ -2,16 +2,16 @@ package root.iv.ivplayer.ui.fragment.game;
 
 import android.content.pm.ActivityInfo;
 
-public abstract class GameFragmentParams {
-    private static final int GAME_TIC_TAC = 1;
-    private static final int GAME_FANORONA = 2;
+import root.iv.ivplayer.game.GameType;
 
-    public static ScreenParam param(int gameType) {
+public abstract class GameFragmentParams {
+
+    public static ScreenParam param(GameType gameType) {
         switch (gameType) {
-            case GAME_TIC_TAC:
+            case TIC_TAC:
                 return ticTacParam();
 
-            case GAME_FANORONA:
+            case FANORONA:
                 return fanoronaParam();
         }
 
