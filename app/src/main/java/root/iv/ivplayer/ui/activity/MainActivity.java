@@ -29,7 +29,6 @@ import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
-import root.iv.ivplayer.ui.fragment.LoginFragment;
 import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
 import root.iv.ivplayer.ui.fragment.rooms.RoomsFragment;
@@ -37,7 +36,6 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements
         GameFragment.Listener,
-        LoginFragment.Listener,
         RoomsFragment.Listener
 {
     private static final int RC_SIGN_IN = 101;
@@ -84,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
             if (resultCode == RESULT_OK) {
                 authSuccessful(FirebaseAuth.getInstance().getCurrentUser());
             } else {
@@ -127,9 +123,8 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             startGame(roomName, gType);
         }
-}
+    }
 
-    @Override
     public void authSuccessful(FirebaseUser user) {
         Timber.i("Игрок успешно вошёл");
 
