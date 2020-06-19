@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
-import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -180,6 +179,7 @@ public class FanoronaEngine {
 
     public void resize(int width, int height) {
         scene.resize(width, height);
+        scene.resizeWay(slotWays);
     }
 
     // Победа, если у нас ещё есть фишки, а у соперника они кончились
