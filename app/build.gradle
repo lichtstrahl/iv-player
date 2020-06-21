@@ -107,4 +107,5 @@ dependencies {
     implementation "com.google.firebase:firebase-crashlytics:$fbCrashLyticsVersion"
     implementation "com.firebaseui:firebase-ui-auth:$fbAuthUIVersion"
 
+    implementation project(":bot")
 }
