@@ -26,8 +26,10 @@ import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.GameType;
-import root.iv.ivplayer.game.fanorona.FanoronaRoom;
 import root.iv.ivplayer.game.fanorona.FanoronaTextures;
+import root.iv.ivplayer.game.fanorona.room.FanoronaRoom;
+import root.iv.ivplayer.game.fanorona.room.FanoronaRoomListener;
+import root.iv.ivplayer.game.fanorona.room.RoomFactory;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.tictac.TicTacRoom;
@@ -38,7 +40,7 @@ import timber.log.Timber;
 public class GameFragment extends Fragment
         implements
         TicTacRoom.Listener,
-        FanoronaRoom.Listener
+        FanoronaRoomListener
 
 {
     private static final int GAME_TIC_TAC = 1;
@@ -220,7 +222,7 @@ public class GameFragment extends Fragment
         viewRole1.setImageResource(R.drawable.ic_dog);
         viewRole2.setImageResource(R.drawable.ic_cat);
 
-        return FanoronaRoom.multiplayer(textures, name, user);
+        return RoomFactory.Fanorona.multiplayer(textures, name, user);
     }
 
     public interface Listener {

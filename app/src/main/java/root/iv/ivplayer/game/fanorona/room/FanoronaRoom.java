@@ -1,4 +1,4 @@
-package root.iv.ivplayer.game.fanorona;
+package root.iv.ivplayer.game.fanorona.room;
 
 import android.view.MotionEvent;
 
@@ -12,6 +12,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
+import root.iv.ivplayer.game.fanorona.FanoronaEngine;
+import root.iv.ivplayer.game.fanorona.FanoronaRole;
+import root.iv.ivplayer.game.fanorona.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;
@@ -26,28 +29,18 @@ import timber.log.Timber;
 public class FanoronaRoom extends FirebaseRoom {
     private FanoronaEngine engine;
     @Nullable
-    private Listener roomListener;
-    private boolean local;
+    private FanoronaRoomListener roomListener;
 
-    private FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user, boolean local) {
+    FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user) {
         super(name, user);
         Timber.i("Fanorona room create");
         engine = new FanoronaEngine(textures, this::touchHandler);
         engine.setCurrentRole(FanoronaRole.BLACK);
-        this.local = local;
-    }
-
-    public static FanoronaRoom multiplayer(FanoronaTextures textures, String name, FirebaseUser user) {
-        return new FanoronaRoom(textures, name, user, false);
-    }
-
-    public static FanoronaRoom local(FanoronaTextures textures) {
-        return new FanoronaRoom(textures, "", null, true);
     }
 
     @Override
     public void addListener(RoomListener listener) {
-        this.roomListener = (Listener) listener;
+        this.roomListener = (FanoronaRoomListener) listener;
     }
 
     @Override
@@ -181,11 +174,6 @@ public class FanoronaRoom extends FirebaseRoom {
         FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
                 .addValueEventListener(progressObserver);
         addFBObserver(progressObserver);
-    }
-
-    public interface Listener extends RoomListener {
-        void changeStatus(RoomState roomState);
-        void updatePlayers(@Nullable String displayName1, @Nullable String displayName2);
     }
 
     // ---
