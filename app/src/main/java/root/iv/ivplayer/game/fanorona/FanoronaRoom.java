@@ -27,12 +27,22 @@ public class FanoronaRoom extends FirebaseRoom {
     private FanoronaEngine engine;
     @Nullable
     private Listener roomListener;
+    private boolean local;
 
-    public FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user) {
+    private FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user, boolean local) {
         super(name, user);
         Timber.i("Fanorona room create");
         engine = new FanoronaEngine(textures, this::touchHandler);
         engine.setCurrentRole(FanoronaRole.BLACK);
+        this.local = local;
+    }
+
+    public static FanoronaRoom multiplayer(FanoronaTextures textures, String name, FirebaseUser user) {
+        return new FanoronaRoom(textures, name, user, false);
+    }
+
+    public static FanoronaRoom local(FanoronaTextures textures) {
+        return new FanoronaRoom(textures, "", null, true);
     }
 
     @Override

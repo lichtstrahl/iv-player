@@ -220,7 +220,7 @@ public class GameFragment extends Fragment
         viewRole1.setImageResource(R.drawable.ic_dog);
         viewRole2.setImageResource(R.drawable.ic_cat);
 
-        return new FanoronaRoom(textures, name, user);
+        return FanoronaRoom.multiplayer(textures, name, user);
     }
 
     public interface Listener {
