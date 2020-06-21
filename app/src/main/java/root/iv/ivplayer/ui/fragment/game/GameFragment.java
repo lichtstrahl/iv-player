@@ -26,6 +26,7 @@ import butterknife.ButterKnife;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.GameType;
+import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.fanorona.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.room.FanoronaRoom;
 import root.iv.ivplayer.game.fanorona.room.FanoronaRoomListener;
@@ -222,7 +223,8 @@ public class GameFragment extends Fragment
         viewRole1.setImageResource(R.drawable.ic_dog);
         viewRole2.setImageResource(R.drawable.ic_cat);
 
-        return RoomFactory.Fanorona.multiplayer(textures, name, user);
+//        return RoomFactory.Fanorona.multiplayer(textures, name, user);
+        return RoomFactory.Fanorona.local(textures, FanoronaRole.BLACK);
     }
 
     public interface Listener {

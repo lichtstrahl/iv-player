@@ -149,6 +149,8 @@ public class FanoronaEngine {
             startMove.next(next);
         }
 
+        progressSteps.clear();
+
         return startMove;
     }
 
