@@ -10,9 +10,9 @@ public abstract class Room {
         this.name = name;
     }
 
-    abstract public void addListener(RoomListener listener);
-    abstract public void resize(int width, int height);
-    abstract public void connect(GameView gameView);
-    abstract public void exit();
-    abstract public void init();
+    public abstract void addListener(RoomListener listener);
+    public abstract void resize(int width, int height);
+    public abstract void connect(GameView gameView);
+    public abstract void exit();
+    public abstract void init();
 }

@@ -2,6 +2,7 @@ package root.iv.ivplayer.game.fanorona.room;
 
 import com.google.firebase.auth.FirebaseUser;
 
+import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.fanorona.FanoronaTextures;
 
 public class RoomFactory {
@@ -11,8 +12,8 @@ public class RoomFactory {
             return new FanoronaRoom(textures, name, user);
         }
 
-        public static FanoronaLocalRoom local(FanoronaTextures textures) {
-            return new FanoronaLocalRoom(textures);
+        public static FanoronaLocalRoom local(FanoronaTextures textures, FanoronaRole role) {
+            return new FanoronaLocalRoom(textures, role);
         }
     }
 

@@ -40,6 +40,22 @@ public class Move {
         return m;
     }
 
+    public void next(Move next) {
+        Move last;
+        for (last = this; last.cont != null; last = last.cont)
+            ;
+
+        last.cont = next;
+    }
+
+    public int toX() {
+        return x + dx;
+    }
+
+    public int toY() {
+        return y + dy;
+    }
+
     public boolean eating(){
         return this.eats!=Eats.NO;
     }

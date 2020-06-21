@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
+import root.iv.bot.Move;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -138,6 +139,49 @@ public class FanoronaEngine {
         for (int i : possibleSlots)
             scene.markAsPossibleProgress(i);
 
+    }
+
+    public Move getMove() {
+        Move startMove = move(progressSteps.get(0));
+
+        for (int i = 1; i < progressSteps.size(); i++) {
+            Move next = move(progressSteps.get(i));
+            startMove.next(next);
+        }
+
+        return startMove;
+    }
+
+    public List<FanoronaProgressDTO> parse(Move move) {
+        List<FanoronaProgressDTO> progress = new ArrayList<>();
+        FanoronaRole role = enemyRoleFor(currentRole);
+
+        for (Move cur = move; cur != null; cur = cur.cont) {
+            int fromIndex = cur.y * COUNT_COLUMN + cur.x;
+
+            int toX = cur.toX();
+            int toY = cur.toY();
+            int toIndex = toY * COUNT_COLUMN + toX;
+
+            FanoronaProgressDTO p = new FanoronaProgressDTO(role, fromIndex, toIndex);
+            progress.add(p);
+        }
+
+        return progress;
+    }
+
+    private Move move(FanoronaProgressDTO progress) {
+        return move(progress.getFrom(), progress.getTo());
+    }
+
+    private Move move(int from, int to) {
+        int row0 = row(from);
+        int column0 = column(from);
+
+        int rowTo = row(to);
+        int columnTo = column(to);
+
+        return new Move(row0, column0, rowTo-row0, columnTo-column0);
     }
 
     private void prepareProgress(Integer touched) {
