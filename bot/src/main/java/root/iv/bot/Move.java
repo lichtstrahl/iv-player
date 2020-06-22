@@ -2,6 +2,9 @@ package root.iv.bot;
 
 import lombok.ToString;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ToString
 public class Move {
     public int y;
@@ -10,6 +13,26 @@ public class Move {
     public int dx;
     public Eats eats = Eats.NO;
     public Move cont = null;
+
+    public List<Move> asList(){
+        List<Move> r = new ArrayList<>();
+        for(Move m=this; m!=null; m=m.cont){
+            r.add(m);
+        }
+        return r;
+    }
+    public static Move fromList(List<Move> mm){
+        if(mm==null || mm.isEmpty()){
+            return null;
+        }
+        Move m = mm.get(0);
+        Move cur = m;
+        for(int i=1; i<mm.size(); ++i){
+            cur.cont = mm.get(i);
+            cur=cur.cont;
+        }
+        return m;
+    }
 
     public Move(int y, int x, int dy, int dx){
         this.y = y;
@@ -40,27 +63,8 @@ public class Move {
         return m;
     }
 
-    public void next(Move next) {
-        Move last;
-        for (last = this; last.cont != null; last = last.cont)
-            ;
-
-        last.cont = next;
-    }
-
-    public int toX() {
-        return x + dx;
-    }
-
-    public int toY() {
-        return y + dy;
-    }
-
     public boolean eating(){
         return this.eats!=Eats.NO;
     }
 
-    public enum Eats{
-        NO,ATK,WTH
-    }
 }

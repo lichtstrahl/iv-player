@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 import java.util.List;
 
 import root.iv.bot.FanoronaBot;
-import root.iv.bot.Move;
+import root.iv.bot.Progress;
 import root.iv.bot.Role;
 import root.iv.ivplayer.game.fanorona.FanoronaEngine;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
@@ -28,7 +28,7 @@ public class FanoronaLocalRoom extends Room {
     FanoronaLocalRoom(FanoronaTextures textures, FanoronaRole role) {
         super("");
         engine = new FanoronaEngine(textures, this::touchHandler);
-        bot = FanoronaBot.defaultSize(role == FanoronaRole.BLACK ? Role.WHITE : Role.BLACK);
+        bot = FanoronaBot.defaultSize(role == FanoronaRole.BLACK ? Role.BLACK : Role.WHITE);
         engine.setCurrentRole(role);
         state = role == FanoronaRole.BLACK ? RoomState.GAME : RoomState.WAIT_PROGRESS;
     }
@@ -66,8 +66,8 @@ public class FanoronaLocalRoom extends Room {
             // Если ход был сделан и он оказался последним в цепочке
             if (lastProgress != null && engine.isEndSteps()) {
                 // Узнаём ход игрока. Говорим боту о ходе
-                Move move = engine.getMove();
-                bot.processEnemyProgress(move);
+                List<Progress> moves = engine.getMove();
+                bot.processEnemyProgress(moves);
 
                 // Узнаём ход бота. Моделируем ход
                 List<FanoronaProgressDTO> botProgress = engine.parse(bot.progress());

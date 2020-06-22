@@ -1,5 +1,7 @@
 package root.iv.bot;
 
+import java.util.List;
+
 public interface BotAPI {
 
     /**
@@ -13,12 +15,12 @@ public interface BotAPI {
      * Передвинуть у себя в голове фишки соперника, убрать свои если требуется.
      * В целом это последовательный вызов processEnemyStep
      */
-    void processEnemyProgress(Move move);
+    void processEnemyProgress(List<Progress> move);
 
     /**
      * Бот делает ход. Переставляет свою фишку (возможно несколько раз, пока агрессивные ходы продолжаются),
      * убирает фишки соперника если нужно.
      * @return Список ходов-перемещений, чтобы клиент на них среагировал.
      */
-    Move progress();
+    List<Progress> progress();
 }

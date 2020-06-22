@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
+import root.iv.bot.Eats;
 import root.iv.bot.Move;
+import root.iv.bot.Progress;
+import root.iv.bot.Role;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -141,49 +144,23 @@ public class FanoronaEngine {
 
     }
 
-    public Move getMove() {
-        Move startMove = move(progressSteps.get(0));
-
-        for (int i = 1; i < progressSteps.size(); i++) {
-            Move next = move(progressSteps.get(i));
-            startMove.next(next);
-        }
-
-        progressSteps.clear();
-
-        return startMove;
+    public List<Progress> getMove() {
+        return progressSteps.stream()
+                .map(it-> new Progress(it.getFrom(), it.getTo(),
+                        null, //is not needed
+                        Eats.NO))//#todo
+                .collect(Collectors.toList());
     }
 
-    public List<FanoronaProgressDTO> parse(Move move) {
-        List<FanoronaProgressDTO> progress = new ArrayList<>();
-        FanoronaRole role = enemyRoleFor(currentRole);
-
-        for (Move cur = move; cur != null; cur = cur.cont) {
-            int fromIndex = cur.y * COUNT_COLUMN + cur.x;
-
-            int toX = cur.toX();
-            int toY = cur.toY();
-            int toIndex = toY * COUNT_COLUMN + toX;
-
-            FanoronaProgressDTO p = new FanoronaProgressDTO(role, fromIndex, toIndex);
-            progress.add(p);
-        }
-
-        return progress;
-    }
-
-    private Move move(FanoronaProgressDTO progress) {
-        return move(progress.getFrom(), progress.getTo());
-    }
-
-    private Move move(int from, int to) {
-        int row0 = row(from);
-        int column0 = column(from);
-
-        int rowTo = row(to);
-        int columnTo = column(to);
-
-        return new Move(row0, column0, rowTo-row0, columnTo-column0);
+    public List<FanoronaProgressDTO> parse(List<Progress> moves) {
+        return moves.stream()
+                .map(it-> new FanoronaProgressDTO(
+                        it.role==Role.WHITE ? FanoronaRole.WHITE :
+                                it.role==Role.BLACK ? FanoronaRole.BLACK :
+                                        FanoronaRole.FREE,
+                        it.from, it.to
+                ))
+                .collect(Collectors.toList());
     }
 
     private void prepareProgress(Integer touched) {

@@ -17,7 +17,7 @@ public class FanoronaBot implements BotAPI {
     public static FanoronaBot defaultSize(Role role) {
         Main ai = new Main();
         FanoronaBot bot = new FanoronaBot(ai, 5, 9);
-        ai.init(Role.WHITE.equals(role), 9, 5, null, null, Behaviour.LONGEST);
+        ai.init(role, 9, 5, null, null, Behaviour.LONGEST);
         return bot;
     }
 
@@ -29,16 +29,16 @@ public class FanoronaBot implements BotAPI {
     }
 
     @Override
-    public void processEnemyProgress(Move move) {
-        ai.acceptTurn(move);
+    public void processEnemyProgress(List<Progress> move) {
+        ai.acceptTurn(ai.board.progressesToMove(move));
     }
 
     @Override
-    public Move progress() {
-        return ai.takeTurn();
+    public List<Progress> progress() {
+        return ai.board.moveToProgresses(ai.takeTurn());
     }
 
     private int[] coordToYX(int coord){
-        return new int[]{coord/cols,coord%cols};
+        return new int[]{coord/rows,coord%rows};
     }
 }
