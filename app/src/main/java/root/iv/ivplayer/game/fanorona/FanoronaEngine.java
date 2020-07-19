@@ -13,9 +13,7 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
-import root.iv.bot.Eats;
 import root.iv.bot.Progress;
-import root.iv.bot.Role;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -38,7 +36,6 @@ public class FanoronaEngine {
     private List<FanoronaProgressDTO> progressSteps;
     @Getter
     private boolean endSteps;
-    private boolean aggressiveStep;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new FanoronaRole[COUNT_ROW][COUNT_COLUMN];
@@ -109,16 +106,14 @@ public class FanoronaEngine {
 
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
-            FanoronaProgressDTO progressDTO = progress(selected, touched, currentRole, AttackType.FORWARD);
-            // Если это ход текущего игрока
+            FanoronaProgressDTO progressDTO = buildProgressDTO(selected, touched);
             progressSteps.add(progressDTO);
             Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
-
 
             scene.releaseAllSlots();
             // Если после выполнения хода агрессивных ходов больше нет или сам ход был не агрессивным,
             // то завершаем последовательность ходов
-            if (findAgressiveProgress(touched).isEmpty() || !aggressiveStep) {
+            if (findAgressiveProgress(touched).isEmpty() || progressDTO.getAttack() == AttackType.NO) {
                 Timber.i("Агрессивные ходы кончились. step=0");
                 this.endSteps = true;
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
@@ -205,9 +200,9 @@ public class FanoronaEngine {
                 }
 
                 return FanoronaProgressDTO.back(state, pFrom, pTo);
+            default:
+                throw new IllegalStateException("Обработка хода завершена неудачно");
         }
-
-        throw new IllegalStateException("Обработка хода завершена неудачно");
     }
 
 
@@ -225,7 +220,6 @@ public class FanoronaEngine {
         // Пробуем нарисовать возможные агрессивные ходы:
         List<Integer> aggressiveProgress = findAgressiveProgress(touched);
         for (Integer progress : aggressiveProgress) {
-            aggressiveStep = true;
             scene.progressSlot(progress);
         }
 
@@ -235,9 +229,25 @@ public class FanoronaEngine {
             List<Integer> freeFriends = findFriends(touched, FanoronaRole.FREE);
 
             for (Integer free : freeFriends) {
-                aggressiveStep = false;
                 scene.progressSlot(free);
             }
+        }
+    }
+
+    // Готовим ход в зависимости от совершенных касаний
+    private FanoronaProgressDTO buildProgressDTO(int from, int to) {
+        boolean possibleForwardAttack = possibleAttack(from, to, AttackType.FORWARD);
+        boolean possibleBackAttack = possibleAttack(from, to, AttackType.BACK);
+
+        if (possibleForwardAttack && possibleBackAttack) {
+            Timber.i("Атака в обоих направлениях. По умолчанию выбрали FORWARD");
+            return progress(from, to, currentRole, AttackType.FORWARD);
+        } else if (possibleForwardAttack) {
+            return progress(from, to, currentRole, AttackType.FORWARD);
+        } else if (possibleBackAttack) {
+            return progress(from, to, currentRole, AttackType.BACK);
+        } else {
+            return progress(from, to, currentRole, AttackType.NO);
         }
     }
 
@@ -301,6 +311,24 @@ public class FanoronaEngine {
                 .collect(Collectors.toList());
     }
 
+    // Есть ли возможность атаки в указанном направлении?
+    // Да, если следующей фишкой по данному направлению является противник
+    private boolean possibleAttack(int from, int to, AttackType attack) {
+        FanoronaRole enemy = enemyRoleFor(currentRole);
+        Integer next;
+
+        switch (attack) {
+            case FORWARD:
+                next = nextSlotForLine(from, to);
+                return next != null && getState(next) == enemy;
+
+            case BACK:
+                next = nextSlotForLine(to, from);
+                return next != null && getState(next) == enemy;
+            default:
+                return false;
+        }
+    }
 
     /**
         Фишка имеет агрессивные ходы: (это должна быть наша фишка)
@@ -418,13 +446,13 @@ public class FanoronaEngine {
     // Список всех фишек для данной роли
     private List<Integer> listSlotsForRole(FanoronaRole role) {
         int totalCountSlots = COUNT_ROW * COUNT_COLUMN;
-        List<Integer> slots = new ArrayList<>(totalCountSlots);
+        List<Integer> slotsForRole = new ArrayList<>(totalCountSlots);
 
         for (int i = 0; i < totalCountSlots; i++)
             if (getState(i) == role)
-                slots.add(i);
+                slotsForRole.add(i);
 
-        return slots;
+        return slotsForRole;
     }
 
     // Список фишек, имеющих рядом свободную клетку
