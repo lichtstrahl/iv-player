@@ -17,11 +17,14 @@ import root.iv.ivplayer.R;
 public class BackgroundTextures {
     @Nullable
     private Drawable background;
+    @Nullable
+    private Drawable board;
     private @ColorInt int color;
 
     public static BackgroundTextures create(Context context) {
         return new BackgroundTextures(
-                context.getDrawable(R.drawable.background_texture_of_dark_wood),
+                context.getDrawable(R.drawable.background_green),
+                context.getDrawable(R.drawable.board_dark),
                 Color.GRAY
         );
     }
