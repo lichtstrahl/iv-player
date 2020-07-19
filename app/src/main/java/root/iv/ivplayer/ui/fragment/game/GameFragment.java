@@ -223,8 +223,8 @@ public class GameFragment extends Fragment
 
         Drawable background = resources.getDrawable(R.drawable.background_texture_of_dark_wood, context.getTheme());
         Drawable slot = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
-        Drawable chipBlack = resources.getDrawable(R.drawable.ic_dog, context.getTheme());
-        Drawable chipWhite = resources.getDrawable(R.drawable.ic_cat, context.getTheme());
+        Drawable chipWhite = resources.getDrawable(R.drawable.ic_dog, context.getTheme());
+        Drawable chipBlack = resources.getDrawable(R.drawable.ic_cat, context.getTheme());
 
         FanoronaTextures textures = FanoronaTextures.light(background, chipWhite, chipBlack, slot);
         viewRole1.setImageResource(R.drawable.ic_dog);
@@ -232,7 +232,7 @@ public class GameFragment extends Fragment
 
         return (network)
                 ? RoomFactory.Fanorona.multiplayer(textures, name, user)
-                : RoomFactory.Fanorona.local(textures, FanoronaRole.BLACK);
+                : RoomFactory.Fanorona.local(textures, FanoronaRole.WHITE);
     }
 
     public interface Listener {

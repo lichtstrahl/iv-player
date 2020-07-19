@@ -32,9 +32,9 @@ public class FanoronaLocalRoom extends Room {
     FanoronaLocalRoom(FanoronaTextures textures, FanoronaRole role) {
         super("");
         engine = new FanoronaEngine(textures, this::touchHandler);
-        bot = FanoronaBot.defaultSize(role == FanoronaRole.BLACK ? Role.BLACK : Role.WHITE);
+        bot = FanoronaBot.defaultSize(role == FanoronaRole.BLACK ? Role.WHITE : Role.BLACK);
         engine.setCurrentRole(role);
-        state = role == FanoronaRole.BLACK ? RoomState.GAME : RoomState.WAIT_PROGRESS;
+        state = role == FanoronaRole.BLACK ? RoomState.WAIT_PROGRESS : RoomState.GAME;
     }
 
     @Override

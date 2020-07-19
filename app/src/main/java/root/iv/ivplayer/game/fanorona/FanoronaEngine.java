@@ -53,28 +53,22 @@ public class FanoronaEngine {
 
         // Расставляем тылы BLACK
         for (int j = 0; j < COUNT_COLUMN; j++) {
-            mark(4, j, FanoronaRole.BLACK);
-            mark(3, j, FanoronaRole.BLACK);
+            mark(0, j, FanoronaRole.BLACK);
+            mark(1, j, FanoronaRole.BLACK);
         }
 
         // Расставляем тылы WHITE
         for (int j = 0; j < COUNT_COLUMN; j++) {
-            mark(0, j, FanoronaRole.WHITE);
-            mark(1, j, FanoronaRole.WHITE);
+            mark(3, j, FanoronaRole.WHITE);
+            mark(4, j, FanoronaRole.WHITE);
         }
 
-        // Линия фронта (Слева начиная с WHITE, Справа начиная с BLACK)
-        for (int j = 0; j < COUNT_COLUMN; j++) {
-            mark(2, j, (j%2) == 0 ? FanoronaRole.WHITE : FanoronaRole.BLACK);
-        }
+        // Линия фронта (Слева начиная с BLACK, Справа начиная с BLACK)
 
         for (int left = 0, right = COUNT_COLUMN-1; left != right; left++, right--) {
-            mark(2, left, (left%2) == 0 ? FanoronaRole.WHITE : FanoronaRole.BLACK);
-            mark(2, right, (right%2) == 0 ? FanoronaRole.BLACK : FanoronaRole.WHITE);
+            mark(2, left, (left%2) == 0 ? FanoronaRole.BLACK : FanoronaRole.WHITE);
+            mark(2, right, (right%2) == 0 ? FanoronaRole.WHITE : FanoronaRole.BLACK);
         }
-
-        // Очищаем серединку
-        mark(2, 4, FanoronaRole.FREE);
 
         // Последовательность ходов (изначально пустая)
         progressSteps = new ArrayList<>(10);
