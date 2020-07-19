@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements
             this.gameType = gameType;
             this.roomName = null;
             this.screenParam = sParam;
-            this.network = true;
+            this.network = false;
         } else {
             startGame(roomName, gameType, false);
         }
