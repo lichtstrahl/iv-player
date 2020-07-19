@@ -19,6 +19,7 @@ import timber.log.Timber;
 
 public class FanoronaScene extends SensorScene {
     private static final int DEFAULT_SIZE = 50;
+    private static final int DEFAULT_RADIUS = 50;
 
     // Текстуры
     private FanoronaTextures textures;
@@ -63,7 +64,7 @@ public class FanoronaScene extends SensorScene {
 
         this.startMargin = startMargin;
         this.topMargin = topMargin;
-        slotGroup = slotsConstruct(startMargin, topMargin, DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
+        slotGroup = slotsConstruct(startMargin, topMargin, DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_RADIUS);
         wayGroup = wayConstruct(ways);
     }
 
@@ -213,7 +214,7 @@ public class FanoronaScene extends SensorScene {
                     .getBounds()
                     .getCenter();
 
-            group.add(Way.of(center1, center2, textures.getWayTextures()));
+            group.add(Way.of(center1, center2, DEFAULT_RADIUS, textures.getWayTextures()));
         }
 
         return group;

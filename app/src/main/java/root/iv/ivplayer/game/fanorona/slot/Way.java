@@ -8,23 +8,27 @@ import androidx.annotation.ColorInt;
 import root.iv.ivplayer.game.fanorona.textures.WayTextures;
 import root.iv.ivplayer.game.object.StaticObject2;
 import root.iv.ivplayer.game.object.simple.Point2;
+import root.iv.ivplayer.game.object.simple.Vector2;
+
 // Фактически это прямоугольник, который будет рисовать только собственную диагональ
 public class Way extends StaticObject2 {
     private Point2 dist;
     private @ColorInt int color;
+    private int slotRadius;
     private WayState state;
 
 
-    private Way(Point2 p1, Point2 p2, @ColorInt int color) {
+    private Way(Point2 p1, Point2 p2, int slotRadius, @ColorInt int color) {
         super(p1, null, 0, 0);
         this.dist = p2;
         this.color = color;
         this.state = WayState.ORIGIN;
+        this.slotRadius = slotRadius;
     }
 
 
-    public static Way of (Point2 p1, Point2 p2, WayTextures textures) {
-        Way way = new Way(p1, p2, textures.getOriginColor());
+    public static Way of(Point2 p1, Point2 p2, int radius, WayTextures textures) {
+        Way way = new Way(p1, p2, radius, textures.getOriginColor());
         return way;
     }
 
@@ -36,7 +40,14 @@ public class Way extends StaticObject2 {
         // Полупрозрачный
         paint.setAlpha(120);
 
-        canvas.drawLine(position.x, position.y, dist.x, dist.y, paint);
+        // Делаем отступ от начала и конца отрезка
+        Point2 from = Point2.point(position.x, position.y);
+        from.moveOn(Vector2.between(position, dist), slotRadius);
+
+        Point2 to = Point2.point(dist.x, dist.y);
+        to.moveOn(Vector2.between(dist, position), slotRadius);
+
+        canvas.drawLine(from.x, from.y, to.x, to.y, paint);
     }
 
     public void used() {

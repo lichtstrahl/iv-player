@@ -28,6 +28,19 @@ public class Point2 extends PointF {
         this.y += dy;
     }
 
+    // Сдвиг в определённом направлении на заданное расстояние
+    public void moveOn(Vector2 vector, int length) {
+        float len = vector.length();
+
+        // Коэфициент подобия
+        float k = length/len;
+
+        float dx = vector.x * k;
+        float dy = vector.y * k;
+
+        moveOn(dx, dy);
+    }
+
     public double distantion(Point2 point) {
         float deltaX = Math.abs(point.x - x);
         float deltaY = Math.abs(point.y - y);
