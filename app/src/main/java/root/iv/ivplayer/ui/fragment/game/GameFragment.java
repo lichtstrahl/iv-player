@@ -27,7 +27,7 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
-import root.iv.ivplayer.game.fanorona.FanoronaTextures;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.room.FanoronaRoomListener;
 import root.iv.ivplayer.game.fanorona.room.RoomFactory;
 import root.iv.ivplayer.game.room.Room;
@@ -222,17 +222,11 @@ public class GameFragment extends Fragment
     }
 
     private Room buildRoomFanorona(String name, FirebaseUser user, boolean network, FanoronaRole role) {
-        Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
-        Drawable background = resources.getDrawable(R.drawable.background_texture_of_dark_wood, context.getTheme());
-        Drawable slot = resources.getDrawable(R.drawable.ic_circle, context.getTheme());
-        Drawable chipWhite = resources.getDrawable(R.drawable.ic_dog, context.getTheme());
-        Drawable chipBlack = resources.getDrawable(R.drawable.ic_cat, context.getTheme());
-
-        FanoronaTextures textures = FanoronaTextures.light(background, chipWhite, chipBlack, slot);
-        viewRole1.setImageResource(R.drawable.ic_dog);
-        viewRole2.setImageResource(R.drawable.ic_cat);
+        FanoronaTextures textures = FanoronaTextures.create(context);
+        viewRole1.setImageDrawable(textures.getChipTextures().getBlackChip());
+        viewRole2.setImageDrawable(textures.getChipTextures().getWhiteChip());
 
         return (network)
                 ? RoomFactory.Fanorona.multiplayer(textures, name, user, role)

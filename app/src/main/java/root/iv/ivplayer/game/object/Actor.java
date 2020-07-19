@@ -2,6 +2,8 @@ package root.iv.ivplayer.game.object;
 
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.Nullable;
+
 import lombok.Getter;
 import root.iv.ivplayer.game.object.simple.Point2;
 
@@ -10,7 +12,7 @@ import root.iv.ivplayer.game.object.simple.Point2;
 @Getter
 public class Actor extends StaticObject2 implements MovableObject {
 
-    public Actor(Point2 position, Drawable drawable, int w, int h) {
+    public Actor(Point2 position, @Nullable Drawable drawable, int w, int h) {
         super(position, drawable, w, h);
     }
 

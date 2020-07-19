@@ -3,7 +3,7 @@ package root.iv.ivplayer.game.fanorona.room;
 import com.google.firebase.auth.FirebaseUser;
 
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
-import root.iv.ivplayer.game.fanorona.FanoronaTextures;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 
 public class RoomFactory {
 

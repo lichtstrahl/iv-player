@@ -5,10 +5,12 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.game.object.simple.Point2;
 
 public class ObjectGenerator {
+    @Nullable
     private Drawable drawable;
     private int width;
     private int height;
@@ -20,7 +22,7 @@ public class ObjectGenerator {
         );
     }
 
-    public void setDrawable(Drawable drawable) {
+    public void setDrawable(@Nullable Drawable drawable) {
         this.drawable = drawable;
     }
 
@@ -30,7 +32,8 @@ public class ObjectGenerator {
     }
 
     public void setTintColor(@ColorInt int color) {
-        this.drawable.setTint(color);
+        if (drawable != null)
+            drawable.setTint(color);
     }
 
     public boolean hasTexture() {

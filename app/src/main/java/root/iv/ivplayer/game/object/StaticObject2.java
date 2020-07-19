@@ -3,6 +3,8 @@ package root.iv.ivplayer.game.object;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.Nullable;
+
 import lombok.Getter;
 import root.iv.ivplayer.game.object.simple.Object2;
 import root.iv.ivplayer.game.object.simple.Point2;
@@ -10,11 +12,12 @@ import root.iv.ivplayer.game.object.simple.Point2;
 
 @Getter
 public class StaticObject2 extends Object2 implements DrawableObject {
+    @Nullable
     protected Drawable drawable;
     protected int width;
     protected int height;
 
-    public StaticObject2(Point2 position, Drawable drawable, int w, int h) {
+    public StaticObject2(Point2 position, @Nullable Drawable drawable, int w, int h) {
         super(position);
 
         this.drawable = drawable;
@@ -32,8 +35,10 @@ public class StaticObject2 extends Object2 implements DrawableObject {
         int x0 = Math.round(position.x);
         int y0 = Math.round(position.y);
 
-        drawable.setBounds(x0, y0, x0+width, y0+height);
-        drawable.draw(canvas);
+        if (drawable != null) {
+            drawable.setBounds(x0, y0, x0 + width, y0 + height);
+            drawable.draw(canvas);
+        }
     }
 
 }

@@ -14,7 +14,7 @@ import java.util.Objects;
 
 import root.iv.ivplayer.game.fanorona.FanoronaEngine;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
-import root.iv.ivplayer.game.fanorona.FanoronaTextures;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.room.FirebaseRoom;
 import root.iv.ivplayer.game.room.RoomListener;

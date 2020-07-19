@@ -2,13 +2,13 @@ package root.iv.ivplayer.game.fanorona;
 
 import android.graphics.Canvas;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
 import root.iv.ivplayer.game.fanorona.slot.Way;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.object.Group;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
@@ -50,17 +50,17 @@ public class FanoronaScene extends SensorScene {
 
         // Генератор для фона
         backgroundGenerator = new ObjectGenerator();
-        backgroundGenerator.setDrawable(textures.getBackground());
+        backgroundGenerator.setDrawable(textures.getBackgroundTextures().getBackground());
 
         // Генератор для сетки
         slotGenerator = new ObjectGenerator();
-        slotGenerator.setDrawable(textures.getSlot());
-        slotGenerator.setTintColor(textures.getSlotColor());
+        slotGenerator.setDrawable(textures.getSlotTextures().getDrawable());
+        slotGenerator.setTintColor(textures.getSlotTextures().getFreeColor());
 
         this.startMargin = startMargin;
         this.topMargin = topMargin;
         slotGroup = slotsConstruct(startMargin, topMargin, DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
-        wayGroup = wayConstruct(ways, textures.getSlotColor());
+        wayGroup = wayConstruct(ways);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class FanoronaScene extends SensorScene {
             backgroundGenerator.setFixSize(canvas.getWidth(), canvas.getHeight());
             backgroundGenerator.buildStatic(0,0).render(canvas);
         } else {
-            canvas.drawColor(textures.getBackgroundColor());
+            canvas.drawColor(textures.getBackgroundTextures().getColor());
         }
 
         // Отрисовка дорожек
@@ -115,7 +115,7 @@ public class FanoronaScene extends SensorScene {
 
 
     public void resizeWay(SlotWay[] ways) {
-        wayGroup = wayConstruct(ways, textures.getSlotColor());
+        wayGroup = wayConstruct(ways);
     }
 
     @Override
@@ -184,8 +184,7 @@ public class FanoronaScene extends SensorScene {
 
                 slotGenerator.setFixSize(radius*2, radius*2);
                 StaticObject2 staticObject2 = slotGenerator.buildStatic(x0, y0);
-                Slot slot = Slot.of(staticObject2, radius, textures.getChipWhite(), textures.getChipWhiteColor(),
-                        textures.getChipBlack(), textures.getChipBlackColor());
+                Slot slot = Slot.of(staticObject2, radius, textures.getChipTextures(), textures.getSlotTextures());
                 slots.add(slot);
             }
         }
@@ -193,9 +192,8 @@ public class FanoronaScene extends SensorScene {
         return slots;
     }
 
-    private Group<Way> wayConstruct(SlotWay[] ways, @ColorInt int wayColor) {
+    private Group<Way> wayConstruct(SlotWay[] ways) {
         Group<Way> group = Group.empty();
-
 
         for (SlotWay way : ways) {
             Point2 center1 = slotGroup.getObject(way.getFrom())
@@ -205,7 +203,7 @@ public class FanoronaScene extends SensorScene {
                     .getBounds()
                     .getCenter();
 
-            group.add(Way.of(center1, center2, wayColor));
+            group.add(Way.of(center1, center2, textures.getWayTextures()));
         }
 
         return group;

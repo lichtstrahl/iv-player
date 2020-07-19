@@ -16,6 +16,7 @@ import lombok.Setter;
 import root.iv.bot.Progress;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
 import timber.log.Timber;
