@@ -5,7 +5,9 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import root.iv.bot.BotAPI;
 import root.iv.bot.FanoronaBot;
 import root.iv.bot.Progress;
 import root.iv.bot.Role;
@@ -22,7 +24,7 @@ public class FanoronaLocalRoom extends Room {
     private FanoronaEngine engine;
     @Nullable
     private FanoronaRoomListener roomListener;
-    private FanoronaBot bot;
+    private BotAPI bot;
     private RoomState state;
 
     FanoronaLocalRoom(FanoronaTextures textures, FanoronaRole role) {
@@ -60,6 +62,15 @@ public class FanoronaLocalRoom extends Room {
     }
 
     private void touchHandler(MotionEvent event) {
+
+        switch (state) {
+            case GAME:
+                processTouch(event);
+                break;
+        }
+    }
+
+    private void processTouch(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
             FanoronaProgressDTO lastProgress = engine.touch(event.getX(), event.getY());
 
@@ -70,9 +81,13 @@ public class FanoronaLocalRoom extends Room {
                 bot.processEnemyProgress(moves);
 
                 // Узнаём ход бота. Моделируем ход
-                List<FanoronaProgressDTO> botProgress = engine.parse(bot.progress());
+                List<FanoronaProgressDTO> botProgress = bot.progress()
+                        .stream()
+                        .map(FanoronaProgressDTO::of)
+                        .collect(Collectors.toList());
+
                 for (FanoronaProgressDTO p : botProgress)
-                    engine.progress(p.getFrom(), p.getTo(), p.getState());
+                    engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
             }
         }
     }

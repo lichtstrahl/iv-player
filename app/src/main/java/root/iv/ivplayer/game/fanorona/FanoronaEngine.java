@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import root.iv.bot.Eats;
-import root.iv.bot.Move;
 import root.iv.bot.Progress;
 import root.iv.bot.Role;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
@@ -110,7 +109,7 @@ public class FanoronaEngine {
 
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
-            FanoronaProgressDTO progressDTO = progress(selected, touched, currentRole);
+            FanoronaProgressDTO progressDTO = progress(selected, touched, currentRole, AttackType.FORWARD);
             // Если это ход текущего игрока
             progressSteps.add(progressDTO);
             Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
@@ -145,52 +144,12 @@ public class FanoronaEngine {
     }
 
     public List<Progress> getMove() {
-        return progressSteps.stream()
-                .map(it-> new Progress(it.getFrom(), it.getTo(),
-                        null, //is not needed
-                        Eats.NO))//#todo
+        List<Progress> progresses = progressSteps.stream()
+                .map(FanoronaProgressDTO::export)
                 .collect(Collectors.toList());
-    }
+        progresses.clear();
 
-    public List<FanoronaProgressDTO> parse(List<Progress> moves) {
-        return moves.stream()
-                .map(it-> new FanoronaProgressDTO(
-                        it.role==Role.WHITE ? FanoronaRole.WHITE :
-                                it.role==Role.BLACK ? FanoronaRole.BLACK :
-                                        FanoronaRole.FREE,
-                        it.from, it.to
-                ))
-                .collect(Collectors.toList());
-    }
-
-    private void prepareProgress(Integer touched) {
-        scene.selectSlot(touched);
-
-        // Если это пустая ячейка или чужая для нас фишка, то больше ничего не делаем
-        if (isFree(touched) || isEnemy(touched, currentRole))
-            return;
-
-        // Если рядом нет свободных друзей, то ход очевидно невозможен
-        if (findFreeFriends(touched).isEmpty())
-            return;
-
-        // Пробуем нарисовать возможные агрессивные ходы:
-        List<Integer> aggressiveProgress = findAgressiveProgress(touched);
-        for (Integer progress : aggressiveProgress) {
-            aggressiveStep = true;
-            scene.progressSlot(progress);
-        }
-
-        // Если агрессивных ходов из этой позиции нет и для роли их больше не существует вообще
-        // + это начало цепочки, то можно просто походить на пустую клетку
-        if (aggressiveProgress.isEmpty() && progressSteps.isEmpty() && !hasAgressiveProgress(currentRole)) {
-            List<Integer> freeFriends = findFreeFriends(touched);
-
-            for (Integer free : freeFriends) {
-                aggressiveStep = false;
-                scene.progressSlot(free);
-            }
-        }
+        return progresses;
     }
 
     public void connect(GameView gameView) {
@@ -203,6 +162,7 @@ public class FanoronaEngine {
     }
 
     // Победа, если у нас ещё есть фишки, а у соперника они кончились
+
     public boolean win() {
         return !listSlotsForRole(currentRole).isEmpty() && listSlotsForRole(enemyRoleFor(currentRole)).isEmpty();
     }
@@ -210,6 +170,75 @@ public class FanoronaEngine {
     // Конец игры наступает, если нет больше фишек у одного из игроков
     public boolean end() {
         return listSlotsForRole(currentRole).isEmpty() || listSlotsForRole(enemyRoleFor(currentRole)).isEmpty();
+    }
+
+    public FanoronaProgressDTO progress(int oldIndex, int newIndex, FanoronaRole state, AttackType attack) {
+        Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d]) (%s)",
+                state.name(), oldIndex, newIndex,
+                row(oldIndex), column(oldIndex), row(newIndex), column(newIndex), attack.name());
+
+        mark(oldIndex, FanoronaRole.FREE);
+        mark(newIndex, state);
+
+        int pFrom = oldIndex;
+        int pTo = newIndex;
+        switch (attack) {
+            case NO:
+                return FanoronaProgressDTO.passive(state, oldIndex, newIndex);
+
+            case FORWARD:
+                // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
+                for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
+                    mark(nextSlot, FanoronaRole.FREE);
+                    oldIndex = newIndex;
+                    newIndex = nextSlot;
+                }
+
+                return FanoronaProgressDTO.forward(state, pFrom, pTo);
+
+            case BACK:
+                // Убираем всех соперников по обратной линии
+                for (Integer nextSlot = nextSlotForLine(newIndex, oldIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(newIndex, oldIndex)) {
+                    mark(nextSlot, FanoronaRole.FREE);
+                    newIndex = oldIndex;
+                    oldIndex = nextSlot;
+                }
+
+                return FanoronaProgressDTO.back(state, pFrom, pTo);
+        }
+
+        throw new IllegalStateException("Обработка хода завершена неудачно");
+    }
+
+
+    private void prepareProgress(Integer touched) {
+        scene.selectSlot(touched);
+
+        // Если это пустая ячейка или чужая для нас фишка, то больше ничего не делаем
+        if (isFree(touched) || isEnemy(touched, currentRole))
+            return;
+
+        // Если рядом нет свободных друзей, то ход очевидно невозможен
+        if (findFriends(touched, FanoronaRole.FREE).isEmpty())
+            return;
+
+        // Пробуем нарисовать возможные агрессивные ходы:
+        List<Integer> aggressiveProgress = findAgressiveProgress(touched);
+        for (Integer progress : aggressiveProgress) {
+            aggressiveStep = true;
+            scene.progressSlot(progress);
+        }
+
+        // Если агрессивных ходов из этой позиции нет и для роли их больше не существует вообще
+        // + это начало цепочки, то можно просто походить на пустую клетку
+        if (aggressiveProgress.isEmpty() && progressSteps.isEmpty() && !hasAgressiveProgress(currentRole)) {
+            List<Integer> freeFriends = findFriends(touched, FanoronaRole.FREE);
+
+            for (Integer free : freeFriends) {
+                aggressiveStep = false;
+                scene.progressSlot(free);
+            }
+        }
     }
 
     private void fillWays() {
@@ -264,46 +293,14 @@ public class FanoronaEngine {
         return friends;
     }
 
-    private List<Integer> findFreeFriends(int globalIndex) {
+    // Найти всех друзей с указанным состоянием
+    private List<Integer> findFriends(int globalIndex, FanoronaRole role) {
         return findFriends(globalIndex)
                 .stream()
-                .filter(i -> getState(i) == FanoronaRole.FREE)
+                .filter(i -> getState(i) == role)
                 .collect(Collectors.toList());
     }
 
-    private List<Integer> findEnemyFriends(int globalIndex) {
-        return findFriends(globalIndex)
-                .stream()
-                .filter(i -> getState(i) == enemyRoleFor(currentRole))
-                .collect(Collectors.toList());
-    }
-
-    public FanoronaProgressDTO progress(int oldIndex, int newIndex, FanoronaRole state) {
-        Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d])",
-                state.name(), oldIndex, newIndex,
-                row(oldIndex), column(oldIndex), row(newIndex), column(newIndex));
-        // Сразу формируем итоговый ответ о ходе. Т.к. индексы потом будут изменяться.
-        FanoronaProgressDTO progressDTO = new FanoronaProgressDTO(state, oldIndex, newIndex);
-
-        mark(oldIndex, FanoronaRole.FREE);
-        mark(newIndex, state);
-
-        // Убираем всех соперников по линии, пока не дойдём до конца поля или не встретим пустую клетку
-        for (Integer nextSlot = nextSlotForLine(oldIndex, newIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(oldIndex, newIndex)) {
-                mark(nextSlot, FanoronaRole.FREE);
-                oldIndex = newIndex;
-                newIndex = nextSlot;
-        }
-
-        // Убираем всех соперников по обратной линии
-        for (Integer nextSlot = nextSlotForLine(newIndex, oldIndex); nextSlot != null && isEnemy(nextSlot, state); nextSlot = nextSlotForLine(newIndex, oldIndex)) {
-            mark(nextSlot, FanoronaRole.FREE);
-            newIndex = oldIndex;
-            oldIndex = nextSlot;
-        }
-
-        return progressDTO;
-    }
 
     /**
         Фишка имеет агрессивные ходы: (это должна быть наша фишка)
@@ -319,7 +316,7 @@ public class FanoronaEngine {
             return aggressiveProgress;
 
         // Перебираем свободных друзей и смотрим есть ли на линии фишка соперника
-        List<Integer> freeFriends = findFreeFriends(to);
+        List<Integer> freeFriends = findFriends(to, FanoronaRole.FREE);
         for (Integer freeFriend : freeFriends) {
             Integer nextSlot = nextSlotForLine(to, freeFriend);
 
@@ -329,7 +326,7 @@ public class FanoronaEngine {
         }
 
         // Перебираем фишки противника среди друзей
-        List<Integer> enemyFriends = findEnemyFriends(to);
+        List<Integer> enemyFriends = findFriends(to, enemyRoleFor(currentRole));
         for (Integer enemyFriend : enemyFriends) {
             Integer nextSlot = nextSlotForLine(enemyFriend, to);
 
@@ -437,7 +434,7 @@ public class FanoronaEngine {
         return allSlotsForRole
                 .stream()
                 .filter(index -> {
-                    List<Integer> friends = findFreeFriends(index);
+                    List<Integer> friends = findFriends(index, FanoronaRole.FREE);
                     return !friends.isEmpty();
                 })
                 .collect(Collectors.toList());

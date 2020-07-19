@@ -98,7 +98,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
                     for (FanoronaProgressDTO pDTO : engine.getProgressSteps()) {
                         FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
-                                pDTO.getFrom(), pDTO.getTo(), end, win);
+                                pDTO.getFrom(), pDTO.getTo(), pDTO.getAttack(), end, win);
 
                         FBDatabaseAdapter.getProgressInRoom(name, progressPath)
                                 .setValue(fbProgress);
@@ -254,7 +254,7 @@ public class FanoronaRoom extends FirebaseRoom {
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBFanoronaProgress enemyProgress = dataSnapshot.getValue(FBFanoronaProgress.class);
             if (enemyProgress != null) {
-                engine.progress(enemyProgress.getFrom(), enemyProgress.getTo(), enemyProgress.getState());
+                engine.progress(enemyProgress.getFrom(), enemyProgress.getTo(), enemyProgress.getState(), enemyProgress.getAttack());
                 if (enemyProgress.isWin() && engine.win())
                     win(enemyProgress.getUid());
                 else if (engine.end())
