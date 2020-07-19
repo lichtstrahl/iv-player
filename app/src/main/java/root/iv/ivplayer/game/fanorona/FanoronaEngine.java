@@ -142,7 +142,7 @@ public class FanoronaEngine {
         List<Progress> progresses = progressSteps.stream()
                 .map(FanoronaProgressDTO::export)
                 .collect(Collectors.toList());
-        progresses.clear();
+        progressSteps.clear();
 
         return progresses;
     }

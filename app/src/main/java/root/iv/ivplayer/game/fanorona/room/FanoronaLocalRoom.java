@@ -18,7 +18,9 @@ import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.view.GameView;
+import timber.log.Timber;
 
 public class FanoronaLocalRoom extends Room {
     private FanoronaEngine engine;
@@ -61,6 +63,15 @@ public class FanoronaLocalRoom extends Room {
         // Подписка на события от Firebase
     }
 
+    private void updateState(RoomState newState) {
+        if (RoomStateJump.of(state).possibleTransit(newState)) {
+            state = newState;
+            roomListener.changeStatus(state);
+        } else {
+            Timber.w("Невозможен переход %s -> %s", state.name(), newState.name());
+        }
+    }
+
     private void touchHandler(MotionEvent event) {
 
         switch (state) {
@@ -80,14 +91,20 @@ public class FanoronaLocalRoom extends Room {
                 List<Progress> moves = engine.getMove();
                 bot.processEnemyProgress(moves);
 
+                // Переходим в ожидание хода
+                updateState(RoomState.WAIT_PROGRESS);
+
+
                 // Узнаём ход бота. Моделируем ход
                 List<FanoronaProgressDTO> botProgress = bot.progress()
                         .stream()
                         .map(FanoronaProgressDTO::of)
                         .collect(Collectors.toList());
-
+//
                 for (FanoronaProgressDTO p : botProgress)
                     engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
+
+                updateState(RoomState.GAME);
             }
         }
     }
