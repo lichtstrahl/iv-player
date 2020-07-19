@@ -10,8 +10,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,24 +29,28 @@ import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
+import root.iv.ivplayer.ui.fragment.menu.MenuFragment;
 import root.iv.ivplayer.ui.fragment.rooms.create.CreateRoomFragment;
 import root.iv.ivplayer.ui.fragment.rooms.list.RoomsFragment;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements
         GameFragment.Listener,
-        RoomsFragment.Listener
+        RoomsFragment.Listener,
+        MenuFragment.Listener
 {
     private static final int RC_SIGN_IN = 101;
     private static final String ARG_REORIENTATION = "arg:reorientation";
     private static final String ARG_ROOM_NAME = "arg:room-name";
     private static final String ARG_GAME_TYPE = "arg:game-type";
     private static final String ARG_SCREEN_PARAM = "arg:screen-param";
+    private static final String ARG_NETWORK_FLAG = "arg:network";
 
     private boolean rotateScreen = false;
     private String roomName = "";
     private GameType gameType = null;
     private ScreenParam screenParam = null;
+    private Boolean network = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,7 +67,8 @@ public class MainActivity extends AppCompatActivity implements
         if (savedInstanceState != null && savedInstanceState.getBoolean(ARG_REORIENTATION) && savedInstanceState.getString(ARG_GAME_TYPE) != null){
             prepareScreen((ScreenParam) savedInstanceState.getSerializable(ARG_SCREEN_PARAM));
             GameType gType = GameType.valueOf(savedInstanceState.getString(ARG_GAME_TYPE));
-            startGame(savedInstanceState.getString(ARG_ROOM_NAME), gType);
+            boolean networkFlag = savedInstanceState.getBoolean(ARG_NETWORK_FLAG);
+            startGame(savedInstanceState.getString(ARG_ROOM_NAME), gType, networkFlag);
         }
     }
 
@@ -85,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                authSuccessful(FirebaseAuth.getInstance().getCurrentUser());
+                authSuccessful();
             } else {
                 Toast.makeText(this, "Неудачный вход", Toast.LENGTH_SHORT).show();
             }
@@ -99,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements
         outState.putString(ARG_ROOM_NAME, roomName);
         outState.putString(ARG_GAME_TYPE, (gameType != null) ? gameType.name() : null);
         outState.putSerializable(ARG_SCREEN_PARAM, screenParam);
+        outState.putBoolean(ARG_NETWORK_FLAG, network);
     }
 
     @Override
@@ -107,6 +111,25 @@ public class MainActivity extends AppCompatActivity implements
         if (getSupportActionBar() != null) getSupportActionBar().show();
         rotateScreen = reorientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         gameType = null;
+    }
+
+    @Override
+    public void startSingleGame(GameType gameType) {
+        ScreenParam sParam = GameFragmentParams.param(gameType);
+
+        // Готовим экран. Возможно был вызван поворот
+        prepareScreen(sParam);
+
+        // Если был запрошен поворот экрана, то передаём название комнаты и тип игры.
+        // Если смены экрана не будет, то можно запустить игру прямо сейчас
+        if (rotateScreen) {
+            this.gameType = gameType;
+            this.roomName = null;
+            this.screenParam = sParam;
+            this.network = true;
+        } else {
+            startGame(roomName, gameType, false);
+        }
     }
 
     @Override
@@ -122,8 +145,9 @@ public class MainActivity extends AppCompatActivity implements
             this.gameType = gType;
             this.roomName = roomName;
             this.screenParam = sParam;
+            this.network = true;
         } else {
-            startGame(roomName, gType);
+            startGame(roomName, gType, true);
         }
     }
 
@@ -136,9 +160,19 @@ public class MainActivity extends AppCompatActivity implements
                 .commit();
     }
 
-    public void authSuccessful(FirebaseUser user) {
+    public void authSuccessful() {
         Timber.i("Игрок успешно вошёл");
+        openMenu();
+    }
 
+    private void openMenu() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFrame, MenuFragment.getInstance(), MenuFragment.TAG)
+                .commit();
+    }
+
+    private void openRoomsFragment(FirebaseUser user) {
         // Перед запуском удаляем существующие комнаты со своим именем
         FBDatabaseAdapter.getRooms()
                 .addListenerForSingleValueEvent(new RoomsFBRemoveDead(user));
@@ -149,23 +183,15 @@ public class MainActivity extends AppCompatActivity implements
                 .commit();
     }
 
-    // Удаление последнего отображенного фрагмента. Используется для ручного удаление игрового фрагмента
-    private void removeLastFragment() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        int countFragments = fragmentManager.getBackStackEntryCount();
-        Fragment removedFragment = fragmentManager.getFragments().get(countFragments-1);
-        fragmentManager
-                .beginTransaction()
-                .remove(removedFragment)
-                .commit();
-        fragmentManager.popBackStack();
-    }
+    private void startGame(String rName, GameType gType, boolean network) {
+        GameFragment gameFragment = (network)
+                ? GameFragment.networkGame(rName, gType)
+                : GameFragment.localGame(rName, gType);
 
-    private void startGame(String rName, GameType gType) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(null)
-                .replace(R.id.mainFrame, GameFragment.getInstance(rName, gType), GameFragment.TAG)
+                .replace(R.id.mainFrame, gameFragment, GameFragment.TAG)
                 .commit();
     }
 
@@ -193,16 +219,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @AllArgsConstructor
-    private class RoomsFBRemoveDead extends FBDataListener {
+    private static class RoomsFBRemoveDead extends FBDataListener {
         private FirebaseUser user;
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             for (DataSnapshot room : dataSnapshot.getChildren()) {
-                String roomName = room.getKey();
+                String rName = room.getKey();
                 FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
                 if (fbRoom.isPresent(user.getUid()))
-                    FBDatabaseAdapter.getRoom(roomName).removeValue();
+                    FBDatabaseAdapter.getRoom(rName).removeValue();
             }
         }
     }

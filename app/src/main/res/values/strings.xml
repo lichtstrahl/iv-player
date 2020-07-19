@@ -19,4 +19,7 @@
     <string name="label_create">Создать</string>
     <string name="game_tic_tac_toe">Крестики-Нолики</string>
     <string name="game_fanorona">Фанорона</string>
+    <string name="label_menu">Меню</string>
+    <string name="label_single_play">Одиночная игра</string>
+    <string name="label_network_game">Сетевая игра</string>
 </resources>

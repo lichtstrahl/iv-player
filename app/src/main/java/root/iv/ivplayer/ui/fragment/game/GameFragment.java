@@ -28,7 +28,6 @@ import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.fanorona.FanoronaTextures;
-import root.iv.ivplayer.game.fanorona.room.FanoronaRoom;
 import root.iv.ivplayer.game.fanorona.room.FanoronaRoomListener;
 import root.iv.ivplayer.game.fanorona.room.RoomFactory;
 import root.iv.ivplayer.game.room.Room;
@@ -44,12 +43,10 @@ public class GameFragment extends Fragment
         FanoronaRoomListener
 
 {
-    private static final int GAME_TIC_TAC = 1;
-    private static final int GAME_FANORONA = 2;
-
     public static final String TAG = "fragment:game";
     private static final String ARG_ROOM_NAME = "arg:room-name";
     private static final String ARG_GAME_TYPE = "arg:game-type";
+    private static final String ARG_NETWORK_FLAG = "arg:network";
 
     @BindView(R.id.gameView)
     protected GameView gameView;
@@ -77,12 +74,21 @@ public class GameFragment extends Fragment
     private Listener listener;
     private Room room;
 
-    public static GameFragment getInstance(String roomName, GameType gameType) {
+    public static GameFragment localGame(String roomName, GameType gameType) {
+        return getInstance(roomName, gameType, false);
+    }
+
+    public static GameFragment networkGame(String roomName, GameType gameType) {
+        return getInstance(roomName, gameType, true);
+    }
+
+    private static GameFragment getInstance(String roomName, GameType gameType, boolean network) {
         GameFragment fragment = new GameFragment();
 
         Bundle bundle = new Bundle();
         bundle.putString(ARG_ROOM_NAME, roomName);
         bundle.putString(ARG_GAME_TYPE, gameType.name());
+        bundle.putBoolean(ARG_NETWORK_FLAG, network);
         fragment.setArguments(bundle);
 
         return fragment;
@@ -103,6 +109,7 @@ public class GameFragment extends Fragment
 
 
         GameType gameType = GameType.valueOf(args.getString(ARG_GAME_TYPE));
+        Boolean network = args.getBoolean(ARG_NETWORK_FLAG);
         switch (gameType) {
             case TIC_TAC:
                 room = buildRoomTicTac(roomName, fbAuth.getCurrentUser());
@@ -112,7 +119,7 @@ public class GameFragment extends Fragment
                 break;
 
             case FANORONA:
-                room = buildRoomFanorona(roomName, fbAuth.getCurrentUser());
+                room = buildRoomFanorona(roomName, fbAuth.getCurrentUser(), network);
                 room.addListener(this);
                 room.connect(gameView);
                 gameView.post(() -> room.resize(gameView.getWidth(), gameView.getHeight()));
@@ -210,7 +217,7 @@ public class GameFragment extends Fragment
         return new TicTacRoom(textures, name, user);
     }
 
-    private Room buildRoomFanorona(String name, FirebaseUser user) {
+    private Room buildRoomFanorona(String name, FirebaseUser user, boolean network) {
         Resources resources = getResources();
         Context context = Objects.requireNonNull(getContext());
 
@@ -223,8 +230,9 @@ public class GameFragment extends Fragment
         viewRole1.setImageResource(R.drawable.ic_dog);
         viewRole2.setImageResource(R.drawable.ic_cat);
 
-//        return RoomFactory.Fanorona.multiplayer(textures, name, user);
-        return RoomFactory.Fanorona.local(textures, FanoronaRole.BLACK);
+        return (network)
+                ? RoomFactory.Fanorona.multiplayer(textures, name, user)
+                : RoomFactory.Fanorona.local(textures, FanoronaRole.BLACK);
     }
 
     public interface Listener {

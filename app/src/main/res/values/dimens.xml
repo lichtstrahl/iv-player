@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="stdMargin">8dp</dimen>
+    <dimen name="bigMargin">35dp</dimen>
     <dimen name="notification_height">64dp</dimen>
     <dimen name="notification_height_expand">256dp</dimen>
     <dimen name="smallMargin">2dp</dimen>
