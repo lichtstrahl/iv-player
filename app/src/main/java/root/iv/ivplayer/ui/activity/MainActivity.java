@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements
         outState.putString(ARG_ROOM_NAME, roomName);
         outState.putString(ARG_GAME_TYPE, (gameType != null) ? gameType.name() : null);
         outState.putSerializable(ARG_SCREEN_PARAM, screenParam);
-        outState.putBoolean(ARG_NETWORK_FLAG, network);
+        outState.putBoolean(ARG_NETWORK_FLAG, (network != null) ? network : false);
     }
 
     @Override
