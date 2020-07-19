@@ -133,6 +133,14 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void startNetworkGame() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFrame, RoomsFragment.getInstance(), RoomsFragment.TAG)
+                .commit();
+    }
+
+    @Override
     public void clickRoom(String roomName, GameType gType) {
         ScreenParam sParam = GameFragmentParams.param(gType);
 

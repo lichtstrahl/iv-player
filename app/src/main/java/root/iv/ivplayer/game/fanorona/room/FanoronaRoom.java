@@ -31,11 +31,11 @@ public class FanoronaRoom extends FirebaseRoom {
     @Nullable
     private FanoronaRoomListener roomListener;
 
-    FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user) {
+    FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user, FanoronaRole role) {
         super(name, user);
         Timber.i("Fanorona room create");
         engine = new FanoronaEngine(textures, this::touchHandler);
-        engine.setCurrentRole(FanoronaRole.BLACK);
+        engine.setCurrentRole(role);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
                     // Вторым игроком
                     if (oldCount == 1) {
-                        startGame(newRoom, FanoronaRole.BLACK);
+                        startGame(newRoom, FanoronaRole.WHITE);
                     }
                 }
 
@@ -218,7 +218,7 @@ public class FanoronaRoom extends FirebaseRoom {
                 int newCount = newRoom.countPlayer();
                 Timber.i("Локальная комната создана, вошли %d-ым", newCount);
                 if (newCount == 2) {
-                    startGame(newRoom, FanoronaRole.WHITE);
+                    startGame(newRoom, FanoronaRole.BLACK);
                 }
             }
 

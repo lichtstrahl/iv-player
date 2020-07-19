@@ -8,8 +8,8 @@ import root.iv.ivplayer.game.fanorona.FanoronaTextures;
 public class RoomFactory {
 
     public static class Fanorona {
-        public static FanoronaRoom multiplayer(FanoronaTextures textures, String name, FirebaseUser user) {
-            return new FanoronaRoom(textures, name, user);
+        public static FanoronaRoom multiplayer(FanoronaTextures textures, String name, FirebaseUser user, FanoronaRole role) {
+            return new FanoronaRoom(textures, name, user, role);
         }
 
         public static FanoronaLocalRoom local(FanoronaTextures textures, FanoronaRole role) {

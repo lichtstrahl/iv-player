@@ -58,7 +58,13 @@ public class MenuFragment extends Fragment {
         listener.startSingleGame(GameType.FANORONA);
     }
 
+    @OnClick(R.id.buttonNetworkPlay)
+    public void clickNetworkPlay() {
+        listener.startNetworkGame();
+    }
+
     public interface Listener {
         void startSingleGame(GameType gameType);
+        void startNetworkGame();
     }
 }
