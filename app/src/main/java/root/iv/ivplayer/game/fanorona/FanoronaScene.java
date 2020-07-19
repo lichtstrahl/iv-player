@@ -26,6 +26,7 @@ public class FanoronaScene extends SensorScene {
     // Генераторы создания объектов
     private ObjectGenerator slotGenerator;
     private ObjectGenerator backgroundGenerator;
+    private ObjectGenerator boardGenerator;
 
     // Группа: слоты под фишки
     private Group<Slot> slotGroup;
@@ -52,6 +53,9 @@ public class FanoronaScene extends SensorScene {
         backgroundGenerator = new ObjectGenerator();
         backgroundGenerator.setDrawable(textures.getBackgroundTextures().getBackground());
 
+        boardGenerator = new ObjectGenerator();
+        boardGenerator.setDrawable(textures.getBackgroundTextures().getBoard());
+
         // Генератор для сетки
         slotGenerator = new ObjectGenerator();
         slotGenerator.setDrawable(textures.getSlotTextures().getDrawable());
@@ -69,6 +73,12 @@ public class FanoronaScene extends SensorScene {
         if (backgroundGenerator.hasTexture()) {
             backgroundGenerator.setFixSize(canvas.getWidth(), canvas.getHeight());
             backgroundGenerator.buildStatic(0,0).render(canvas);
+
+            // Поверх зелёного фона рисуем доску
+            int boardStartMargin = 15;
+            int boardTopMargin = 15;
+            boardGenerator.setFixSize(canvas.getWidth() - 2*boardStartMargin, canvas.getHeight() - 2*boardTopMargin);
+            boardGenerator.buildStatic(boardStartMargin,boardTopMargin).render(canvas);
         } else {
             canvas.drawColor(textures.getBackgroundTextures().getColor());
         }

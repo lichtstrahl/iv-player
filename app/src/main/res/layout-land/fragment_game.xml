@@ -9,13 +9,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottomBlock"
-        tools:background="@drawable/background_texture_of_dark_wood"
-        />
+        android:layout_marginBottom="0dp"
+        tools:background="@drawable/background_green"/>
 
     <RelativeLayout
         android:id="@+id/bottomBlock"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
+        android:layout_height="90dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/background_paperlight">
         <TextView
