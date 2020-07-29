@@ -123,6 +123,7 @@ public class FanoronaLocalRoom extends Room {
             updateState(RoomState.GAME);
         } else if (engine.possibleDoubleAttack(x, y)) { // Ход не обработан, т.к. возможны два направления атаки
             updateState(RoomState.SELECT_ATTACK_TYPE);
+            engine.markSlotsForAttack(x, y);
         }
     }
 

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -137,6 +139,23 @@ public class FanoronaEngine {
                 && possibleAttack(from, to, AttackType.FORWARD)
                 && possibleAttack(from, to, AttackType.BACK)
         );
+    }
+
+    // Гарантировано есть выбранная и тронутая ячейка
+    public void markSlotsForAttack(float x, float y) {
+        int selected = Objects.requireNonNull(scene.getSelectedSlot());
+        int to = Objects.requireNonNull(scene.findSlot(Point2.point(x, y)));
+
+        // Перебираем все слоты по линии и помечаем их под атаку
+        // (пока подряд идут фишки соперника или пока не кончится доска)
+        nextSlotsForLine(selected, to, cur -> cur != null && isEnemy(cur, currentRole))
+                .forEach(scene::markForAttack);
+
+
+        // Перебираем все слоты по обратной линии и помечаем их под атаку
+        // (пока подряд идут фишки соперника или пока не кончится доска
+        nextSlotsForLine(to, selected, cur -> cur != null && isEnemy(cur, currentRole))
+                .forEach(scene::markForAttack);
     }
 
     // Пометить фишки с возможными ходами. Для данной роли
@@ -413,6 +432,17 @@ public class FanoronaEngine {
             return nextI*COUNT_COLUMN + nextJ;
         else
             return null;
+    }
+
+    // Получение фишек по линии, согласно условию
+    private List<Integer> nextSlotsForLine(int startIndex, int endIndex, Predicate<Integer> predicate) {
+        List<Integer> slots = new ArrayList<>();
+
+        for (Integer cur = nextSlotForLine(startIndex, endIndex); predicate.test(cur); cur = nextSlotForLine(startIndex, endIndex)) {
+            slots.add(cur);
+        }
+
+        return slots;
     }
 
     private boolean correctI(int i) {

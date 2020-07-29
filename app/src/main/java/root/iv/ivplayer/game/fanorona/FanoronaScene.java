@@ -161,6 +161,10 @@ public class FanoronaScene extends SensorScene {
         slotGroup.getObject(i).hasAgressiveProgress();
     }
 
+    public void markForAttack(int i) {
+        slotGroup.getObject(i).markForAttack();
+    }
+
     @Nullable
     public Integer getSelectedSlot() {
         for (int i = 0; i < slotGroup.size(); i++) {
