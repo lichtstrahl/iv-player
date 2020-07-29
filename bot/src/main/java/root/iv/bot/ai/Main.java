@@ -62,7 +62,6 @@ public class Main {
             if(i<0 || i>=board.rows){
                 continue;
             }
-
             for(int j=x-1; j<=x+1; ++j){
                 if(j<0 || j>=board.cols){
                     continue;
@@ -82,7 +81,7 @@ public class Main {
                         if(board.state[y+2*m.dy][x+2*m.dx]==role.foe()){
                             eats = true;
                             List<int[]> visited2 = new ArrayList<>(visited);
-                            visited2.add(new int[]{i,j});
+                            visited2.add(new int[]{y,x});
                             Move mm = m.cpWithEatsAtk();
                             res.add(mm);
                             res.addAll(expandContinuations(mm, board, visited2));
@@ -92,7 +91,7 @@ public class Main {
                         if(board.state[y-m.dy][x-m.dx]==role.foe()){
                             eats = true;
                             List<int[]> visited2 = new ArrayList<>(visited);
-                            visited2.add(new int[]{i,j});
+                            visited2.add(new int[]{y,x});
                             Move mm = m.cpWithEatsWth();
                             res.add(mm);
                             res.addAll(expandContinuations(mm, board, visited2));

@@ -1,6 +1,7 @@
 package root.iv.bot;
 
 import lombok.AllArgsConstructor;
+import lombok.val;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,11 +68,13 @@ public class Board {
         for(; m!=null; m=m.cont){
             r.add(moveToProgress(m));
         }
+        val role = r.get(r.size()-1).role;
+        r.forEach(it-> it.role=role);
         r.forEach(System.out::println);
         return r;
     }
     public Progress moveToProgress(Move m){
-        return new Progress(m.y*cols+m.x, (m.y+m.dy)*cols+m.x+m.dx, state[m.y][m.x],m.eats);
+        return new Progress(m.y*cols+m.x, (m.y+m.dy)*cols+m.x+m.dx, state[m.y+m.dy][m.x+m.dx],m.eats);
     }
 
     public Move progressesToMove(List<Progress> p){
@@ -103,20 +106,6 @@ public class Board {
         System.out.println("------------\n\n"+ Arrays.stream(state).map(it-> Arrays.stream(it).map(
                 c->c==W ? "W" : c==B ? "B" : " "
         ).collect(Collectors.joining())+"\n").collect(Collectors.joining()));
-    }
-
-    @AllArgsConstructor
-    public class Coord{
-        public int it;
-        public Coord(int y, int x){
-            it = y*rows+x;
-        }
-        public int y(){
-            return it/rows;
-        }
-        public int x(){
-            return it%rows;
-        }
     }
 
     private static final Role W = Role.WHITE;
