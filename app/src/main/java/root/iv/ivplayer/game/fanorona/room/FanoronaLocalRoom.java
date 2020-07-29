@@ -86,7 +86,7 @@ public class FanoronaLocalRoom extends Room {
             FanoronaProgressDTO lastProgress = engine.touch(event.getX(), event.getY());
 
             // Если ход был сделан и он оказался последним в цепочке
-            if (lastProgress != null && engine.isEndSteps()) {
+            if (lastProgress != null && engine.endProgressChain()) {
                 // Узнаём ход игрока. Говорим боту о ходе
                 List<Progress> moves = engine.getMove();
                 bot.processEnemyProgress(moves);

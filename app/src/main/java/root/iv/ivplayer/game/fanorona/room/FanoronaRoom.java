@@ -89,25 +89,23 @@ public class FanoronaRoom extends FirebaseRoom {
                 FanoronaProgressDTO lastProgress = engine.touch(event.getX(), event.getY());
 
                 // Если ход был сделан и он оказался последним в цепочке
-                if (lastProgress != null && engine.isEndSteps()) {
+                if (lastProgress != null && engine.endProgressChain()) {
                     boolean win = engine.win();
                     boolean end = engine.end();
 
 
                     String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
 
-                    for (FanoronaProgressDTO pDTO : engine.getProgressSteps()) {
+                    engine.processProgressChain(pDTO -> {
                         FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
                                 pDTO.getFrom(), pDTO.getTo(), pDTO.getAttack(), end, win);
 
                         FBDatabaseAdapter.getProgressInRoom(name, progressPath)
                                 .setValue(fbProgress);
-                    }
+                    });
 
                     FBDatabaseAdapter.getWaitField(name)
                             .setValue(fbUser.getUid());
-
-                    engine.getProgressSteps().clear();
 
                     if (win)
                         win(fbUser.getUid());

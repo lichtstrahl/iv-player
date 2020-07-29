@@ -33,10 +33,7 @@ public class FanoronaEngine {
     @Getter
     @Setter
     private FanoronaRole currentRole;
-    @Getter
-    private List<FanoronaProgressDTO> progressSteps;
-    @Getter
-    private boolean endSteps;
+    private ProgressChain<FanoronaProgressDTO> progressChain;
 
     public FanoronaEngine(FanoronaTextures textures, Consumer<MotionEvent> touchHandler) {
         slots = new FanoronaRole[COUNT_ROW][COUNT_COLUMN];
@@ -72,26 +69,25 @@ public class FanoronaEngine {
         }
 
         // Последовательность ходов (изначально пустая)
-        progressSteps = new ArrayList<>(10);
+        progressChain = ProgressChain.empty();
     }
 
     @Nullable
     public FanoronaProgressDTO touch(float x, float y) {
-        this.endSteps = false;
         // Запоминаем прошлую выбранную ячейку и проверяем возможен ли ход в текущую.
         Integer selected = scene.getSelectedSlot();
         Integer touched = scene.touchSlot(Point2.point(x, y));
         boolean possibleProgress = touched != null && scene.possibleProgress(touched);
 
         // Если касание было вне поля и последовательность ходов завершена, то отметки сбрасываются
-        if (touched == null && progressSteps.isEmpty()) {
+        if (touched == null && progressChain.isEmpty()) {
             scene.releaseAllSlots();
             markPossibleProgress(currentRole);
             return null;
         }
 
         // Последовательность ходов не начата, ход невозможен.
-        if (progressSteps.isEmpty() && !possibleProgress) {
+        if (progressChain.isEmpty() && !possibleProgress) {
             scene.releaseAllSlots();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
             prepareProgress(touched);
@@ -102,7 +98,7 @@ public class FanoronaEngine {
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
             FanoronaProgressDTO progressDTO = buildProgressDTO(selected, touched);
-            progressSteps.add(progressDTO);
+            progressChain.step(progressDTO);
             Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
 
             scene.releaseAllSlots();
@@ -110,9 +106,9 @@ public class FanoronaEngine {
             // то завершаем последовательность ходов
             if (findAgressiveProgress(touched).isEmpty() || progressDTO.getAttack() == AttackType.NO) {
                 Timber.i("Агрессивные ходы кончились. step=0");
-                this.endSteps = true;
+                progressChain.end();
             } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
-                Timber.i("Агрессивные ходы продолжаются step: %d", progressSteps.size());
+                Timber.i("Агрессивные ходы продолжаются step: %d", progressChain.size());
                 prepareProgress(touched);
             }
 
@@ -120,6 +116,10 @@ public class FanoronaEngine {
         }
 
         return null;
+    }
+
+    public boolean endProgressChain() {
+        return progressChain.isEnd();
     }
 
     // Пометить фишки с возможными ходами. Для данной роли
@@ -133,11 +133,16 @@ public class FanoronaEngine {
 
     }
 
+    public void processProgressChain(Consumer<FanoronaProgressDTO> consumer) {
+        progressChain.process(consumer);
+    }
+
     public List<Progress> getMove() {
-        List<Progress> progresses = progressSteps.stream()
-                .map(FanoronaProgressDTO::export)
-                .collect(Collectors.toList());
-        progressSteps.clear();
+        List<Progress> progresses = new ArrayList<>();
+
+        progressChain.process(
+                fp -> progresses.add(fp.export())
+        );
 
         return progresses;
     }
@@ -220,7 +225,7 @@ public class FanoronaEngine {
 
         // Если агрессивных ходов из этой позиции нет и для роли их больше не существует вообще
         // + это начало цепочки, то можно просто походить на пустую клетку
-        if (aggressiveProgress.isEmpty() && progressSteps.isEmpty() && !hasAgressiveProgress(currentRole)) {
+        if (aggressiveProgress.isEmpty() && progressChain.isEmpty() && !hasAgressiveProgress(currentRole)) {
             List<Integer> freeFriends = findFriends(touched, FanoronaRole.FREE);
 
             for (Integer free : freeFriends) {
@@ -362,9 +367,7 @@ public class FanoronaEngine {
         // Из всех возможных агрессивных ходов выбираем только те, что не продолжают линию (last->to)
         // И те что не содержатся среди уже совершенных ходов
         // last - ячейка, где сейчас стоит фишка.
-        FanoronaProgressDTO lastProgress = progressSteps.isEmpty()
-                ? null
-                : progressSteps.get(progressSteps.size()-1);
+        FanoronaProgressDTO lastProgress = progressChain.last();
 
         return aggressiveProgress
                 .stream()
@@ -373,8 +376,7 @@ public class FanoronaEngine {
                     return next == null || !next.equals(progress);
                 })
                 .filter(progress ->
-                        !progressSteps
-                            .stream()
+                        !progressChain.asStream()
                             .map(FanoronaProgressDTO::getFrom)
                             .collect(Collectors.toList())
                             .contains(progress)
