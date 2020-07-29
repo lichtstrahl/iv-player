@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import lombok.Getter;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.fanorona.textures.ChipTextures;
+import root.iv.ivplayer.game.fanorona.textures.MarkAttackTextures;
 import root.iv.ivplayer.game.fanorona.textures.SlotTextures;
 import root.iv.ivplayer.game.object.ObjectGenerator;
 import root.iv.ivplayer.game.object.StaticObject2;
@@ -34,33 +35,40 @@ public class Slot extends StaticObject2 {
     private Paint paintProgress;
     private Paint paintHasProgress;
     private Paint paintFree;
+    private Paint paintMarkAttack;
 
-    private Slot(StaticObject2 object2, int radius, SlotTextures slotTextures) {
+    private Slot(StaticObject2 object2, int radius, SlotTextures slotTextures, MarkAttackTextures attackTextures) {
         super(object2.getPosition(), object2.getDrawable(), object2.getWidth(), object2.getHeight());
         this.bounds = GeometryFactory.newFactory()
                 .pivotCircle(position, radius);
         this.role = FanoronaRole.FREE;
 
-        int alpha = (int)Math.round(slotTextures.getAlpha() * 255);
+        int slotAlpha = (int)Math.round(slotTextures.getAlpha() * 255);
         this.paintSelect = new Paint();
         paintSelect.setColor(slotTextures.getSelectedColor());
-        paintSelect.setAlpha(alpha);
+        paintSelect.setAlpha(slotAlpha);
         paintSelect.setStyle(Paint.Style.FILL);
 
 
         this.paintProgress = new Paint();
         paintProgress.setColor(slotTextures.getProgressColor());
-        paintProgress.setAlpha(alpha);
+        paintProgress.setAlpha(slotAlpha);
         paintProgress.setStyle(Paint.Style.FILL);
 
         this.paintHasProgress = new Paint();
         paintHasProgress.setColor(slotTextures.getHasProgressColor());
-        paintHasProgress.setAlpha(alpha);
+        paintHasProgress.setAlpha(slotAlpha);
         paintHasProgress.setStyle(Paint.Style.FILL);
+
+        this.paintMarkAttack = new Paint();
+        paintMarkAttack.setColor(attackTextures.getColor());
+        paintMarkAttack.setAlpha((int)Math.round(attackTextures.getAlpha() * 255));
+        paintMarkAttack.setStyle(Paint.Style.STROKE);
+        paintMarkAttack.setStrokeWidth(10);
 
         this.paintFree = new Paint();
         paintFree.setColor(slotTextures.getFreeColor());
-        paintFree.setAlpha(alpha);
+        paintFree.setAlpha(slotAlpha);
         paintFree.setStyle(Paint.Style.STROKE);
         paintFree.setStrokeWidth(7);
 
@@ -72,8 +80,9 @@ public class Slot extends StaticObject2 {
         return bounds.contain(point);
     }
 
-    public static Slot of(StaticObject2 object2, int radius, ChipTextures chipTextures, SlotTextures slotTextures) {
-        Slot slot = new Slot(object2, radius, slotTextures);
+    public static Slot of(StaticObject2 object2, int radius, ChipTextures chipTextures, SlotTextures slotTextures,
+                          MarkAttackTextures attackTextures) {
+        Slot slot = new Slot(object2, radius, slotTextures, attackTextures);
 
         int iconW = slot.width - margin*2;
         int iconH = slot.height - margin*2;
@@ -125,6 +134,15 @@ public class Slot extends StaticObject2 {
                 black.render(canvas);
                 break;
         }
+
+        // Помечаем ячейку как возможное направление атаки
+        switch (state) {
+            case MARK_FOR_ATTACK:
+                int d = bounds.getRadius()*2;
+                canvas.drawLine(x0, y0, x0+d, y0+d, paintMarkAttack);
+                canvas.drawLine(x0, y0+d, x0+d, y0, paintMarkAttack);
+                break;
+        }
     }
 
     public void mark(FanoronaRole role) {
@@ -149,5 +167,9 @@ public class Slot extends StaticObject2 {
 
     public void release() {
         this.state = SlotState.DEFAULT;
+    }
+
+    public void markForAttack() {
+        this.state = SlotState.MARK_FOR_ATTACK;
     }
 }

@@ -11,7 +11,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-class MarkAttackTextures {
+public class MarkAttackTextures {
     private @ColorInt int color;
     private double alpha;
 

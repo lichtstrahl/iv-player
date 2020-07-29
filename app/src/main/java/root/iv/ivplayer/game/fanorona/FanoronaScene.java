@@ -195,7 +195,7 @@ public class FanoronaScene extends SensorScene {
 
                 slotGenerator.setFixSize(radius*2, radius*2);
                 StaticObject2 staticObject2 = slotGenerator.buildStatic(x0, y0);
-                Slot slot = Slot.of(staticObject2, radius, textures.getChipTextures(), textures.getSlotTextures());
+                Slot slot = Slot.of(staticObject2, radius, textures.getChipTextures(), textures.getSlotTextures(), textures.getMarkAttackTextures());
                 slots.add(slot);
             }
         }
