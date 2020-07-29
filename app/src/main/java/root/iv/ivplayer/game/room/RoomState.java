@@ -11,7 +11,8 @@ public enum RoomState {
     GAME("Игра"),
     PAUSE("Пауза"),
     CLOSE("Игровая комната закрыта"),
-    NEW("Комната создана");
+    NEW("Комната создана"),
+    SELECT_ATTACK_TYPE("Выбор направления атаки");
 
     @Getter
     private String description;

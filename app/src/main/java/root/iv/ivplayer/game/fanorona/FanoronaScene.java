@@ -142,7 +142,7 @@ public class FanoronaScene extends SensorScene {
 
     // Пробуем выбрать слот
     @Nullable
-    public Integer touchSlot(Point2 touchPoint) {
+    public Integer findSlot(Point2 touchPoint) {
         for (int i = 0; i < slotGroup.getObjects().size(); i++) {
             Slot slot = slotGroup.getObject(i);
             if (slot.getBounds().contain(touchPoint)) {

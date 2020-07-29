@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -77,8 +76,12 @@ public class FanoronaEngine {
     public FanoronaProgressDTO touch(float x, float y) {
         // Запоминаем прошлую выбранную ячейку и проверяем возможен ли ход в текущую.
         Integer selected = scene.getSelectedSlot();
-        Integer touched = scene.touchSlot(Point2.point(x, y));
+        Integer touched = scene.findSlot(Point2.point(x, y));
         boolean possibleProgress = touched != null && scene.possibleProgress(touched);
+
+        // Если возможен ход в двух направлениях, то касание никак не обрабатывается
+        if (possibleDoubleAttack(selected, touched))
+            return null;
 
         // Если касание было вне поля и последовательность ходов завершена, то отметки сбрасываются
         if (touched == null && progressChain.isEmpty()) {
@@ -121,6 +124,19 @@ public class FanoronaEngine {
 
     public boolean endProgressChain() {
         return progressChain.isEnd();
+    }
+
+    // Своя фишка, Такой ход допустим, Возможны два направления атаки
+    public boolean possibleDoubleAttack(float x, float y) {
+        Integer from = scene.getSelectedSlot();
+        Integer to = scene.findSlot(Point2.point(x, y));
+
+        return (from != null && to != null
+                && getState(from) == currentRole
+                && scene.possibleProgress(to)
+                && possibleAttack(from, to, AttackType.FORWARD)
+                && possibleAttack(from, to, AttackType.BACK)
+        );
     }
 
     // Пометить фишки с возможными ходами. Для данной роли

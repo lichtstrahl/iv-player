@@ -83,29 +83,51 @@ public class FanoronaLocalRoom extends Room {
 
     private void processTouch(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
-            FanoronaProgressDTO lastProgress = engine.touch(event.getX(), event.getY());
 
-            // Если ход был сделан и он оказался последним в цепочке
-            if (lastProgress != null && engine.endProgressChain()) {
-                // Узнаём ход игрока. Говорим боту о ходе
-                List<Progress> moves = engine.getMove();
-                bot.processEnemyProgress(moves);
+            switch (state) {
+                case GAME:
+                    processProgress(event.getX(), event.getY());
+                    break;
 
-                // Переходим в ожидание хода
-                updateState(RoomState.WAIT_PROGRESS);
-
-
-                // Узнаём ход бота. Моделируем ход
-                List<FanoronaProgressDTO> botProgress = bot.progress()
-                        .stream()
-                        .map(FanoronaProgressDTO::of)
-                        .collect(Collectors.toList());
-//
-                for (FanoronaProgressDTO p : botProgress)
-                    engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
-
-                updateState(RoomState.GAME);
+                case SELECT_ATTACK_TYPE:
+                    processSelectAttackType(event.getX(), event.getY());
+                    break;
             }
         }
+    }
+
+    // Обработка хода (GAME)
+    private void processProgress(float x, float y) {
+        FanoronaProgressDTO lastProgress = engine.touch(x, y);
+
+
+        // Если ход был сделан и он оказался последним в цепочке
+        if (lastProgress != null && engine.endProgressChain()) {
+            // Узнаём ход игрока. Говорим боту о ходе
+            List<Progress> moves = engine.getMove();
+            bot.processEnemyProgress(moves);
+
+            // Переходим в ожидание хода
+            updateState(RoomState.WAIT_PROGRESS);
+
+
+            // Узнаём ход бота. Моделируем ход
+            List<FanoronaProgressDTO> botProgress = bot.progress()
+                    .stream()
+                    .map(FanoronaProgressDTO::of)
+                    .collect(Collectors.toList());
+//
+            for (FanoronaProgressDTO p : botProgress)
+                engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
+
+            updateState(RoomState.GAME);
+        } else if (engine.possibleDoubleAttack(x, y)) { // Ход не обработан, т.к. возможны два направления атаки
+            updateState(RoomState.SELECT_ATTACK_TYPE);
+        }
+    }
+
+    // Обработка выбора направления атаки: (SELECT_ATTACK_TYPE)
+    private void processSelectAttackType(float x, float y) {
+
     }
 }

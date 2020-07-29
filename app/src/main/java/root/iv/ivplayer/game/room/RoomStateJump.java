@@ -7,10 +7,11 @@ import java.util.stream.Collectors;
 public enum  RoomStateJump {
     NEW(RoomState.WAIT_PLAYERS),
     WAIT_PLAYERS(RoomState.GAME),
-    GAME(RoomState.PAUSE, RoomState.CLOSE, RoomState.WAIT_PROGRESS),
+    GAME(RoomState.PAUSE, RoomState.CLOSE, RoomState.WAIT_PROGRESS, RoomState.SELECT_ATTACK_TYPE),
     WAIT_PROGRESS(RoomState.GAME, RoomState.CLOSE),
     PAUSE(RoomState.GAME, RoomState.CLOSE),
-    CLOSE();
+    CLOSE(),
+    SELECT_ATTACK_TYPE(RoomState.GAME);
 
     private List<RoomState> nextStates;
 
