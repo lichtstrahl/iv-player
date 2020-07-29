@@ -21,6 +21,9 @@ public class FanoronaTextures {
     // WAY
     private WayTextures wayTextures;
 
+    // MARK FOR ATTACK
+    private MarkAttackTextures markAttackTextures;
+
     public static FanoronaTextures create(Context context) {
         return FanoronaTextures
                 .builder()
@@ -28,6 +31,7 @@ public class FanoronaTextures {
                 .chipTextures(ChipTextures.create(context))
                 .slotTextures(SlotTextures.create(context))
                 .wayTextures(WayTextures.create(context))
+                .markAttackTextures(MarkAttackTextures.defaultMark(context))
                 .build();
     }
 }
