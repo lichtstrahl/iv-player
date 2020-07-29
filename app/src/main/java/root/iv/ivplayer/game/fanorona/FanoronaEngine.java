@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -97,7 +98,7 @@ public class FanoronaEngine {
 
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
-            FanoronaProgressDTO progressDTO = buildProgressDTO(selected, touched);
+            FanoronaProgressDTO progressDTO = buildProgressDTO(selected, touched, null);
             progressChain.step(progressDTO);
             Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
 
@@ -235,13 +236,13 @@ public class FanoronaEngine {
     }
 
     // Готовим ход в зависимости от совершенных касаний
-    private FanoronaProgressDTO buildProgressDTO(int from, int to) {
+    private FanoronaProgressDTO buildProgressDTO(int from, int to, @Nullable AttackType type) {
         boolean possibleForwardAttack = possibleAttack(from, to, AttackType.FORWARD);
         boolean possibleBackAttack = possibleAttack(from, to, AttackType.BACK);
 
         if (possibleForwardAttack && possibleBackAttack) {
-            Timber.i("Атака в обоих направлениях. По умолчанию выбрали FORWARD");
-            return progress(from, to, currentRole, AttackType.FORWARD);
+            Timber.i("Атака в обоих направлениях. Заданное направление: %s", type);
+            return progress(from, to, currentRole, (type != null) ? type : AttackType.FORWARD);
         } else if (possibleForwardAttack) {
             return progress(from, to, currentRole, AttackType.FORWARD);
         } else if (possibleBackAttack) {
