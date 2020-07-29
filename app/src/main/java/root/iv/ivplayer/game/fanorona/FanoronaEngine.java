@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -103,22 +104,28 @@ public class FanoronaEngine {
 
         // Если в прошлый раз была выбрана своя фишка, а сейчас выбрана ячейка для хода
         if (selected != null && getState(selected) == currentRole && possibleProgress) {
-            FanoronaProgressDTO progressDTO = buildProgressDTO(selected, touched, null);
-            progressChain.step(progressDTO);
-            Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
+            return step(selected, touched, null);
+        }
 
-            scene.releaseAllSlots();
-            // Если после выполнения хода агрессивных ходов больше нет или сам ход был не агрессивным,
-            // то завершаем последовательность ходов
-            if (findAgressiveProgress(touched).isEmpty() || progressDTO.getAttack() == AttackType.NO) {
-                Timber.i("Агрессивные ходы кончились. step=0");
-                progressChain.end();
-            } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
-                Timber.i("Агрессивные ходы продолжаются step: %d", progressChain.size());
-                prepareProgress(touched);
-            }
+        return null;
+    }
 
-            return progressDTO;
+    // Касание при выборе направления атаки: гарантировано должен остаться с прошлого раза selected
+    // Сразу же происходит ход в выбранном направлении
+    public FanoronaProgressDTO selectAttackType(float x, float y) {
+        Integer selected = Objects.requireNonNull(scene.getSelectedSlot());
+        Integer touched = scene.findSlot(Point2.point(x, y));
+
+        // Если слот найден и он помечен под атаку
+        if (Objects.nonNull(touched) && scene.markedForAttack(touched)) {
+            Integer friend = friendOnDirection(selected, touched);
+
+            // Если друг свободен, значит это FORWARD-атака, иначе BACK
+            AttackType aType = isFree(friend)
+                    ? AttackType.FORWARD
+                    : AttackType.BACK;
+
+            return step(selected, friend, aType);
         }
 
         return null;
@@ -133,6 +140,10 @@ public class FanoronaEngine {
         Integer from = scene.getSelectedSlot();
         Integer to = scene.findSlot(Point2.point(x, y));
 
+        return possibleDoubleAttack(from, to);
+    }
+
+    private boolean possibleDoubleAttack(@Nullable Integer from, @Nullable Integer to) {
         return (from != null && to != null
                 && getState(from) == currentRole
                 && scene.possibleProgress(to)
@@ -241,6 +252,39 @@ public class FanoronaEngine {
         }
     }
 
+    // Делается ход. Может выбираться приоритетное направление атаки, если это ребуется
+    private FanoronaProgressDTO step(int selected, int touched, @Nullable AttackType type) {
+        FanoronaProgressDTO progressDTO = buildProgressDTO(selected, touched, type);
+        progressChain.step(progressDTO);
+        Timber.i("Ход, step: #%d ->%d", progressDTO.getFrom(), progressDTO.getTo());
+
+        scene.releaseAllSlots();
+        // Если после выполнения хода агрессивных ходов больше нет или сам ход был не агрессивным,
+        // то завершаем последовательность ходов
+        if (findAgressiveProgress(touched).isEmpty() || progressDTO.getAttack() == AttackType.NO) {
+            Timber.i("Агрессивные ходы кончились. step=0");
+            progressChain.end();
+        } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
+            Timber.i("Агрессивные ходы продолжаются step: %d", progressChain.size());
+            prepareProgress(touched);
+        }
+
+        return progressDTO;
+    }
+
+    private boolean onSameLine(Integer from, Integer to, Integer slot) {
+        // Перебираем все ячейки по линии до конца доски. Содержится ли там искомый слот (начиная с to)
+        return to.equals(slot) || nextSlotsForLine(from, to, Objects::nonNull).contains(slot);
+    }
+
+    // Возвращает друга from в направлении (from -> to)
+    private Integer friendOnDirection(Integer from, Integer to) {
+        return findFriends(from)
+                .stream()
+                .filter(f -> onSameLine(from, f, to))
+                .findFirst()
+                .orElse(null);
+    }
 
     private void prepareProgress(Integer touched) {
         scene.selectSlot(touched);
