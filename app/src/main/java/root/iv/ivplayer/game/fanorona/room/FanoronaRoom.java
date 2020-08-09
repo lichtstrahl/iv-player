@@ -107,8 +107,7 @@ public class FanoronaRoom extends FirebaseRoom {
 
             // Если выиграли
             if (win) {
-                updateStatus(RoomState.CLOSE);
-                roomListener.win();
+                endGame(EndGameType.WIN);
             }
         } else if (engine.possibleDoubleAttack(x, y)) { // Ход не обработан т.к. возможны два направления атаки
             updateStatus(RoomState.SELECT_ATTACK_TYPE);
@@ -164,18 +163,6 @@ public class FanoronaRoom extends FirebaseRoom {
         }
     }
 
-    private void win(String uid) {
-        String winner = fbUser.getUid().equals(uid)
-                ? "Я"
-                : "Соперник";
-
-        Timber.i("Выиграл %s", winner);
-    }
-
-    private void end() {
-
-    }
-
     private void startGame(FBRoom newRoom, FanoronaRole currentRole) {
         engine.setCurrentRole(currentRole);
         newRoom.setState(RoomState.GAME);
@@ -202,6 +189,20 @@ public class FanoronaRoom extends FirebaseRoom {
         FBDatabaseAdapter.getProgressInRoom(name, enemyProgressPath)
                 .addValueEventListener(progressObserver);
         addFBObserver(progressObserver);
+    }
+
+    private void endGame(EndGameType endType) {
+        updateStatus(RoomState.CLOSE);
+
+        switch (endType) {
+            case WIN:
+                roomListener.win();
+                break;
+
+            case LOSE:
+                roomListener.lose();
+                break;
+        }
     }
 
     // ---
@@ -275,6 +276,10 @@ public class FanoronaRoom extends FirebaseRoom {
         }
     }
 
+    enum EndGameType {
+        WIN, LOSE
+    }
+
     // Следим за обновлением хода противника
     private class ProgressObserver implements ValueEventListener {
 
@@ -283,10 +288,16 @@ public class FanoronaRoom extends FirebaseRoom {
             FBFanoronaProgress enemyProgress = dataSnapshot.getValue(FBFanoronaProgress.class);
             if (enemyProgress != null) {
                 engine.progress(enemyProgress.getFrom(), enemyProgress.getTo(), enemyProgress.getState(), enemyProgress.getAttack());
-                if (enemyProgress.isWin() && engine.win())
-                    win(enemyProgress.getUid());
-                else if (engine.end())
-                    end();
+
+                // Если соперник утверждает, что его ход победный.
+                // И после него игра закончилась значит не было рассинхронов.
+                //
+                if (enemyProgress.isWin()) {
+                    if (engine.end())
+                        endGame(EndGameType.LOSE);
+                    else
+                        Timber.e("Принят победный ход соперника. Однако это не соответствует состоянию локального engine");
+                }
             }
         }
 
