@@ -268,6 +268,7 @@ public class FanoronaRoom extends FirebaseRoom {
             if (waitEmail != null && waitEmail.equals(fbUser.getUid()))
                 updateStatus(RoomState.WAIT_PROGRESS);
             else if (waitEmail != null) {
+                engine.clearEnemyChain();
                 engine.markPossibleProgress(engine.getCurrentRole());
                 updateStatus(RoomState.GAME);
             }
@@ -285,7 +286,6 @@ public class FanoronaRoom extends FirebaseRoom {
 
     // Следим за обновлением хода противника
     private class ProgressObserver implements ValueEventListener {
-        int power = 0;
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -293,8 +293,8 @@ public class FanoronaRoom extends FirebaseRoom {
             if (enemyProgress != null) {
                 engine.progress(
                         enemyProgress.getFrom(), enemyProgress.getTo(),
-                        enemyProgress.getState(), enemyProgress.getAttack(),
-                        power++);
+                        enemyProgress.getState(), enemyProgress.getAttack());
+                engine.enemyStep();
 
                 // Если соперник утверждает, что его ход победный.
                 // И после него игра закончилась значит не было рассинхронов.
