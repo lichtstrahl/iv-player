@@ -480,13 +480,15 @@ public class FanoronaEngine {
 
     // Получение фишек по линии, согласно условию
     private List<Integer> nextSlotsForLine(int startIndex, int endIndex, Predicate<Integer> predicate) {
-        List<Integer> slots = new ArrayList<>();
+        List<Integer> slts = new ArrayList<>();
 
         for (Integer cur = nextSlotForLine(startIndex, endIndex); predicate.test(cur); cur = nextSlotForLine(startIndex, endIndex)) {
-            slots.add(cur);
+            slts.add(cur);
+            startIndex = endIndex;
+            endIndex = Objects.requireNonNull(cur);
         }
 
-        return slots;
+        return slts;
     }
 
     private boolean correctI(int i) {
