@@ -42,7 +42,7 @@ public class FanoronaEngine {
         BoardGenerator boardGenerator = BoardGenerator.newGenerator(COUNT_COLUMN, COUNT_ROW);
 
         pairIndices = boardGenerator.ways();
-        slots = boardGenerator.testInner();
+        slots = boardGenerator.testDoubleAttack();
 
         // Создаём сцену
         scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, pairIndices);

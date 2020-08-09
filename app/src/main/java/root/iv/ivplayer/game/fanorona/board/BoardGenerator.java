@@ -55,7 +55,7 @@ public class BoardGenerator {
         return slots;
     }
 
-    // Черная фишка окружена белыми. Для тестирования цепочки ходов
+    // Белая фишка окружена черными. Для тестирования цепочки ходов
     public FanoronaRole[][] testInner() {
         FanoronaRole[][] slots = empty();
 
@@ -72,6 +72,21 @@ public class BoardGenerator {
 
         // Ставим слева и справа
         slots[blackI][blackJ-2] = slots[blackI][blackJ+2] = FanoronaRole.BLACK;
+
+        return slots;
+    }
+
+    // Тест на двойное направление атаки
+    public FanoronaRole[][] testDoubleAttack() {
+        FanoronaRole[][] slots = empty();
+
+        slots[0][0] = FanoronaRole.BLACK;
+        slots[0][1] = FanoronaRole.BLACK;
+
+        slots[0][2] = FanoronaRole.WHITE;
+
+        slots[0][4] = FanoronaRole.BLACK;
+        slots[0][5] = FanoronaRole.BLACK;
 
         return slots;
     }
