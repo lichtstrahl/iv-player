@@ -3,7 +3,6 @@ package root.iv.ivplayer.game.fanorona.room;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -14,11 +13,11 @@ import java.util.Objects;
 
 import root.iv.ivplayer.game.fanorona.FanoronaEngine;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
-import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.room.FirebaseRoom;
-import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
+import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
@@ -28,7 +27,6 @@ import timber.log.Timber;
 
 public class FanoronaRoom extends FirebaseRoom {
     private FanoronaEngine engine;
-    @Nullable
     private FanoronaRoomListener roomListener;
 
     FanoronaRoom(FanoronaTextures textures, String name, FirebaseUser user, FanoronaRole role) {
@@ -81,48 +79,80 @@ public class FanoronaRoom extends FirebaseRoom {
     }
 
     private void touchHandler(MotionEvent event) {
-        if (fbRoom.getState() != RoomState.GAME)
-            return;
+        if (event.getAction() == MotionEvent.ACTION_UP) {
 
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_UP:
-                FanoronaProgressDTO lastProgress = engine.touch(event.getX(), event.getY());
+            switch (fbRoom.getState()) {
+                case GAME:
+                    processTouchGame(event.getX(), event.getY());
+                    break;
 
-                // Если ход был сделан и он оказался последним в цепочке
-                if (lastProgress != null && engine.endProgressChain()) {
-                    boolean win = engine.win();
-                    boolean end = engine.end();
+                case SELECT_ATTACK_TYPE:
+                    processTouchSelectAttackType(event.getX(), event.getY());
+                    break;
+            }
 
-
-                    String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
-
-                    engine.processProgressChain(pDTO -> {
-                        FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
-                                pDTO.getFrom(), pDTO.getTo(), pDTO.getAttack(), end, win);
-
-                        FBDatabaseAdapter.getProgressInRoom(name, progressPath)
-                                .setValue(fbProgress);
-                    });
-
-                    FBDatabaseAdapter.getWaitField(name)
-                            .setValue(fbUser.getUid());
-
-                    if (win)
-                        win(fbUser.getUid());
-                    else if (end)
-                        end();
-                }
-
-                break;
         }
 
+    }
+
+    // Обработка нажатия GAME
+    private void processTouchGame(float x, float y) {
+        FanoronaProgressDTO lastProgress = engine.touch(x,y);
+
+        // Если ход был сделан и он оказался последним в цепочке
+        if (lastProgress != null && engine.endProgressChain()) {
+            boolean win = engine.win();
+            // Делаем ход
+            makeProgress(win);
+
+            // Если выиграли
+            if (win) {
+                updateStatus(RoomState.CLOSE);
+                roomListener.win();
+            }
+        } else if (engine.possibleDoubleAttack(x, y)) { // Ход не обработан т.к. возможны два направления атаки
+            updateStatus(RoomState.SELECT_ATTACK_TYPE);
+            engine.markSlotsForAttack(x, y);
+        }
+    }
+
+    private void processTouchSelectAttackType(float x, float y) {
+        FanoronaProgressDTO progress = engine.selectAttackType(x, y);
+
+        // Если ход был сделан, то переходим в состояние GAME
+        if (progress != null) {
+            updateStatus(RoomState.GAME);
+
+
+            // Если ход был последним в цепочке
+            if (engine.endProgressChain()) {
+                // Ход после выбора направления атаки не может быть победным
+                makeProgress(false);
+            }
+        }
+    }
+
+    // Делаем ход:
+    // Обновляем свою структуру хода. Обновляем поле ожидания, переставляя его на себя.
+    private void makeProgress(boolean win) {
+        String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
+
+        engine.processProgressChain(pDTO -> {
+            FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
+                    pDTO.getFrom(), pDTO.getTo(), pDTO.getAttack(), win);
+
+            FBDatabaseAdapter.getProgressInRoom(name, progressPath)
+                    .setValue(fbProgress);
+        });
+
+        FBDatabaseAdapter.getWaitField(name)
+                .setValue(fbUser.getUid());
     }
 
     private void updateStatus(RoomState state) {
         boolean updated = updateLocalStatus(state);
         if (updated && roomListener != null)
             roomListener.changeStatus(state);
-
     }
 
     private void updateRoom(FBRoom newRoom) {
@@ -147,8 +177,8 @@ public class FanoronaRoom extends FirebaseRoom {
     }
 
     private void startGame(FBRoom newRoom, FanoronaRole currentRole) {
-        newRoom.setState(RoomState.GAME);
         engine.setCurrentRole(currentRole);
+        newRoom.setState(RoomState.GAME);
         FBDatabaseAdapter.getRoomStatus(name)
                 .setValue(RoomState.GAME);
 
