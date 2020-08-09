@@ -12,11 +12,14 @@ import root.iv.ivplayer.game.object.simple.Vector2;
 
 // Фактически это прямоугольник, который будет рисовать только собственную диагональ
 public class Way extends StaticObject2 {
+    private static final int INIT_POWER = -1;
+
     private Point2 dist;
     private @ColorInt int originColor;
     private int slotRadius;
     private WayState state;
-    private @ColorInt int usedColor;
+    private int[] usedColors;
+    private int power;
 
 
 
@@ -25,8 +28,9 @@ public class Way extends StaticObject2 {
         this.dist = p2;
         this.originColor = textures.getOriginColor();
         this.state = WayState.ORIGIN;
+        this.power = INIT_POWER;
         this.slotRadius = slotRadius;
-        this.usedColor = textures.getUsedColor();
+        this.usedColors = textures.getUsedColor();
     }
 
 
@@ -41,15 +45,15 @@ public class Way extends StaticObject2 {
 
         switch (state) {
             case USED:
-                currentColor = usedColor;
+                int powerIndex = Math.min(2, power);
+                currentColor = usedColors[powerIndex];
                 break;
         }
 
         Paint paint = new Paint();
         paint.setStrokeWidth(5.0f);
         paint.setColor(currentColor);
-        // Полупрозрачный
-        paint.setAlpha(120);
+        paint.setAlpha(130);
 
         // Делаем отступ от начала и конца отрезка
         Point2 from = Point2.point(position.x, position.y);
@@ -63,10 +67,17 @@ public class Way extends StaticObject2 {
 
     public void used() {
         this.state = WayState.USED;
+        this.power = 0;
+    }
+
+    public void used(int power) {
+        this.state = WayState.USED;
+        this.power = power;
     }
 
     public void release() {
         this.state = WayState.ORIGIN;
+        this.power = INIT_POWER;
     }
 
     // Соединяет ли данная дорожка две точки

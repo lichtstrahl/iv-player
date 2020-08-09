@@ -191,12 +191,12 @@ public class FanoronaScene extends SensorScene {
     }
 
     // Помечаем дорожку между двумя слотами
-    public void useWay(int slot1, int slot2) {
+    public void useWay(int slot1, int slot2, int power) {
         Integer wayIndex = findWay(slotGroup.getObject(slot1), slotGroup.getObject(slot2));
 
         if (wayIndex != null) {
             Way way = wayGroup.getObject(wayIndex);
-            way.used();
+            way.used(power);
         }
 
     }

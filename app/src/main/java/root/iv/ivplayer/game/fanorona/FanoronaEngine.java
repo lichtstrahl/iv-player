@@ -212,7 +212,8 @@ public class FanoronaEngine {
 
         mark(oldIndex, FanoronaRole.FREE);
         mark(newIndex, state);
-        scene.useWay(oldIndex, newIndex);
+        // Т.к. мы готовим элемент для добавления в chain, текущий размер chain и есть индекс нового элемента (т.е. power)
+        scene.useWay(oldIndex, newIndex, progressChain.size());
 
 
         int pFrom = oldIndex;
@@ -241,7 +242,7 @@ public class FanoronaEngine {
 
                 return FanoronaProgressDTO.back(state, pFrom, pTo);
             default:
-                throw new IllegalStateException("Обработка хода завершена неудачно");
+                throw new IllegalStateException("Неподдерживаемый тип атаки");
         }
     }
 
@@ -407,7 +408,7 @@ public class FanoronaEngine {
         Фишка имеет агрессивные ходы: (это должна быть наша фишка)
         Два типа агрессии:
         1. Среди друзей есть фишки соперника, по обраткой линии от этого соперника есть свободная клетка
-        2. Среди друзей естьсвободная клетка, по линии этой клетки есть соперник.
+        2. Среди друзей есть свободная клетка, по линии этой клетки есть соперник.
 
     */
     private List<Integer> findAgressiveProgress(int to) {

@@ -9,4 +9,9 @@
     <color name="shadow_low">#80FFFFFF</color>
     <color name="tic_tac_room_color">#FFF176</color>
     <color name="fanorona_room_color">#76ADFF</color>
+
+
+    <color name="way_used_power_1">#1B488C</color>
+    <color name="way_used_power_2">#487CCA</color>
+    <color name="way_used_power_3">#76ADFF</color>
 </resources>
