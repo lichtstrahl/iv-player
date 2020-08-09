@@ -143,15 +143,6 @@ public class FanoronaEngine {
         return possibleDoubleAttack(from, to);
     }
 
-    private boolean possibleDoubleAttack(@Nullable Integer from, @Nullable Integer to) {
-        return (from != null && to != null
-                && getState(from) == currentRole
-                && scene.possibleProgress(to)
-                && possibleAttack(from, to, AttackType.FORWARD)
-                && possibleAttack(from, to, AttackType.BACK)
-        );
-    }
-
     // Гарантировано есть выбранная и тронутая ячейка
     public void markSlotsForAttack(float x, float y) {
         int selected = Objects.requireNonNull(scene.getSelectedSlot());
@@ -516,6 +507,15 @@ public class FanoronaEngine {
     // Имеет ли указанная роль агрессивные ходы?
     private boolean hasAgressiveProgress(FanoronaRole role) {
         return !listSlotsWithAgressiveProgress(role).isEmpty();
+    }
+
+    private boolean possibleDoubleAttack(@Nullable Integer from, @Nullable Integer to) {
+        return (from != null && to != null
+                && getState(from) == currentRole
+                && scene.possibleProgress(to)
+                && possibleAttack(from, to, AttackType.FORWARD)
+                && possibleAttack(from, to, AttackType.BACK)
+        );
     }
 
     // Список фишек, имеющих агрессивные ходы. Для указанной роли.

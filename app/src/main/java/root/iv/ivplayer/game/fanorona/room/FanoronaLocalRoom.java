@@ -31,7 +31,7 @@ public class FanoronaLocalRoom extends Room {
 
     FanoronaLocalRoom(FanoronaTextures textures, FanoronaRole role) {
         super("");
-        engine = new FanoronaEngine(textures, this::touchHandler);
+        engine = new FanoronaEngine(textures, this::processTouch);
         bot = FanoronaBot.defaultSize(role == FanoronaRole.BLACK ? Role.WHITE : Role.BLACK);
         engine.setCurrentRole(role);
         state = role == FanoronaRole.BLACK ? RoomState.WAIT_PROGRESS : RoomState.GAME;
@@ -72,15 +72,6 @@ public class FanoronaLocalRoom extends Room {
         }
     }
 
-    private void touchHandler(MotionEvent event) {
-
-        switch (state) {
-            case GAME:
-                processTouch(event);
-                break;
-        }
-    }
-
     private void processTouch(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_UP) {
 
@@ -92,6 +83,9 @@ public class FanoronaLocalRoom extends Room {
                 case SELECT_ATTACK_TYPE:
                     processSelectAttackType(event.getX(), event.getY());
                     break;
+
+                default:
+                    Timber.i("В текущем состоянии %s касания не обрабатываются", state.name());
             }
         }
     }
