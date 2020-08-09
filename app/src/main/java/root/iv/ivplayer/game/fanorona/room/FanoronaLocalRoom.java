@@ -131,8 +131,12 @@ public class FanoronaLocalRoom extends Room {
                 .map(FanoronaProgressDTO::of)
                 .collect(Collectors.toList());
 //
-//        for (FanoronaProgressDTO p : botProgress)
-//            engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
+        for (FanoronaProgressDTO p : botProgress) {
+            engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
+            engine.enemyStep();
+        }
+
+        engine.clearEnemyChain();
 
         updateState(RoomState.GAME);
     }
