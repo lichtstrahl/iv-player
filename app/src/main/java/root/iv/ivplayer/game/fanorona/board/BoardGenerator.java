@@ -91,6 +91,22 @@ public class BoardGenerator {
         return slots;
     }
 
+    // Тест на возможность атаки по направлению предыдущей
+    public FanoronaRole[][] testNextLineAttack() {
+        FanoronaRole[][] slots = empty();
+
+        slots[0][0] = FanoronaRole.BLACK;
+        slots[2][1] = FanoronaRole.BLACK;
+
+        slots[1][1] = FanoronaRole.WHITE;
+
+
+        slots[0][4] = FanoronaRole.BLACK;
+        slots[0][5] = FanoronaRole.BLACK;
+
+        return slots;
+    }
+
     // Заполнение переходов между слотами. Стандартная доска.
     public PairIndex[] ways() {
         PairIndex[] pairIndices = new PairIndex[108];
