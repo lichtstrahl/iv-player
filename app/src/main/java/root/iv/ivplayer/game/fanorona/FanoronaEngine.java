@@ -152,7 +152,7 @@ public class FanoronaEngine {
     }
 
     public void processProgressChain(Consumer<FanoronaProgressDTO> consumer) {
-        progressChain.process(consumer);
+        progressChain.process(consumer, 1500);
     }
 
     public List<Progress> getMove() {

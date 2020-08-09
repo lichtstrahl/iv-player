@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.SneakyThrows;
 
 // Компонент для отслеживания и сохранения последовательности из нескольких ходов
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -51,11 +52,17 @@ public class ProgressChain<P> {
 
     // Применяя действие для каждого элемента: удаляем его из очереди
     // После обработки последовательность снова открыта для записи
-    public void process(Consumer<? super P> action) {
+    @SneakyThrows
+    public void process(Consumer<? super P> action, long msPause) {
         for (P progress = chain.poll(); progress != null; progress = chain.poll()) {
             action.accept(progress);
+            Thread.sleep(msPause);
         }
 
         end = false;
+    }
+
+    public void process(Consumer<? super P> action) {
+        process(action, 0);
     }
 }
