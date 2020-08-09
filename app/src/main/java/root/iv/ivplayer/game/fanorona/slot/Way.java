@@ -20,6 +20,7 @@ public class Way extends StaticObject2 {
     private WayState state;
     private int[] usedColors;
     private int power;
+    private Paint paint;
 
 
 
@@ -31,6 +32,12 @@ public class Way extends StaticObject2 {
         this.power = INIT_POWER;
         this.slotRadius = slotRadius;
         this.usedColors = textures.getUsedColor();
+
+        paint = new Paint();
+        paint.setStrokeWidth(5.0f);
+        paint.setAntiAlias(true);
+        paint.setColor(originColor);
+        paint.setAlpha(130);
     }
 
 
@@ -42,18 +49,17 @@ public class Way extends StaticObject2 {
     @Override
     public void render(Canvas canvas) {
         int currentColor = originColor;
+        float paintWidth = 5.0f;
 
         switch (state) {
             case USED:
                 int powerIndex = Math.min(2, power);
                 currentColor = usedColors[powerIndex];
+                paintWidth += powerIndex*3;
                 break;
         }
-
-        Paint paint = new Paint();
-        paint.setStrokeWidth(5.0f);
         paint.setColor(currentColor);
-        paint.setAlpha(130);
+        paint.setStrokeWidth(paintWidth);
 
         // Делаем отступ от начала и конца отрезка
         Point2 from = Point2.point(position.x, position.y);

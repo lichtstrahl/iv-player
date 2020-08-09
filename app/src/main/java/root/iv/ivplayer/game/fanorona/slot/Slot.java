@@ -71,6 +71,7 @@ public class Slot extends StaticObject2 {
         paintFree.setAlpha(slotAlpha);
         paintFree.setStyle(Paint.Style.STROKE);
         paintFree.setStrokeWidth(7);
+        paintFree.setAntiAlias(true);
 
         state = SlotState.DEFAULT;
     }
