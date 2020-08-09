@@ -237,6 +237,7 @@ public class FanoronaEngine {
         if (findAgressiveProgress(touched).isEmpty() || progressDTO.getAttack() == AttackType.NO) {
             Timber.i("Агрессивные ходы кончились. step=0");
             progressChain.end();
+            scene.releaseAllWays();
         } else { // Если агрессивная последовательность может продолжаться, то нужно пометить
             Timber.i("Агрессивные ходы продолжаются step: %d", progressChain.size());
             prepareProgress(touched);

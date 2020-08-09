@@ -90,9 +90,7 @@ public class FanoronaRoom extends FirebaseRoom {
                     processTouchSelectAttackType(event.getX(), event.getY());
                     break;
             }
-
         }
-
     }
 
     // Обработка нажатия GAME
