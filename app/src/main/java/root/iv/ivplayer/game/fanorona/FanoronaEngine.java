@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 import androidx.core.util.Consumer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -42,7 +41,7 @@ public class FanoronaEngine {
         BoardGenerator boardGenerator = BoardGenerator.newGenerator(COUNT_COLUMN, COUNT_ROW);
 
         pairIndices = boardGenerator.ways();
-        slots = boardGenerator.testNextLineAttack();
+        slots = boardGenerator.start();
 
         // Создаём сцену
         scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, pairIndices);

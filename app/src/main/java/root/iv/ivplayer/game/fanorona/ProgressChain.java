@@ -14,7 +14,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProgressChain<P> {
 
-    private Queue<P> chain;
+    private ArrayDeque<P> chain;
     @Getter
     private boolean end;
 
@@ -32,8 +32,9 @@ public class ProgressChain<P> {
         return chain.isEmpty();
     }
 
+    // Последний пришедший в очередь элемент
     public P last() {
-        return chain.peek();
+        return chain.peekLast();
     }
 
     public Stream<P> asStream() {
