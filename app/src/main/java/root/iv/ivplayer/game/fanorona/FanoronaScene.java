@@ -4,9 +4,11 @@ import android.graphics.Canvas;
 
 import androidx.annotation.Nullable;
 
+import java.util.Objects;
+
 import root.iv.ivplayer.game.fanorona.slot.Slot;
 import root.iv.ivplayer.game.fanorona.slot.SlotState;
-import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.fanorona.slot.PairIndex;
 import root.iv.ivplayer.game.fanorona.slot.Way;
 import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.object.Group;
@@ -42,7 +44,7 @@ public class FanoronaScene extends SensorScene {
     private int startMargin;
     private int topMargin;
 
-    public FanoronaScene(FanoronaTextures textures, int countRows, int countColumns, int startMargin, int topMargin, SlotWay[] ways) {
+    public FanoronaScene(FanoronaTextures textures, int countRows, int countColumns, int startMargin, int topMargin, PairIndex[] ways) {
         super(new FanoronaController());
         this.textures = textures;
 
@@ -125,7 +127,7 @@ public class FanoronaScene extends SensorScene {
     }
 
 
-    public void resizeWay(SlotWay[] ways) {
+    public void resizeWay(PairIndex[] ways) {
         wayGroup = wayConstruct(ways);
     }
 
@@ -188,9 +190,24 @@ public class FanoronaScene extends SensorScene {
         slotGroup.getObject(i).progress();
     }
 
+    // Помечаем дорожку между двумя слотами
+    public void useWay(int slot1, int slot2) {
+        Integer wayIndex = findWay(slotGroup.getObject(slot1), slotGroup.getObject(slot2));
+
+        if (wayIndex != null) {
+            Way way = wayGroup.getObject(wayIndex);
+            way.used();
+        }
+
+    }
+
     public void releaseAllSlots() {
-        for (Slot slot : slotGroup.getObjects())
-            slot.release();
+        slotGroup.getObjects()
+                .forEach(Slot::release);
+    }
+
+    public void releaseAllWays() {
+        wayGroup.getObjects().forEach(Way::release);
     }
 
     private Group<Slot> slotsConstruct(int startMargin, int topMargin, int hDelta, int vDelta, int radius) {
@@ -211,22 +228,37 @@ public class FanoronaScene extends SensorScene {
         return slots;
     }
 
-    private Group<Way> wayConstruct(SlotWay[] ways) {
+    private Group<Way> wayConstruct(PairIndex[] pairs) {
         Group<Way> group = Group.empty();
 
-        for (SlotWay way : ways) {
-            Point2 center1 = slotGroup.getObject(way.getFrom())
+        for (PairIndex pair : pairs) {
+            Point2 center1 = slotGroup.getObject(pair.getFrom())
                     .getBounds()
                     .getCenter();
-            Point2 center2 = slotGroup.getObject(way.getTo())
+            Point2 center2 = slotGroup.getObject(pair.getTo())
                     .getBounds()
                     .getCenter();
 
-            group.add(Way.of(center1, center2, DEFAULT_RADIUS, textures.getWayTextures()));
+            int radius = slotGroup.getObject(0).getBounds().getRadius();
+
+            group.add(Way.of(center1, center2, radius, textures.getWayTextures()));
         }
 
         return group;
     }
 
+    // Ищем дорожку, соединяющую слоты
+    @Nullable
+    private Integer findWay(Slot slot1, Slot slot2) {
 
+        for (int i = 0; i < wayGroup.size(); i++) {
+            Way way = wayGroup.getObject(i);
+
+            if (way.connect(slot1.getBounds().getCenter(), slot2.getBounds().getCenter()))
+                return i;
+        }
+
+
+        return null;
+    }
 }

@@ -3,6 +3,8 @@ package root.iv.ivplayer.game.object.simple;
 import android.graphics.PointF;
 
 public class Point2 extends PointF {
+    public static final double EPS = 1e-1;
+
     public static Point2 point(float x, float y) {
         Point2 p = new Point2();
         p.x = x;
@@ -45,5 +47,9 @@ public class Point2 extends PointF {
         float deltaX = Math.abs(point.x - x);
         float deltaY = Math.abs(point.y - y);
         return Math.sqrt(deltaX*deltaX + deltaY*deltaY);
+    }
+
+    public boolean nearly(Point2 point) {
+        return distantion(point) < EPS;
     }
 }

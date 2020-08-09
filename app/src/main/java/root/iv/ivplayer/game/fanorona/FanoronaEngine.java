@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 import root.iv.bot.Progress;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
-import root.iv.ivplayer.game.fanorona.slot.SlotWay;
+import root.iv.ivplayer.game.fanorona.slot.PairIndex;
 import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.object.simple.Point2;
 import root.iv.ivplayer.game.view.GameView;
@@ -31,7 +30,7 @@ public class FanoronaEngine {
     private static final int COUNT_ROW = 5;
     private static final int COUNT_COLUMN = 9;
     private FanoronaRole[][] slots;
-    private SlotWay[] slotWays;
+    private PairIndex[] pairIndices;
     private FanoronaScene scene;
     @Getter
     @Setter
@@ -49,7 +48,7 @@ public class FanoronaEngine {
         fillWays();
 
         // Создаём сцену
-        this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, slotWays);
+        this.scene = new FanoronaScene(textures, COUNT_ROW, COUNT_COLUMN, 10, 10, pairIndices);
         this.scene.getSensorController().setTouchHandler(touchHandler);
 
         // Расставляем тылы BLACK
@@ -96,6 +95,7 @@ public class FanoronaEngine {
         // Последовательность ходов не начата, ход невозможен.
         if (progressChain.isEmpty() && !possibleProgress) {
             scene.releaseAllSlots();
+            scene.releaseAllWays();
             Timber.i("Коснулись ячейки. step=0, помечаем её как возможное начало для хода");
             prepareProgress(touched);
             return null;
@@ -191,7 +191,7 @@ public class FanoronaEngine {
 
     public void resize(int width, int height) {
         scene.resize(width, height);
-        scene.resizeWay(slotWays);
+        scene.resizeWay(pairIndices);
     }
 
     // Победа, если у нас ещё есть фишки, а у соперника они кончились
@@ -212,6 +212,8 @@ public class FanoronaEngine {
 
         mark(oldIndex, FanoronaRole.FREE);
         mark(newIndex, state);
+        scene.useWay(oldIndex, newIndex);
+
 
         int pFrom = oldIndex;
         int pTo = newIndex;
@@ -323,29 +325,29 @@ public class FanoronaEngine {
     }
 
     private void fillWays() {
-        slotWays = new SlotWay[108];
+        pairIndices = new PairIndex[108];
         int index = 0;
 
         // Заполняем строки
         for (int i = 0; i < COUNT_ROW; i++) {
             for (int j = 0; j < COUNT_COLUMN-1; j++)
-                slotWays[index++] = SlotWay.column9(i,j, i, j+1);
+                pairIndices[index++] = PairIndex.column9(i,j, i, j+1);
         }
 
         // Заполняем столбцы
         for (int j = 0; j < COUNT_COLUMN; j++) {
             for (int i = 0; i < COUNT_ROW-1; i++)
-                slotWays[index++] = SlotWay.column9(i,j, i+1, j);
+                pairIndices[index++] = PairIndex.column9(i,j, i+1, j);
         }
 
         // Заполняем диагонали
         for (int i = 1; i < COUNT_ROW; i += 2) {
             for (int j = 1; j < COUNT_COLUMN; j += 2) {
                 // Нужно соединить эту вершину со всеми возможными диагоналями (центр паука). Рисуем лапки
-                slotWays[index++] = SlotWay.column9(i,j, i-1,j-1);
-                slotWays[index++] = SlotWay.column9(i,j, i-1,j+1);
-                slotWays[index++] = SlotWay.column9(i,j, i+1,j-1);
-                slotWays[index++] = SlotWay.column9(i,j, i+1, j+1);
+                pairIndices[index++] = PairIndex.column9(i,j, i-1,j-1);
+                pairIndices[index++] = PairIndex.column9(i,j, i-1,j+1);
+                pairIndices[index++] = PairIndex.column9(i,j, i+1,j-1);
+                pairIndices[index++] = PairIndex.column9(i,j, i+1, j+1);
             }
         }
 
@@ -365,7 +367,7 @@ public class FanoronaEngine {
     private List<Integer> findFriends(int globalIndex) {
         List<Integer> friends = new LinkedList<>();
 
-        for (SlotWay way : slotWays) {
+        for (PairIndex way : pairIndices) {
             if (way.connect(globalIndex)) {
                 friends.add(way.friend(globalIndex));
             }
