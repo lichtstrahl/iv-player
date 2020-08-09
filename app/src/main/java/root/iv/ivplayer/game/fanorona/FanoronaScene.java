@@ -131,6 +131,18 @@ public class FanoronaScene extends SensorScene {
         wayGroup = wayConstruct(ways);
     }
 
+    // Загрузка в сцену состояния поля
+    public void loadRoleState(FanoronaRole[][] roles) {
+        int countRows = roles.length;
+        int countColumns = roles[0].length;
+
+        for (int i = 0; i < countRows; i++) {
+            for (int j = 0; j < countColumns; j++) {
+                markSlot(i*countColumns + j, roles[i][j]);
+            }
+        }
+    }
+
     @Override
     public void connect(GameView gameView) {
         gameView.loadScene(this);
