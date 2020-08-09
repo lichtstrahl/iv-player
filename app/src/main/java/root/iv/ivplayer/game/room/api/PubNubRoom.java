@@ -2,7 +2,7 @@ package root.iv.ivplayer.game.room.api;
 
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 
-import root.iv.ivplayer.game.room.RoomListener;
+import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.scene.Scene;
 

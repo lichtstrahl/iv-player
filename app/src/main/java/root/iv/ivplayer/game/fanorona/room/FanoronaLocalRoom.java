@@ -2,21 +2,18 @@ package root.iv.ivplayer.game.fanorona.room;
 
 import android.view.MotionEvent;
 
-import androidx.annotation.Nullable;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 import root.iv.bot.BotAPI;
 import root.iv.bot.FanoronaBot;
-import root.iv.bot.Progress;
 import root.iv.bot.Role;
 import root.iv.ivplayer.game.fanorona.FanoronaEngine;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.room.Room;
-import root.iv.ivplayer.game.room.RoomListener;
+import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.room.RoomStateJump;
 import root.iv.ivplayer.game.view.GameView;
@@ -24,7 +21,6 @@ import timber.log.Timber;
 
 public class FanoronaLocalRoom extends Room {
     private FanoronaEngine engine;
-    @Nullable
     private FanoronaRoomListener roomListener;
     private BotAPI bot;
     private RoomState state;
@@ -97,6 +93,8 @@ public class FanoronaLocalRoom extends Room {
 
         // Если ход был сделан и он оказался последним в цепочке
         if (lastProgress != null && engine.endProgressChain()) {
+            if (endGame())
+                return;
             messagesBot();
         } else if (engine.possibleDoubleAttack(x, y)) { // Ход не обработан, т.к. возможны два направления атаки
             updateState(RoomState.SELECT_ATTACK_TYPE);
@@ -133,9 +131,26 @@ public class FanoronaLocalRoom extends Room {
                 .map(FanoronaProgressDTO::of)
                 .collect(Collectors.toList());
 //
-        for (FanoronaProgressDTO p : botProgress)
-            engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
+//        for (FanoronaProgressDTO p : botProgress)
+//            engine.progress(p.getFrom(), p.getTo(), p.getState(), p.getAttack());
 
         updateState(RoomState.GAME);
+    }
+
+    // Проверка завершения игры
+    private boolean endGame() {
+        if (engine.end()) {
+            updateState(RoomState.CLOSE);
+
+            if (engine.win()) {
+                roomListener.win();
+            } else {
+                roomListener.lose();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

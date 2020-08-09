@@ -1,5 +1,6 @@
 package root.iv.ivplayer.game.room;
 
+import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.view.GameView;
 
 // Базовая комната. Является контейнером для сцены, имеющим имя

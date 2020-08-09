@@ -175,7 +175,6 @@ public class FanoronaEngine {
     }
 
     // Победа, если у нас ещё есть фишки, а у соперника они кончились
-
     public boolean win() {
         return !listSlotsForRole(currentRole).isEmpty() && listSlotsForRole(enemyRoleFor(currentRole)).isEmpty();
     }

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,9 +28,9 @@ import root.iv.ivplayer.R;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
-import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.room.FanoronaRoomListener;
 import root.iv.ivplayer.game.fanorona.room.RoomFactory;
+import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.room.Room;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.tictac.TicTacRoom;
@@ -41,7 +42,6 @@ public class GameFragment extends Fragment
         implements
         TicTacRoom.Listener,
         FanoronaRoomListener
-
 {
     public static final String TAG = "fragment:game";
     private static final String ARG_ROOM_NAME = "arg:room-name";
@@ -181,22 +181,13 @@ public class GameFragment extends Fragment
     }
 
     @Override
-    public void win(int numberPlayer) {
-        String name = (numberPlayer == 1)
-                ? viewLogin1.getText().toString()
-                : viewLogin2.getText().toString();
+    public void win() {
+        Toast.makeText(this.getContext(), "Победа", Toast.LENGTH_LONG).show();
+    }
 
-        labelRoomStatus.setText("Игрок " + name + "выиграл");
-        int color1 = numberPlayer == 1
-                ? Color.GREEN
-                : Color.RED;
-
-        int color2 = numberPlayer == 2
-                ? Color.GREEN
-                : Color.RED;
-
-        panelPlayer1.setBackgroundColor(color1);
-        panelPlayer2.setBackgroundColor(color2);
+    @Override
+    public void lose() {
+        Toast.makeText(this.getContext(), "Проиграл", Toast.LENGTH_LONG).show();
     }
 
     @Override

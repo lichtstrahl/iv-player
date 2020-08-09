@@ -17,7 +17,7 @@ import root.iv.ivplayer.game.fanorona.FanoronaRole;
 import root.iv.ivplayer.game.fanorona.textures.FanoronaTextures;
 import root.iv.ivplayer.game.fanorona.dto.FanoronaProgressDTO;
 import root.iv.ivplayer.game.room.FirebaseRoom;
-import root.iv.ivplayer.game.room.RoomListener;
+import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.view.GameView;
 import root.iv.ivplayer.network.firebase.FBDataListener;

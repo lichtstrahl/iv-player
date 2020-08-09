@@ -12,8 +12,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
+import root.iv.ivplayer.game.room.listeners.DuelRoomListener;
 import root.iv.ivplayer.game.room.FirebaseRoom;
-import root.iv.ivplayer.game.room.RoomListener;
+import root.iv.ivplayer.game.room.listeners.EndGameListener;
+import root.iv.ivplayer.game.room.listeners.RoomListener;
 import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.tictac.dto.TicTacProgressDTO;
 import root.iv.ivplayer.game.view.GameView;
@@ -89,7 +91,12 @@ public class TicTacRoom extends FirebaseRoom {
 
 
         Timber.i("Игрок %s выиграл", uid);
-        if (roomListener != null) roomListener.win(fbRoom.numberPlayer(uid));
+        if (roomListener != null) {
+            if (fbUser.getUid().equals(uid))
+                roomListener.win();
+            else
+                roomListener.lose();
+        }
     }
 
     private void end() {
@@ -165,11 +172,8 @@ public class TicTacRoom extends FirebaseRoom {
     }
 
 
-    public interface Listener extends RoomListener {
-        void updatePlayers(@Nullable String displayName1, @Nullable String displayName2);
-        void win(int numberPlayer);
+    public interface Listener extends DuelRoomListener, EndGameListener {
         void end();
-        void changeStatus(RoomState roomState);
     }
 
     // ---
