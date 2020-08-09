@@ -111,9 +111,9 @@ public class FanoronaEngine {
     }
 
     // Касание при выборе направления атаки: гарантировано должен остаться с прошлого раза selected
-    // Сразу же происходит ход в выбранном направлении
+    // Происходит выбор направления атаки (направление ход не меняется)
     public FanoronaProgressDTO selectAttackType(float x, float y) {
-        Integer selected = Objects.requireNonNull(scene.getSelectedSlot());
+        int selected = Objects.requireNonNull(scene.getSelectedSlot());
         Integer touched = scene.findSlot(Point2.point(x, y));
 
         // Если слот найден и он помечен под атаку
@@ -121,11 +121,11 @@ public class FanoronaEngine {
             Integer friend = friendOnDirection(selected, touched);
 
             // Если друг свободен, значит это FORWARD-атака, иначе BACK
-            AttackType aType = isFree(friend)
-                    ? AttackType.FORWARD
-                    : AttackType.BACK;
-
-            return step(selected, friend, aType);
+            // Если это FORWARD-атака, то ходим в направлении друга (selected -> friend, to (enemy))
+            // Если это BACK-атака, то ходим в обратном направлении (friend(enemy), selected -> to(free))
+            return isFree(friend)
+                    ? step(selected, friend, AttackType.FORWARD)
+                    : step(selected, nextSlotForLine(friend, selected), AttackType.BACK);
         }
 
         return null;
@@ -263,8 +263,8 @@ public class FanoronaEngine {
         return progressDTO;
     }
 
+    // Перебираем все ячейки по линии до конца доски. Содержится ли там искомый слот (начиная с to)
     private boolean onSameLine(Integer from, Integer to, Integer slot) {
-        // Перебираем все ячейки по линии до конца доски. Содержится ли там искомый слот (начиная с to)
         return to.equals(slot) || nextSlotsForLine(from, to, Objects::nonNull).contains(slot);
     }
 
