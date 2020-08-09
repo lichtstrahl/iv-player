@@ -184,15 +184,14 @@ public class FanoronaEngine {
         return listSlotsForRole(currentRole).isEmpty() || listSlotsForRole(enemyRoleFor(currentRole)).isEmpty();
     }
 
-    public FanoronaProgressDTO progress(int oldIndex, int newIndex, FanoronaRole state, AttackType attack) {
+    public FanoronaProgressDTO progress(int oldIndex, int newIndex, FanoronaRole state, AttackType attack, int power) {
         Timber.i("Ход %s: %d -> %d  ([%d][%d])->([%d][%d]) (%s)",
                 state.name(), oldIndex, newIndex,
                 row(oldIndex), column(oldIndex), row(newIndex), column(newIndex), attack.name());
 
         mark(oldIndex, FanoronaRole.FREE);
         mark(newIndex, state);
-        // Т.к. мы готовим элемент для добавления в chain, текущий размер chain и есть индекс нового элемента (т.е. power)
-        scene.useWay(oldIndex, newIndex, progressChain.size());
+        scene.useWay(oldIndex, newIndex, power);
 
 
         int pFrom = oldIndex;
@@ -223,6 +222,11 @@ public class FanoronaEngine {
             default:
                 throw new IllegalStateException("Неподдерживаемый тип атаки");
         }
+    }
+
+    private FanoronaProgressDTO progress(int oldIndex, int newIndex, FanoronaRole state, AttackType attack) {
+        // Т.к. мы готовим элемент для добавления в chain, текущий размер chain и есть индекс нового элемента (т.е. power)
+        return progress(oldIndex, newIndex, state, attack, progressChain.size());
     }
 
     // Делается ход. Может выбираться приоритетное направление атаки, если это ребуется

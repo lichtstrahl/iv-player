@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
+import java.util.concurrent.Executors;
 
 import root.iv.ivplayer.game.fanorona.FanoronaEngine;
 import root.iv.ivplayer.game.fanorona.FanoronaRole;
@@ -131,19 +132,23 @@ public class FanoronaRoom extends FirebaseRoom {
 
     // Делаем ход:
     // Обновляем свою структуру хода. Обновляем поле ожидания, переставляя его на себя.
+    // Отправляем последовательность ходов в новом потоке. Чтобы игрок не видел задержки
     private void makeProgress(boolean win) {
         String progressPath = fbRoom.getCurrentProgressPath(fbUser.getUid());
 
-        engine.processProgressChain(pDTO -> {
-            FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
-                    pDTO.getFrom(), pDTO.getTo(), pDTO.getAttack(), win);
+        Executors.newFixedThreadPool(1)
+                .execute(() -> {
+                    engine.processProgressChain(pDTO -> {
+                        FBFanoronaProgress fbProgress = new FBFanoronaProgress(fbUser.getUid(), engine.getCurrentRole(),
+                                pDTO.getFrom(), pDTO.getTo(), pDTO.getAttack(), win);
 
-            FBDatabaseAdapter.getProgressInRoom(name, progressPath)
-                    .setValue(fbProgress);
-        });
+                        FBDatabaseAdapter.getProgressInRoom(name, progressPath)
+                                .setValue(fbProgress);
+                    });
 
-        FBDatabaseAdapter.getWaitField(name)
-                .setValue(fbUser.getUid());
+                    FBDatabaseAdapter.getWaitField(name)
+                            .setValue(fbUser.getUid());
+                });
     }
 
     private void updateStatus(RoomState state) {
@@ -280,16 +285,19 @@ public class FanoronaRoom extends FirebaseRoom {
 
     // Следим за обновлением хода противника
     private class ProgressObserver implements ValueEventListener {
+        int power = 0;
 
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             FBFanoronaProgress enemyProgress = dataSnapshot.getValue(FBFanoronaProgress.class);
             if (enemyProgress != null) {
-                engine.progress(enemyProgress.getFrom(), enemyProgress.getTo(), enemyProgress.getState(), enemyProgress.getAttack());
+                engine.progress(
+                        enemyProgress.getFrom(), enemyProgress.getTo(),
+                        enemyProgress.getState(), enemyProgress.getAttack(),
+                        power++);
 
                 // Если соперник утверждает, что его ход победный.
                 // И после него игра закончилась значит не было рассинхронов.
-                //
                 if (enemyProgress.isWin()) {
                     if (engine.end())
                         endGame(EndGameType.LOSE);
