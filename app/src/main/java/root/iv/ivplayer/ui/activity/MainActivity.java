@@ -134,6 +134,12 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void startNetworkGame() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // Перед запуском удаляем существующие комнаты со своим именем
+        FBDatabaseAdapter.getRooms()
+                .addListenerForSingleValueEvent(new RoomsFBRemoveDead(user));
+
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFrame, RoomsFragment.getInstance(), RoomsFragment.TAG)
@@ -177,17 +183,6 @@ public class MainActivity extends AppCompatActivity implements
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFrame, MenuFragment.getInstance(), MenuFragment.TAG)
-                .commit();
-    }
-
-    private void openRoomsFragment(FirebaseUser user) {
-        // Перед запуском удаляем существующие комнаты со своим именем
-        FBDatabaseAdapter.getRooms()
-                .addListenerForSingleValueEvent(new RoomsFBRemoveDead(user));
-
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.mainFrame, RoomsFragment.getInstance(), RoomsFragment.TAG)
                 .commit();
     }
 
