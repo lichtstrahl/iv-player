@@ -36,6 +36,7 @@ import root.iv.ivplayer.game.room.RoomState;
 import root.iv.ivplayer.game.tictac.TicTacRoom;
 import root.iv.ivplayer.game.tictac.TicTacTextures;
 import root.iv.ivplayer.game.view.GameView;
+import root.iv.ivplayer.ui.notification.NotificationPublisher;
 import timber.log.Timber;
 
 public class GameFragment extends Fragment
@@ -74,6 +75,8 @@ public class GameFragment extends Fragment
 
     private Listener listener;
     private Room room;
+    private NotificationPublisher notificationPublisher;
+    private GameType gameType;
 
     public static GameFragment localGame(String roomName, GameType gameType) {
         return getInstance(roomName, gameType, false, FanoronaRole.WHITE);
@@ -104,13 +107,14 @@ public class GameFragment extends Fragment
 
 
         FirebaseAuth fbAuth = FirebaseAuth.getInstance();
+        notificationPublisher = new NotificationPublisher();
 
         Bundle args = Objects.requireNonNull(getArguments());
         String roomName = args.getString(ARG_ROOM_NAME, "<NO-NAME>");
         viewRoomName.setText(roomName);
 
 
-        GameType gameType = GameType.valueOf(args.getString(ARG_GAME_TYPE));
+        gameType = GameType.valueOf(args.getString(ARG_GAME_TYPE));
         boolean network = args.getBoolean(ARG_NETWORK_FLAG);
         FanoronaRole role = FanoronaRole.valueOf(args.getString(ARG_ROLE));
 
@@ -182,12 +186,14 @@ public class GameFragment extends Fragment
 
     @Override
     public void win() {
-        Toast.makeText(this.getContext(), "Победа", Toast.LENGTH_LONG).show();
+        notificationPublisher
+                .notification(this.getContext(), gameType.getDescription(), "Победа");
     }
 
     @Override
     public void lose() {
-        Toast.makeText(this.getContext(), "Проиграл", Toast.LENGTH_LONG).show();
+        notificationPublisher
+                .notification(this.getContext(), gameType.getDescription(), "Поражение");
     }
 
     @Override
