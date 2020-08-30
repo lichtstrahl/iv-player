@@ -71,7 +71,7 @@ public class Main {
                 }
                 final int i_=i;
                 final int j_=j;
-                if(visited.stream().skip(visited.size()==1 ? 0 : 1).anyMatch(it-> it[0]==i_ && it[1]==j_)){
+                if(visited.stream().anyMatch(it-> it[0]==i_ && it[1]==j_)){
                     continue;
                 }
                 if(board.state[i][j]==Role.NONE){

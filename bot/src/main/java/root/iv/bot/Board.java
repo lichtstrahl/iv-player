@@ -78,8 +78,11 @@ public class Board {
     }
 
     public Move progressesToMove(List<Progress> p){
+        if(p==null || p.isEmpty()){
+            return null;
+        }
         Move r = progressToMove(p.get(0));
-        p.stream().skip(1).forEach(it-> r.cont=progressToMove(it));
+        r.cont = progressesToMove(p.stream().skip(1).collect(Collectors.toList()));
         return r;
     }
     public Move progressToMove(Progress p){

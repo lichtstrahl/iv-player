@@ -30,6 +30,8 @@ public class FanoronaBot implements BotAPI {
 
     @Override
     public void processEnemyProgress(List<Progress> move) {
+        System.out.println(move);
+        System.out.println(ai.board.progressesToMove(move));
         ai.acceptTurn(ai.board.progressesToMove(move));
     }
 
