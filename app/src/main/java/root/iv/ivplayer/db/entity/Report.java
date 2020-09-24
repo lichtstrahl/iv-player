@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import lombok.Data;
 import root.iv.ivplayer.db.converters.CalendarConverter;
@@ -28,6 +29,8 @@ public class Report {
         Report report = new Report();
         report.componentName = component;
         report.timestamp = Calendar.getInstance();
+
+        report.description = report.timestamp.getTime().toString();
 
         return report;
     }
