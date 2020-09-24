@@ -20,18 +20,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import lombok.AllArgsConstructor;
+import root.iv.ivplayer.service.GameService;
 import root.iv.ivplayer.R;
-import root.iv.ivplayer.app.App;
-import root.iv.ivplayer.db.entity.Report;
 import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
+import root.iv.ivplayer.service.GameServiceConnection;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
@@ -156,13 +153,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void buttonCreateReportClick() {
-        Report report = Report.create(MainActivity.class.getSimpleName());
-        Disposable d = App.getIvDatabase().reportDAO().insert(report)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(id -> Timber.i("insert report: %d", id), Timber::e);
-        compositeDisposable.add(d);
+    public void buttonStartServiceClick() {
+        GameService.bind(this, new GameServiceConnection());
     }
 
     @Override

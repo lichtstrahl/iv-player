@@ -86,15 +86,15 @@ public class MenuFragment extends Fragment {
         listener.buttonAuthClick();
     }
 
-    @OnClick(R.id.buttonCreateReport)
-    public void clickCreateReport() {
-        listener.buttonCreateReportClick();
+    @OnClick(R.id.buttonStartService)
+    public void clickStartService() {
+        listener.buttonStartServiceClick();
     }
 
     public interface Listener {
         void startSingleGame(GameType gameType);
         void startNetworkGame();
         void buttonAuthClick();
-        void buttonCreateReportClick();
+        void buttonStartServiceClick();
     }
 }

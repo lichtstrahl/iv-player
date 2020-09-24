@@ -49,10 +49,10 @@
             android:textColor="@android:color/white"/>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonCreateReport"
+            android:id="@+id/buttonStartService"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/create_report"
+            android:text="@string/start_service"
             android:textColor="@android:color/white"/>
 
     </LinearLayout>

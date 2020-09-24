@@ -24,4 +24,5 @@
     <string name="label_network_game">Сетевая игра</string>
     <string name="auth">Вход в систему</string>
     <string name="create_report">Создание отчета</string>
+    <string name="start_service">Запуск службы</string>
 </resources>

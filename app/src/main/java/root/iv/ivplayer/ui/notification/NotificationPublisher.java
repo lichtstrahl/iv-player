@@ -7,7 +7,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
 import java.util.Optional;
@@ -18,6 +20,10 @@ public class NotificationPublisher {
     private static final String CHANNEL_ID = "channel:1";
     private static final String CHANNEL_SERVICE = "channel:fanorona-service";
     private static final String CHANNEL_NAME = "channel-fanorona";
+
+    public static NotificationPublisher defaultPublisher() {
+        return new NotificationPublisher();
+    }
 
     public void notification(Context context, String title, String text) {
         notification(context, title, text, CHANNEL_ID, CHANNEL_NAME);
@@ -34,6 +40,34 @@ public class NotificationPublisher {
 
         notificationManager(context, channelID, channelName)
                 .notify(9, builder.build());
+    }
+
+    public Notification customForegroundChatService
+            (Context context,
+             @NonNull PendingIntent clickIntent,
+             @NonNull PendingIntent closeIntent) {
+        RemoteViews notificationLayout = new RemoteViews(context.getPackageName(), R.layout.notification_chat);
+        notificationLayout.setOnClickPendingIntent(R.id.buttonClose, closeIntent);
+
+
+        NotificationCompat.Builder notificationBuilder = builderCompat(context, CHANNEL_SERVICE)
+                .setSmallIcon(R.drawable.ic_chat)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setOngoing(true)
+                .setContentIntent(clickIntent)
+                .setCustomContentView(notificationLayout);
+
+        createChannel(context, CHANNEL_SERVICE, CHANNEL_NAME);
+
+        return notificationBuilder.build();
+    }
+
+    private void createChannel(Context context, String channelId, String channelName) {
+        NotificationManager manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
+            manager.createNotificationChannel(channel);
+        }
     }
 
     private NotificationManager notificationManager(Context context, String channelID, String channelName) {
