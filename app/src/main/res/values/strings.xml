@@ -23,4 +23,5 @@
     <string name="label_single_play">Одиночная игра</string>
     <string name="label_network_game">Сетевая игра</string>
     <string name="auth">Вход в систему</string>
+    <string name="create_report">Создание отчета</string>
 </resources>

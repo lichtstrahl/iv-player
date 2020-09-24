@@ -19,4 +19,16 @@ public class Report {
     private Calendar timestamp;
     private String description;
     private String json;
+
+    public static Report create() {
+        return create(Thread.currentThread().getName());
+    }
+
+    public static Report create(String component) {
+        Report report = new Report();
+        report.componentName = component;
+        report.timestamp = Calendar.getInstance();
+
+        return report;
+    }
 }

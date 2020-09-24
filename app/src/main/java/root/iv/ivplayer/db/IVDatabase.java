@@ -10,5 +10,5 @@ import root.iv.ivplayer.db.entity.Report;
 public abstract class IVDatabase extends RoomDatabase {
     public static final String NAME = "iv-database";
 
-    abstract ReportDAO reportDAO();
+    public abstract ReportDAO reportDAO();
 }

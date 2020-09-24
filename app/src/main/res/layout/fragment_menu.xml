@@ -31,7 +31,6 @@
             android:id="@+id/buttonAuth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:text="@string/auth"
             android:textColor="@android:color/white"/>
 
@@ -39,7 +38,6 @@
             android:id="@+id/buttonSinglePlay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:text="@string/label_single_play"
             android:textColor="@android:color/white"/>
 
@@ -47,8 +45,14 @@
             android:id="@+id/buttonNetworkPlay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:text="@string/label_network_game"
+            android:textColor="@android:color/white"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCreateReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_report"
             android:textColor="@android:color/white"/>
 
     </LinearLayout>

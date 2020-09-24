@@ -28,7 +28,7 @@ public class App extends Application {
         Stetho.initializeWithDefaults(this);
     }
 
-    public IVDatabase getIvDatabase() {
+    public static IVDatabase getIvDatabase() {
         return ivDatabase;
     }
 }

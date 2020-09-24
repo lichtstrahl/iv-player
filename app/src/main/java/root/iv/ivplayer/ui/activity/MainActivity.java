@@ -20,8 +20,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.AllArgsConstructor;
 import root.iv.ivplayer.R;
+import root.iv.ivplayer.app.App;
+import root.iv.ivplayer.db.entity.Report;
 import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
@@ -51,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements
     private GameType gameType = null;
     private ScreenParam screenParam = null;
     private Boolean network = null;
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -148,6 +156,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void buttonCreateReportClick() {
+        Report report = Report.create(MainActivity.class.getSimpleName());
+        Disposable d = App.getIvDatabase().reportDAO().insert(report)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(id -> Timber.i("insert report: %d", id), Timber::e);
+        compositeDisposable.add(d);
+    }
+
+    @Override
     public void clickRoom(String roomName, GameType gType) {
         ScreenParam sParam = GameFragmentParams.param(gType);
 
@@ -173,6 +191,12 @@ public class MainActivity extends AppCompatActivity implements
                 .add(R.id.mainFrame, CreateRoomFragment.newInstance(), CreateRoomFragment.TAG)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        compositeDisposable.dispose();
     }
 
     public void authSuccessful() {
