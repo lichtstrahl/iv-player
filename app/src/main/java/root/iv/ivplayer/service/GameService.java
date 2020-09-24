@@ -21,37 +21,36 @@ import timber.log.Timber;
 public class GameService extends Service {
 
     // ACTIONS - доступные действия, на которые может реагировать сервис
-    private static final String ACTION_STOP = "root.iv.ivplayer.service.STOP";
-    private static final String STARTING_REPORT = "root.iv.ivplayer.service.STARTING_REPORT";
+    public static final String ACTION_STOP = "root.iv.ivplayer.service.STOP";
+    public static final String STARTING_REPORT = "root.iv.ivplayer.service.STARTING_REPORT";
 
     private static final int NOTIFICATION_ID = 1;
 
-    private NotificationPublisher notificationPublisher;
-    private GameBinder gameBinder;
 
     // COMMANDS - доступные команды для выполнения в фоновом режиме
     private CommandReporter reporter;
 
+    private NotificationPublisher notificationPublisher;
+    private GameBinder gameBinder;
+    private int clients;
 
     public GameService() {
         this.notificationPublisher = NotificationPublisher.defaultPublisher();
         this.gameBinder = new GameBinder();
-        this.reporter = CommandReporter.create(2);
+        this.reporter = CommandReporter.create(10);
+        this.clients = 0;
     }
 
-    public static void reporting(Context context) {
+
+    public static void start(Context context, String ... actions) {
         Intent intent = new Intent(context, GameService.class);
-        intent.setAction(STARTING_REPORT);
+        intent.setAction(actions.length > 0 ? actions[0] : null);
         context.startService(intent);
     }
 
-    public static void start(Context context) {
+    public static void bind(Context context, ServiceConnection serviceConnection, String ... actions) {
         Intent intent = new Intent(context, GameService.class);
-        context.startService(intent);
-    }
-
-    public static void bind(Context context, ServiceConnection serviceConnection) {
-        Intent intent = new Intent(context, GameService.class);
+        intent.setAction(actions.length > 0 ? actions[0] : null);
         context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -66,19 +65,19 @@ public class GameService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Timber.i("bind");
-        return null;
+        Timber.i("bind %d", ++clients);
+        return gameBinder;
     }
 
     @Override
     public void onRebind(Intent intent) {
         super.onRebind(intent);
-        Timber.i("rebind");
+        Timber.i("rebind %d", ++clients);
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Timber.i("unbind");
+        Timber.i("unbind %d", --clients);
         return false; // Чтобы вызвать rebind при повторном подключении
     }
 
@@ -105,17 +104,11 @@ public class GameService extends Service {
         if (action != null) {
             switch (action) {
                 case ACTION_STOP:
+                    stopForeground(true);
                     stopSelf();
                     break;
                 case STARTING_REPORT:
-                    if (reporter.isStarted()) {
-                        Timber.i("reporting already started");
-                        break;
-                    }
-
-                    Executor executor = Executors.newSingleThreadExecutor();
-                    executor.execute(reporter);
-                    Timber.i("started reporting");
+                    startReporting();
                     break;
                 default:
                     Timber.i("Unknown action");
@@ -140,6 +133,17 @@ public class GameService extends Service {
 
     private PendingIntent emptyIntent() {
         return PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_CANCEL_CURRENT);
+    }
+
+    private void startReporting() {
+        if (reporter.isStarted()) {
+            Timber.i("reporting already started");
+            return;
+        }
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(reporter);
+        Timber.i("started reporting");
     }
 
     public class GameBinder extends Binder {

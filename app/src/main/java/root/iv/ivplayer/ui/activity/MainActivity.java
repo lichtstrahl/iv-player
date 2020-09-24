@@ -28,6 +28,7 @@ import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.service.GameService;
+import root.iv.ivplayer.service.GameServiceConnection;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements
     private GameType gameType = null;
     private ScreenParam screenParam = null;
     private Boolean network = null;
+    private GameServiceConnection gameServiceConnection = new GameServiceConnection();
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -153,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void buttonStartServiceClick() {
-        GameService.reporting(this);
+        GameService.start(this, GameService.STARTING_REPORT);
     }
 
     @Override
