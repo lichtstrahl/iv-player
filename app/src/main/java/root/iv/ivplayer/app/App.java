@@ -4,6 +4,8 @@ import android.app.Application;
 
 import androidx.room.Room;
 
+import com.facebook.stetho.Stetho;
+
 import root.iv.ivplayer.db.IVDatabase;
 import timber.log.Timber;
 
@@ -22,6 +24,8 @@ public class App extends Application {
         Timber.plant(new Timber.DebugTree());
         ivDatabase = Room.databaseBuilder(this, IVDatabase.class, IVDatabase.NAME)
                 .build();
+
+        Stetho.initializeWithDefaults(this);
     }
 
     public IVDatabase getIvDatabase() {
