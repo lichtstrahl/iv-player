@@ -20,6 +20,7 @@ public class GameService extends Service {
 
     // ACTIONS - доступные действия, на которые может реагировать сервис
     private static final String ACTION_STOP = "root.iv.ivplayer.service.STOP";
+    private static final String STARTING_REPORT = "root.iv.ivplayer.service.STARTING_REPORT";
 
     private static final int NOTIFICATION_ID = 1;
 
@@ -54,7 +55,7 @@ public class GameService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Timber.i("bind");
-        return gameBinder;
+        return null;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class GameService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         Timber.i("unbind");
-        return true; // Чтобы вызвать rebind при повторном подключении
+        return false; // Чтобы вызвать rebind при повторном подключении
     }
 
     // При создании сервиса необходимо показать нотификашку
@@ -89,12 +90,17 @@ public class GameService extends Service {
         Timber.i("Start command, action: %s", action);
 
         // Если пришла команда на остановку, то останавливаемся
-        if (Objects.equals(action, ACTION_STOP))
+        if (Objects.equals(action, ACTION_STOP)) {
             stopSelf();
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
+    public void onDestroy() {
+        Timber.i("destroy");
+    }
 
     // INTENTS
 

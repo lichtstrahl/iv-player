@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void buttonStartServiceClick() {
-        GameService.bind(this, new GameServiceConnection());
+        GameService.start(this);
     }
 
     @Override
