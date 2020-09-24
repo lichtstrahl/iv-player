@@ -45,6 +45,8 @@ dependencies {
     def loggingInterceptorVersion = '4.5.0'
     def timberVersion = '4.7.1'
     def materialDesignVersion = '1.1.0'
+    def stethoVersion = '1.5.1'
+    def roomVersion = '2.2.5'
     // Firebase
     def fbVersion = '17.2.2'
     def fbDatabaseVersion = '19.3.0'
@@ -106,6 +108,16 @@ dependencies {
     implementation "com.google.firebase:firebase-analytics:$fbAnalyticsVersion"
     implementation "com.google.firebase:firebase-crashlytics:$fbCrashLyticsVersion"
     implementation "com.firebaseui:firebase-ui-auth:$fbAuthUIVersion"
+
+    // Stetho
+    implementation "com.facebook.stetho:stetho:$stethoVersion"
+    implementation "com.facebook.stetho:stetho-okhttp3:$stethoVersion"
+    implementation "com.facebook.stetho:stetho-urlconnection:$stethoVersion"
+
+    // Room
+    implementation "androidx.room:room-runtime:$roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
+    implementation "androidx.room:room-rxjava2:$roomVersion"
 
     implementation project(":bot")
 }
