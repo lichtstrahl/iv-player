@@ -119,5 +119,8 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-rxjava2:$roomVersion"
 
+//    // Vosk
+//    implementation 'com.alphacep:vosk-android:0.3.12'
+
     implementation project(":bot")
 }

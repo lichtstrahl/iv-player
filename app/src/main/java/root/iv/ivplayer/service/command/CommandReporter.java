@@ -4,35 +4,23 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import lombok.Getter;
 import root.iv.ivplayer.app.App;
 import root.iv.ivplayer.db.entity.Report;
 import timber.log.Timber;
 
 // Писатель отчётов. Бескончено составляет отчеты раз в заданное количество секунд
-public class CommandReporter implements Runnable {
+public class CommandReporter extends BaseCommand {
 
     private CompositeDisposable compositeDisposable;
     private int delay;
-    private boolean active;
-    @Getter
-    private boolean started;
 
-    public static CommandReporter create(int delaySeconds) {
-        CommandReporter reporter = new CommandReporter();
+    private CommandReporter(int delaySeconds) {
+        super(null);
 
-        reporter.compositeDisposable = new CompositeDisposable();
-        reporter.delay = delaySeconds;
-        reporter.active = true;
+        compositeDisposable = new CompositeDisposable();
+        delay = delaySeconds;
 
-        return reporter;
-    }
-
-    @Override
-    public void run() {
-        started = true;
-
-        while (active) {
+        action = () -> {
             try {
                 Report report = Report.create(CommandReporter.class.getSimpleName());
 
@@ -47,10 +35,16 @@ public class CommandReporter implements Runnable {
                 Timber.e(e);
                 Thread.currentThread().interrupt();
             }
-        }
+        };
     }
 
-    public void dispose() {
+    public static CommandReporter create(int delaySeconds) {
+        return new CommandReporter(delaySeconds);
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
         compositeDisposable.dispose();
     }
 }

@@ -6,6 +6,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.os.Binder;
 import android.os.IBinder;
 
@@ -23,6 +26,8 @@ public class GameService extends Service {
     // ACTIONS - доступные действия, на которые может реагировать сервис
     public static final String ACTION_STOP = "root.iv.ivplayer.service.STOP";
     public static final String STARTING_REPORT = "root.iv.ivplayer.service.STARTING_REPORT";
+    public static final String ACTION_START_RECORD = "root.iv.ivplayer.service.ACTION_START_RECORD";
+    public static final String ACTION_STOP_RECORD = "root.iv.ivplayer.service.ACTION_STOP_RECORD";
 
     private static final int NOTIFICATION_ID = 1;
 
@@ -33,12 +38,14 @@ public class GameService extends Service {
     private NotificationPublisher notificationPublisher;
     private GameBinder gameBinder;
     private int clients;
+    private AudioRecord audioRecorder;
 
     public GameService() {
         this.notificationPublisher = NotificationPublisher.defaultPublisher();
         this.gameBinder = new GameBinder();
         this.reporter = CommandReporter.create(10);
         this.clients = 0;
+        this.audioRecorder = createAudioRecorder();
     }
 
 
@@ -104,11 +111,19 @@ public class GameService extends Service {
         if (action != null) {
             switch (action) {
                 case ACTION_STOP:
+                    reporter.stop();
                     stopForeground(true);
                     stopSelf();
                     break;
                 case STARTING_REPORT:
                     startReporting();
+                    break;
+                case ACTION_START_RECORD:
+                    audioRecorder.startRecording();
+                    break;
+
+                case ACTION_STOP_RECORD:
+                    audioRecorder.stop();
                     break;
                 default:
                     Timber.i("Unknown action");
@@ -145,6 +160,24 @@ public class GameService extends Service {
         executor.execute(reporter);
         Timber.i("started reporting");
     }
+
+    private AudioRecord createAudioRecorder() {
+        int myBufferSize = 8192;
+        int sampleRate = 8000;
+        int channelConfig = AudioFormat.CHANNEL_IN_MONO;
+        int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
+
+        int minInternalBufferSize = AudioRecord.getMinBufferSize(sampleRate,
+                channelConfig, audioFormat);
+        int internalBufferSize = minInternalBufferSize * 4;
+        Timber.i("minInternalBufferSize = " + minInternalBufferSize
+                + ", internalBufferSize = " + internalBufferSize
+                + ", myBufferSize = " + myBufferSize);
+
+        return new AudioRecord(MediaRecorder.AudioSource.MIC,
+                sampleRate, channelConfig, audioFormat, internalBufferSize);
+    }
+
 
     public class GameBinder extends Binder {
 
