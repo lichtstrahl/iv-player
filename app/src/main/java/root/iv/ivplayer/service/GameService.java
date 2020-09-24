@@ -11,7 +11,6 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -30,10 +29,14 @@ public class GameService extends Service {
     private NotificationPublisher notificationPublisher;
     private GameBinder gameBinder;
 
+    // COMMANDS - доступные команды для выполнения в фоновом режиме
+    private CommandReporter reporter;
+
 
     public GameService() {
         this.notificationPublisher = NotificationPublisher.defaultPublisher();
         this.gameBinder = new GameBinder();
+        this.reporter = CommandReporter.create(2);
     }
 
     public static void reporting(Context context) {
@@ -105,10 +108,14 @@ public class GameService extends Service {
                     stopSelf();
                     break;
                 case STARTING_REPORT:
+                    if (reporter.isStarted()) {
+                        Timber.i("reporting already started");
+                        break;
+                    }
+
                     Executor executor = Executors.newSingleThreadExecutor();
-                    CommandReporter reporter = CommandReporter.create(2);
                     executor.execute(reporter);
-                    Timber.i("start reporting");
+                    Timber.i("started reporting");
                     break;
                 default:
                     Timber.i("Unknown action");
