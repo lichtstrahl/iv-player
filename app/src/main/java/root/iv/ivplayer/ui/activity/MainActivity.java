@@ -58,9 +58,9 @@ public class MainActivity extends AppCompatActivity implements
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        // Если это первый запуск Activity или смена конфигурации не связанная с повторотом: auth
+        // Если это первый запуск Activity или смена конфигурации не связанная с повторотом: openMenu
         if (savedInstanceState == null || !savedInstanceState.getBoolean(ARG_REORIENTATION)) {
-            auth();
+            openMenu();
         }
 
         // Если это перезапуск Activity после смены ориентации экрана и тип игры задан, то старт GameFragment
@@ -70,16 +70,6 @@ public class MainActivity extends AppCompatActivity implements
             boolean networkFlag = savedInstanceState.getBoolean(ARG_NETWORK_FLAG);
             startGame(savedInstanceState.getString(ARG_ROOM_NAME), gType, networkFlag);
         }
-    }
-
-    private void auth() {
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build()
-        );
-
-        Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build();
-        startActivityForResult(intent, RC_SIGN_IN);
     }
 
     @Override
@@ -147,6 +137,17 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void buttonAuthClick() {
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build()
+        );
+
+        Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build();
+        startActivityForResult(intent, RC_SIGN_IN);
+    }
+
+    @Override
     public void clickRoom(String roomName, GameType gType) {
         ScreenParam sParam = GameFragmentParams.param(gType);
 
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements
 
     public void authSuccessful() {
         Timber.i("Игрок успешно вошёл");
-        openMenu();
+//        openMenu();
     }
 
     private void openMenu() {

@@ -27,7 +27,13 @@
         android:layout_marginEnd="@dimen/bigMargin"
         android:orientation="vertical">
 
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonAuth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/auth"
+            android:textColor="@android:color/white"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonSinglePlay"

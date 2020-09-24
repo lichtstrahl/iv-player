@@ -5,11 +5,20 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
+
+import java.util.Objects;
+
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import root.iv.ivplayer.R;
@@ -19,6 +28,9 @@ public class MenuFragment extends Fragment {
     public static final String TAG = "fragment:menu";
 
     private Listener listener;
+
+    @BindView(R.id.buttonAuth)
+    protected MaterialButton buttonAuth;
 
     public static MenuFragment getInstance() {
         MenuFragment fragment = new MenuFragment();
@@ -47,6 +59,14 @@ public class MenuFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        buttonAuth.setEnabled(Objects.isNull(user));
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         listener = null;
@@ -63,8 +83,14 @@ public class MenuFragment extends Fragment {
         listener.startNetworkGame();
     }
 
+    @OnClick(R.id.buttonAuth)
+    public void clickAuth() {
+        listener.buttonAuthClick();
+    }
+
     public interface Listener {
         void startSingleGame(GameType gameType);
         void startNetworkGame();
+        void buttonAuthClick();
     }
 }
