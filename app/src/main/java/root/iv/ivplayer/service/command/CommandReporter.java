@@ -20,22 +20,7 @@ public class CommandReporter extends BaseCommand {
         compositeDisposable = new CompositeDisposable();
         delay = delaySeconds;
 
-        action = () -> {
-            try {
-                Report report = Report.create(CommandReporter.class.getSimpleName());
-
-                Disposable d = App.getIvDatabase().reportDAO().insert(report)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(id -> Timber.i("insert report: %d", id), Timber::e);
-                compositeDisposable.add(d);
-
-                Thread.sleep(1000L * delay);
-            } catch (InterruptedException e) {
-                Timber.e(e);
-                Thread.currentThread().interrupt();
-            }
-        };
+        action = this::action;
     }
 
     public static CommandReporter create(int delaySeconds) {
@@ -46,5 +31,22 @@ public class CommandReporter extends BaseCommand {
     public void stop() {
         super.stop();
         compositeDisposable.dispose();
+    }
+
+    private void action() {
+        try {
+            Report report = Report.create(CommandReporter.class.getSimpleName());
+
+            Disposable d = App.getIvDatabase().reportDAO().insert(report)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(id -> Timber.i("insert report: %d", id), Timber::e);
+            compositeDisposable.add(d);
+
+            Thread.sleep(1000L * delay);
+        } catch (InterruptedException e) {
+            Timber.e(e);
+            Thread.currentThread().interrupt();
+        }
     }
 }

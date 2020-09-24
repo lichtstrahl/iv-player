@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import root.iv.ivplayer.service.command.CommandAudioRead;
 import root.iv.ivplayer.service.command.CommandReporter;
 import root.iv.ivplayer.ui.notification.NotificationPublisher;
 import timber.log.Timber;
@@ -34,6 +35,7 @@ public class GameService extends Service {
 
     // COMMANDS - доступные команды для выполнения в фоновом режиме
     private CommandReporter reporter;
+    private CommandAudioRead audioRead;
 
     private NotificationPublisher notificationPublisher;
     private GameBinder gameBinder;
@@ -46,6 +48,7 @@ public class GameService extends Service {
         this.reporter = CommandReporter.create(10);
         this.clients = 0;
         this.audioRecorder = createAudioRecorder();
+        this.audioRead = new CommandAudioRead(audioRecorder);
     }
 
 
@@ -159,6 +162,10 @@ public class GameService extends Service {
         Executor executor = Executors.newSingleThreadExecutor();
         executor.execute(reporter);
         Timber.i("started reporting");
+    }
+
+    private void startReadAudio() {
+
     }
 
     private AudioRecord createAudioRecorder() {
