@@ -25,7 +25,11 @@ public class App extends Application {
         ivDatabase = Room.databaseBuilder(this, IVDatabase.class, IVDatabase.NAME)
                 .build();
 
-        Stetho.initializeWithDefaults(this);
+        Stetho.InitializerBuilder stethoBuilder = Stetho.newInitializerBuilder(this);
+        stethoBuilder.enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this));
+        stethoBuilder.enableDumpapp(Stetho.defaultDumperPluginsProvider(this));
+
+        Stetho.initialize(stethoBuilder.build());
     }
 
     public static IVDatabase getIvDatabase() {
