@@ -12,7 +12,10 @@ import android.os.IBinder;
 import androidx.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+import root.iv.ivplayer.service.command.CommandReporter;
 import root.iv.ivplayer.ui.notification.NotificationPublisher;
 import timber.log.Timber;
 
@@ -31,6 +34,12 @@ public class GameService extends Service {
     public GameService() {
         this.notificationPublisher = NotificationPublisher.defaultPublisher();
         this.gameBinder = new GameBinder();
+    }
+
+    public static void reporting(Context context) {
+        Intent intent = new Intent(context, GameService.class);
+        intent.setAction(STARTING_REPORT);
+        context.startService(intent);
     }
 
     public static void start(Context context) {
@@ -89,9 +98,21 @@ public class GameService extends Service {
         String action = intent.getAction();
         Timber.i("Start command, action: %s", action);
 
-        // Если пришла команда на остановку, то останавливаемся
-        if (Objects.equals(action, ACTION_STOP)) {
-            stopSelf();
+        // Обработка различных экшенов
+        if (action != null) {
+            switch (action) {
+                case ACTION_STOP:
+                    stopSelf();
+                    break;
+                case STARTING_REPORT:
+                    Executor executor = Executors.newSingleThreadExecutor();
+                    CommandReporter reporter = CommandReporter.create(2);
+                    executor.execute(reporter);
+                    Timber.i("start reporting");
+                    break;
+                default:
+                    Timber.i("Unknown action");
+            }
         }
 
         return super.onStartCommand(intent, flags, startId);

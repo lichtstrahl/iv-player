@@ -22,13 +22,12 @@ import java.util.Objects;
 
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.AllArgsConstructor;
-import root.iv.ivplayer.service.GameService;
 import root.iv.ivplayer.R;
 import root.iv.ivplayer.game.GameType;
 import root.iv.ivplayer.network.firebase.FBDataListener;
 import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
-import root.iv.ivplayer.service.GameServiceConnection;
+import root.iv.ivplayer.service.GameService;
 import root.iv.ivplayer.ui.fragment.game.GameFragment;
 import root.iv.ivplayer.ui.fragment.game.GameFragmentParams;
 import root.iv.ivplayer.ui.fragment.game.ScreenParam;
@@ -154,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void buttonStartServiceClick() {
-        GameService.start(this);
+        GameService.reporting(this);
     }
 
     @Override
