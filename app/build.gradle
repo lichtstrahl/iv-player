@@ -38,7 +38,6 @@ dependencies {
     def rxBinding = '3.1.0'
     def butterKnife = '10.2.1'
     def androidXVersion = '1.1.0'
-    def pubNubVersion = '4.25.0'
     def retrofitVersion = '2.8.1'
     def gsonVersion = '2.8.6'
     def lombokVersion = '1.18.12'
@@ -75,9 +74,6 @@ dependencies {
     // ButterKnife
     implementation "com.jakewharton:butterknife:$butterKnife"
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnife"
-
-    // PubNub
-    implementation("com.pubnub:pubnub-gson:$pubNubVersion")
 
     // Retrofit + RxJava + GSON
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
