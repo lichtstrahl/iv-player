@@ -72,16 +72,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void auth() {
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build()
-        );
-
-        Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build();
-        startActivityForResult(intent, RC_SIGN_IN);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -142,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements
 
         getSupportFragmentManager()
                 .beginTransaction()
+                .addToBackStack(null)
                 .replace(R.id.mainFrame, RoomsFragment.getInstance(), RoomsFragment.TAG)
                 .commit();
     }
@@ -177,6 +168,20 @@ public class MainActivity extends AppCompatActivity implements
     public void authSuccessful() {
         Timber.i("Игрок успешно вошёл");
         openMenu();
+    }
+
+    // ---
+    // PRIVATE
+    // ---
+
+    private void auth() {
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build()
+        );
+
+        Intent intent = AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build();
+        startActivityForResult(intent, RC_SIGN_IN);
     }
 
     private void openMenu() {
