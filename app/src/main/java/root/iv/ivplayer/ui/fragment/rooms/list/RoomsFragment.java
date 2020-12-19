@@ -139,24 +139,28 @@ public class RoomsFragment extends Fragment {
                 .addListenerForSingleValueEvent(new EnterRoomListener(room.getName()));
     }
 
+    public interface Listener {
+        void clickRoom(String roomName, GameType gType);
+        void clickCreateRoom();
+    }
+
+    // ---
+    // PRIVATE
+    // ---
+
     // Если в комнате нет игроков, то для неё возможен вызов контекстного меню
     private void createContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
-        menu.setHeaderTitle("title");
+        menu.setHeaderTitle("Управление комнатами");
         int position = recyclerListRooms.getChildAdapterPosition(view);
         RoomUI roomUI = roomsAdapter.getRoom(position);
 
         if (roomUI.countPlayer() == 0) {
-            menu.add(Menu.NONE, MENU_ITEM_DELETE, Menu.NONE, "delete");
+            menu.add(Menu.NONE, MENU_ITEM_DELETE, Menu.NONE, "Удалить");
 
             if (roomUI.getState() == RoomState.CLOSE) {
-                menu.add(Menu.NONE, MENU_ITEM_REOPEN, Menu.NONE, "reopen");
+                menu.add(Menu.NONE, MENU_ITEM_REOPEN, Menu.NONE, "Переоткрыть");
             }
         }
-    }
-
-    public interface Listener {
-        void clickRoom(String roomName, GameType gType);
-        void clickCreateRoom();
     }
 
     /**
