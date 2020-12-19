@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,6 +37,7 @@ import root.iv.ivplayer.network.firebase.FBDatabaseAdapter;
 import root.iv.ivplayer.network.firebase.dto.FBRoom;
 import root.iv.ivplayer.network.firebase.dto.FBUser;
 import root.iv.ivplayer.network.firebase.dto.RoomUI;
+import root.iv.ivplayer.ui.anim.ViewAnimator;
 
 public class RoomsFragment extends Fragment {
     private static final int MENU_ITEM_DELETE = 0;
@@ -44,6 +46,8 @@ public class RoomsFragment extends Fragment {
 
     @BindView(R.id.recyclerListRooms)
     protected RecyclerView recyclerListRooms;
+    @BindView(R.id.loadingProgress)
+    protected ProgressBar loadingProgress;
 
     private CompositeDisposable compositeDisposable;
     private Listener listener;
@@ -97,6 +101,7 @@ public class RoomsFragment extends Fragment {
         // Получаем список комнат: child-узлы поля rooms
         FBDatabaseAdapter.getRooms()
                 .addValueEventListener(roomsFBListener);
+        viewProgressBar();
     }
 
     @Override
@@ -167,27 +172,9 @@ public class RoomsFragment extends Fragment {
      * Firebase listeners
      */
 
-    /**
-     *  Реагируем на изменение списка комнат и данных в них
-     *
-     *  Каждая комната обновляется (если её не было, то будет создана в адаптере)
-     *  Запоминается список уже имеющихся комнат, чтобы те что не пришли от FB были удалены
-      */
-    private class RoomsFBListener extends FBDataListener {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            List<String> removedRooms = roomsAdapter.roomNames();
-
-            for (DataSnapshot room : dataSnapshot.getChildren()) {
-                String roomName = room.getKey();
-                FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
-                roomsAdapter.roomNotify(roomName, fbRoom);
-                removedRooms.remove(roomName);
-            }
-
-            for (String removedName : removedRooms)
-                roomsAdapter.removeRoom(removedName);
-        }
+    // Показать загрузку
+    private void viewProgressBar() {
+        ViewAnimator.moveOn(loadingProgress, 0, 500);
     }
 
     // Клик на элемент списка, вход в комнату если это возможно
@@ -219,6 +206,35 @@ public class RoomsFragment extends Fragment {
 
 
             listener.clickRoom(roomName, room.getGameType());
+        }
+    }
+
+    private void hideProgressBar() {
+        ViewAnimator.moveOn(loadingProgress, 0, 0);
+    }
+
+    /**
+     *  Реагируем на изменение списка комнат и данных в них
+     *
+     *  Каждая комната обновляется (если её не было, то будет создана в адаптере)
+     *  Запоминается список уже имеющихся комнат, чтобы те что не пришли от FB были удалены
+      */
+    private class RoomsFBListener extends FBDataListener {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            List<String> removedRooms = roomsAdapter.roomNames();
+
+            for (DataSnapshot room : dataSnapshot.getChildren()) {
+                String roomName = room.getKey();
+                FBRoom fbRoom = Objects.requireNonNull(room.getValue(FBRoom.class));
+                roomsAdapter.roomNotify(roomName, fbRoom);
+                removedRooms.remove(roomName);
+            }
+
+            for (String removedName : removedRooms)
+                roomsAdapter.removeRoom(removedName);
+
+            hideProgressBar();
         }
     }
 }
